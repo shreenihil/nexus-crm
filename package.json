@@ -1,0 +1,28 @@
+{
+  "name": "nexus-crm-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Production-grade, multi-tenant, keyboard-first CRM",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "test:e2e": "turbo test:e2e",
+    "lint:currency": "tsx scripts/lint-currency.ts",
+    "screenshots": "tsx tools/screenshots/capture.ts",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.5.0",
+    "tsx": "^4.23.15",
+    "turbo": "^2.4.0",
+    "typescript": "^5.7.3"
+  }
+}

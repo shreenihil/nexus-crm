@@ -1,0 +1,12 @@
+# Nexus CRM — Threat Model (STRIDE)
+
+This document applies Microsoft's **STRIDE** methodology to analyze security threats across Nexus CRM's Phase 0 foundations and defines specific architectural mitigations.
+
+| Threat Category | Potential Attack Vector | Phase 0 Mitigation |
+|---|---|---|
+| **Spoofing** | Attacker impersonates valid user via stolen password or session hijacking | Argon2id password hashing, mandatory TOTP MFA option, cryptographically random session tokens in `httpOnly`, `SameSite=Lax`, `Secure` cookies, user-agent and IP logging. |
+| **Tampering** | Rogue actor or compromised service account modifies audit log or alters tenant records | Append-only `audit_events` table with SHA-256 hash chaining (`current_hash = sha256(prev_hash + payload)`). Database role restricted to `INSERT` and `SELECT` only; DB trigger forbids `UPDATE`/`DELETE`. |
+| **Repudiation** | User denies performing a destructive action or admin change | Immutable audit logging of authentication, role assignment, and workspace mutations with IP, timestamp, actor ID, and payload delta. |
+| **Information Disclosure** | Cross-tenant data exfiltration via missing ORM filters or SQL injection | Defense-in-depth: PostgreSQL Row-Level Security (`SET LOCAL app.workspace_id`) + application-level query scoping (`packages/permissions`). Even raw SQL injection cannot cross tenant boundaries. |
+| **Denial of Service** | Password brute force, MFA flooding, or high-volume endpoint attacks | Global and per-route rate limiting via `@fastify/rate-limit`, progressive authentication delays, Argon2id parameter bounds, body size limits. |
+| **Elevation of Privilege** | Normal user attempts to perform admin/owner actions or access another tenant's workspace | Server-enforced RBAC in `packages/permissions` (`can(user, action, object)`). Role checks verified on every API request; client-side checks only control UI visibility. |
