@@ -83,7 +83,7 @@ describe('KMS Envelope Encryption & BYOK Key Management', () => {
     const newKek = generateKey();
     const dataDek = generateKey();
 
-    const sensitiveData = 'Client API Secret Key: sk_live_998877665544332211';
+    const sensitiveData = 'Client API Secret Key: test_key_mock_arbitrary_string';
     const aad = 'workspace:ws-1:record:rec-1';
 
     // 1. Initial encryption under DEK wrapped by oldKek (Version 1)

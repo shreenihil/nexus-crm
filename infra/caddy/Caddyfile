@@ -1,0 +1,32 @@
+{
+    admin off
+    auto_https off
+}
+
+:80 {
+    # Reverse proxy API requests under /v1, /docs, /health, /ready, /metrics
+    @api {
+        path /v1/*
+        path /docs*
+        path /health
+        path /ready
+        path /metrics
+    }
+    handle @api {
+        reverse_proxy api:4000
+    }
+
+    # Reverse proxy Next.js web application
+    handle {
+        reverse_proxy web:3000
+    }
+
+    # Security headers
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        -Server
+    }
+}

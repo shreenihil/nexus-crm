@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #090A0F;
+    color: #F8FAFC;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .slide {
+    width: 1080px;
+    height: 1350px;
+    padding: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 45%),
+                radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.12), transparent 40%),
+                #0B0D14;
+    page-break-after: always;
+    overflow: hidden;
+  }
+  .slide::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, #6366F1, #3B82F6, #10B981);
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #6366F1, #4F46E5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 22px;
+    color: white;
+  }
+  .brand-name {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .slide-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    color: #94A3B8;
+    background: rgba(255,255,255,0.06);
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 32px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: rgba(99, 102, 241, 0.2);
+    border: 1px solid #6366F1;
+    color: #818CF8;
+    font-size: 14px;
+    font-weight: 600;
+    width: fit-content;
+  }
+  .title {
+    font-size: 54px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+  }
+  .title span {
+    background: linear-gradient(90deg, #818CF8, #60A5FA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .desc {
+    font-size: 24px;
+    line-height: 1.5;
+    color: #94A3B8;
+    max-width: 860px;
+  }
+  .feature-box {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 40px;
+    margin-top: 10px;
+  }
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .metric-card {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 24px;
+    border-radius: 14px;
+  }
+  .metric-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    color: #60A5FA;
+  }
+  .metric-label {
+    font-size: 14px;
+    color: #94A3B8;
+    margin-top: 6px;
+  }
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 24px;
+    font-size: 15px;
+    color: #64748B;
+  }
+</style>
+</head>
+<body>
+  <!-- Slide 1: Hook -->
+  <div class="slide" id="slide-1">
+    <div class="header">
+      <div class="logo"><div class="logo-box">N</div><span class="brand-name">Nexus CRM</span></div>
+      <div class="slide-num">01 / 10</div>
+    </div>
+    <div class="content">
+      <div class="badge">Open Architectural Tour</div>
+      <h1 class="title">I Built a <span>Sovereign, Multi-Tenant CRM</span> from Scratch.</h1>
+      <p class="desc">A deep dive into building an enterprise sales engine with zero third-party cloud data lock-in, INR-first accounting, and sub-millisecond polymorphic querying.</p>
+      <div class="feature-box">
+        <div class="metric-grid">
+          <div class="metric-card"><div class="metric-val">p95 &lt; 1ms</div><div class="metric-label">AST Query Latency</div></div>
+          <div class="metric-card"><div class="metric-val">AES-256</div><div class="metric-label">BYOK KMS Envelope</div></div>
+          <div class="metric-card"><div class="metric-val">100%</div><div class="metric-label">INR Lakhs / Crores</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>Swipe for full breakdown →</span><span>github.com/shreenihil/nexus-crm</span></div>
+  </div>
+
+  <!-- Slide 2: Problem -->
+  <div class="slide" id="slide-2">
+    <div class="header">
+      <div class="logo"><div class="logo-box">N</div><span class="brand-name">Nexus CRM</span></div>
+      <div class="slide-num">02 / 10</div>
+    </div>
+    <div class="content">
+      <div class="badge">The Motivation</div>
+      <h1 class="title">The Traditional CRM Trap: <span>Bloat & Data Custody</span></h1>
+      <p class="desc">Most enterprise CRMs hold tenant data hostage in proprietary silos, calculate currencies via rigid US-dollar assumptions, and slow teams down with sluggish interfaces.</p>
+      <div class="feature-box">
+        <p style="font-size: 20px; line-height: 1.6; color: #E2E8F0;">
+          💡 <strong>Sovereignty Principle:</strong> Organizations should own their encryption keys (BYOK), verify audit trails cryptographically via SHA-256 hash chains, and operate seamlessly in native ₹ INR units.
+        </p>
+      </div>
+    </div>
+    <div class="footer"><span>Architecture Walkthrough</span><span>Swipe →</span></div>
+  </div>
+
+  <!-- Slide 3: Polymorphic Data Model -->
+  <div class="slide" id="slide-3">
+    <div class="header">
+      <div class="logo"><div class="logo-box">N</div><span class="brand-name">Nexus CRM</span></div>
+      <div class="slide-num">03 / 10</div>
+    </div>
+    <div class="content">
+      <div class="badge">Core Engine</div>
+      <h1 class="title">Polymorphic Metadata & <span>Sub-ms Calculations</span></h1>
+      <p class="desc">Dynamic schema authoring without SQL migration restarts. Define custom attributes, relationships, and formula ASTs that evaluate in microseconds.</p>
+      <div class="feature-box">
+        <div class="metric-grid">
+          <div class="metric-card"><div class="metric-val">4 Objects</div><div class="metric-label">Canonical Foundations</div></div>
+          <div class="metric-card"><div class="metric-val">100% Dynamic</div><div class="metric-label">Custom Fields & Views</div></div>
+          <div class="metric-card"><div class="metric-val">AST Lexer</div><div class="metric-label">Expression Engine</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>Data Engine</span><span>Swipe →</span></div>
+  </div>
+
+  <!-- Slide 4: Kanban Pipeline -->
+  <div class="slide" id="slide-4">
+    <div class="header">
+      <div class="logo"><div class="logo-box">N</div><span class="brand-name">Nexus CRM</span></div>
+      <div class="slide-num">04 / 10</div>
+    </div>
+    <div class="content">
+      <div class="badge">Sales Velocity</div>
+      <h1 class="title">Visual Kanban with <span>Deal Rotting Alerts</span></h1>
+      <p class="desc">Smooth drag-and-drop opportunity tracking with automated stage rotting alerts, weighted revenue forecasting, and multi-currency exchange conversion.</p>
+      <div class="feature-box">
+        <p style="font-size: 20px; line-height: 1.6; color: #CBD5E1;">
+          ⚡ <strong>SLA-Driven Sales:</strong> Automatically highlights deals stalled in stage for &gt; 7 days and triggers escalation workflows before revenue leaks.
+        </p>
+      </div>
+    </div>
+    <div class="footer"><span>Sales Management</span><span>Swipe →</span></div>
+  </div>
+
+  <!-- Slide 5: Automatic Activity Capture -->
+  <div class="slide" id="slide-5">
+    <div class="header">
+      <div class="logo"><div class="logo-box">N</div><span class="brand-name">Nexus CRM</span></div>
+      <div class="slide-num">05 / 10</div>
+    </div>
+    <div class="content">
+      <div class="badge">Automation</div>
+      <h1 class="title">Zero-Effort <span>Automated Activity Capture</span></h1>
+      <p class="desc">Inbound email stitching via headers, telephony click-to-call, and SMS conversation logs stream directly into unified chronological timelines.</p>
+      <div class="feature-box">
+        <div class="metric-grid">
+          <div class="metric-card"><div class="metric-val">In-Reply-To</div><div class="metric-label">Thread Stitching</div></div>
+          <div class="metric-card"><div class="metric-val">Auto Opt-Out</div><div class="metric-label">STOP / DNC Safety</div></div>
+          <div class="metric-card"><div class="metric-val">Auto Unenroll</div><div class="metric-label">Drip Reply Safety</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>Communication Engine</span><span>Swipe →</span></div>
+  </div>
+
+  <!-- Slide 6: Deduplication -->
+  <div class="slide" id="slide-6">
+    <div class="header">
+      <div class="logo"><div class="logo-box">N</div><span class="brand-name">Nexus CRM</span></div>
+      <div class="slide-num">06 / 10</div>
+    </div>
+    <div class="content">
+      <div class="badge">Data Integrity</div>
+      <h1 class="title">4-Algorithm <span>Fuzzy Identity Deduplication</span></h1>
+      <p class="desc">Combines Jaro-Winkler, Levenshtein, Double Metaphone phonetic matching, and token-sort legal entity ratio to keep customer records pristine.</p>
+      <div class="feature-box">
+        <p style="font-size: 20px; line-height: 1.6; color: #CBD5E1;">
+          🛡️ <strong>Survivorship Merge Engine:</strong> Non-destructive field-level merging with cryptographic rollback snapshots.
+        </p>
+      </div>
+    </div>
+    <div class="footer"><span>Identity Resolution</span><span>Swipe →</span></div>
+  </div>
+
+  <!-- Slide 7: Security & Audit -->
+  <div class="slide" id="slide-7">
+    <div class="header">
+      <div class="logo"><div class="logo-box">N</div><span class="brand-name">Nexus CRM</span></div>
+      <div class="slide-num">07 / 10</div>
+    </div>
+    <div class="content">
+      <div class="badge">Security</div>
+      <h1 class="title">Cryptographically Verified <span>Audit Trails & BYOK</span></h1>
+      <p class="desc">Tenant data is enveloped with AES-256 data keys (DEK) wrapped by customer master keys (KEK). Every mutation is chained in a SHA-256 tamper-evident ledger.</p>
+      <div class="feature-box">
+        <div class="metric-grid">
+          <div class="metric-card"><div class="metric-val">SHA-256</div><div class="metric-label">Hash Chain Ledger</div></div>
+          <div class="metric-card"><div class="metric-val">Zero Leakage</div><div class="metric-label">Tenant Isolation</div></div>
+          <div class="metric-card"><div class="metric-val">1-Click</div><div class="metric-label">Audit Verification</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>Platform Sovereignty</span><span>Swipe →</span></div>
+  </div>
+
+  <!-- Slide 8: Quote to Cash in INR -->
+  <div class="slide" id="slide-8">
+    <div class="header">
+      <div class="logo"><div class="logo-box">N</div><span class="brand-name">Nexus CRM</span></div>
+      <div class="slide-num">08 / 10</div>
+    </div>
+    <div class="content">
+      <div class="badge">Commerce</div>
+      <h1 class="title">Quote-to-Cash in ₹ <span>Lakhs/Crores & 18% GST</span></h1>
+      <p class="desc">Built Indian-first. Formats all financial metrics according to Indian numbering standards (₹ 10,00,000) with line item CPQ approvals and GST invoicing.</p>
+      <div class="feature-box">
+        <p style="font-size: 20px; line-height: 1.6; color: #CBD5E1;">
+          🧾 <strong>Compliance Out-of-the-Box:</strong> 18% GST calculation, line-item discounts, and single-click invoice generation directly from closed deals.
+        </p>
+      </div>
+    </div>
+    <div class="footer"><span>CPQ & Commerce</span><span>Swipe →</span></div>
+  </div>
+
+  <!-- Slide 9: Onboarding Experience -->
+  <div class="slide" id="slide-9">
+    <div class="header">
+      <div class="logo"><div class="logo-box">N</div><span class="brand-name">Nexus CRM</span></div>
+      <div class="slide-num">09 / 10</div>
+    </div>
+    <div class="content">
+      <div class="badge">User Experience</div>
+      <h1 class="title">First-Run Magic: <span>The 5-Stage Onboarding Flow</span></h1>
+      <p class="desc">Zero sample data in production. Replaced with a thoughtful first-run journey: Welcome Screen → Feature Carousel → Coach Marks Tour → Checklist.</p>
+      <div class="feature-box">
+        <div class="metric-grid">
+          <div class="metric-card"><div class="metric-val">Bilingual</div><div class="metric-label">English & Hindi</div></div>
+          <div class="metric-card"><div class="metric-val">WCAG 2.2</div><div class="metric-label">AA Accessible</div></div>
+          <div class="metric-card"><div class="metric-val">0 Records</div><div class="metric-label">Clean Shipped App</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>Product Design</span><span>Swipe →</span></div>
+  </div>
+
+  <!-- Slide 10: CTA -->
+  <div class="slide" id="slide-10">
+    <div class="header">
+      <div class="logo"><div class="logo-box">N</div><span class="brand-name">Nexus CRM</span></div>
+      <div class="slide-num">10 / 10</div>
+    </div>
+    <div class="content">
+      <div class="badge">Key Takeaway</div>
+      <h1 class="title">Modern B2B Apps Can Be <span>Fast, Sovereign & Beautiful</span>.</h1>
+      <p class="desc">Thank you for following along! Building Nexus CRM proved that high-performance enterprise capabilities and gorgeous design tokens belong together.</p>
+      <div class="feature-box">
+        <p style="font-size: 22px; font-weight: 600; color: #F8FAFC;">
+          💬 Have you faced CRM data isolation or multi-currency issues in your team? Let's connect in the comments below!
+        </p>
+      </div>
+    </div>
+    <div class="footer"><span>Shree Nihil Vijayan • Product Engineer</span><span>github.com/shreenihil</span></div>
+  </div>
+</body>
+</html>

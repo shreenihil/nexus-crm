@@ -387,6 +387,7 @@ describe('Phase 5: Workflow Automation, Webhooks & Extensibility Engine API Test
         name: 'Loop Protection Test Workflow',
         isActive: true,
         triggerType: 'manual',
+        triggerConfig: {},
         rootNodeId: 'loop-root',
         nodes: loopNodes,
         createdAt: new Date().toISOString(),

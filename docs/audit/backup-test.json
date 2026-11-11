@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "timestamp": "2026-10-18T13:51:19.850Z",
+  "entities": {
+    "workspaces": 1,
+    "objects": 4,
+    "attributes": 32,
+    "records": 0
+  },
+  "auditChecksum": "dff3866c51e9d915028e73b6c3f2ee7ceafd3df8360efb8c6e909cd440350fd4"
+}

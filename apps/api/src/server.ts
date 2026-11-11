@@ -24,6 +24,7 @@ import {
   type KmsMasterKeyRecord,
   type TenantExportArchive,
 } from './db/index';
+import { defaultStorageManager } from '@nexus/storage-spi';
 import { validateSafeOutboundUrl, SSRFBlockedError } from './lib/ssrf';
 import {
   validateWorkflowDAG,
@@ -77,18 +78,48 @@ export async function createServer(opts: ServerOptions = {}): Promise<FastifyIns
     logger: opts.logger !== false,
   });
 
-  // Seed default demo workspace & standard objects if empty (dev/runtime only)
+  // Initialize clean sovereign workspace & canonical standard objects (0 business records)
   if (process.env.NODE_ENV !== 'test') {
-    await db.seedDemoData();
+    await db.initializeSystem();
+  }
+
+  // Production Secret & Environment Verification
+  if (process.env.NODE_ENV === 'production') {
+    if (!process.env.COOKIE_SECRET || process.env.COOKIE_SECRET.length < 32) {
+      throw new Error('FATAL: COOKIE_SECRET must be configured with >= 32 characters in production.');
+    }
   }
 
   // Security headers & Plugins
   await app.register(helmet, {
-    contentSecurityPolicy: false, // For dev Swagger UI
+    contentSecurityPolicy: process.env.NODE_ENV === 'production' ? {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+        frameAncestors: ["'none'"],
+      },
+    } : false,
+    frameguard: { action: 'deny' },
+    hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
   });
 
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    process.env.APP_URL,
+    process.env.CORS_ORIGIN,
+  ].filter(Boolean) as string[];
+
   await app.register(cors, {
-    origin: true,
+    origin: (origin, cb) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        cb(null, true);
+        return;
+      }
+      cb(null, false);
+    },
     credentials: true,
   });
 
@@ -225,6 +256,98 @@ nexus_workflows_total ${workflows}
 # TYPE nexus_outbound_webhooks_total gauge
 nexus_outbound_webhooks_total ${webhooks}
 `;
+  });
+
+  // --------------------------------------------------------------------------
+  // SETUP WIZARD ROUTES (§4.2 First-Run Experience)
+  // --------------------------------------------------------------------------
+
+  // Status probe: returns 404 once instance is initialized
+  app.get('/v1/setup/status', async (req: FastifyRequest, reply: FastifyReply) => {
+    if (db.isInstanceInitialized) {
+      return reply.status(404).send({ error: 'Instance is already initialized' });
+    }
+    return {
+      initialized: false,
+      requiresSetupToken: true,
+    };
+  });
+
+  // Verify setup token validity
+  app.post('/v1/setup/verify-token', async (req: FastifyRequest, reply: FastifyReply) => {
+    if (db.isInstanceInitialized) {
+      return reply.status(404).send({ error: 'Instance is already initialized' });
+    }
+    const { token } = (req.body as any) || {};
+    if (!token || typeof token !== 'string') {
+      return reply.status(400).send({ error: 'Setup token is required', valid: false });
+    }
+    const isValid = db.verifySetupToken(token.trim());
+    if (!isValid) {
+      return reply.status(401).send({ error: 'Invalid or expired setup token', valid: false });
+    }
+    return { valid: true };
+  });
+
+  // Complete first-run instance setup
+  app.post('/v1/setup/complete', async (req: FastifyRequest, reply: FastifyReply) => {
+    if (db.isInstanceInitialized) {
+      return reply.status(404).send({ error: 'Instance is already initialized' });
+    }
+    const body = (req.body as any) || {};
+    const { token, instanceName, adminEmail, adminPassword, adminFirstName, adminLastName, baseCurrency, timezone } = body;
+
+    if (!token || !db.verifySetupToken(token.trim())) {
+      return reply.status(401).send({ error: 'Invalid or expired setup token' });
+    }
+
+    if (!adminEmail || !adminEmail.includes('@')) {
+      return reply.status(400).send({ error: 'Valid admin email is required' });
+    }
+
+    if (!adminPassword || adminPassword.length < 12) {
+      return reply.status(400).send({ error: 'Password must be at least 12 characters' });
+    }
+
+    if (!adminFirstName || !adminLastName) {
+      return reply.status(400).send({ error: 'Admin first and last name are required' });
+    }
+
+    const { user, workspace, sessionToken } = await db.completeSetup({
+      instanceName: instanceName || 'Primary Workspace',
+      adminEmail,
+      adminPassword,
+      adminFirstName,
+      adminLastName,
+      baseCurrency: baseCurrency || 'INR',
+      timezone: timezone || 'Asia/Kolkata',
+    });
+
+    reply.setCookie('nexus_session', sessionToken, {
+      path: '/',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60,
+    });
+
+    return reply.status(201).send({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+      workspace: {
+        id: workspace.id,
+        name: workspace.name,
+        slug: workspace.slug,
+        baseCurrency: workspace.baseCurrency,
+        timezone: workspace.timezone,
+      },
+      sessionToken,
+    });
   });
 
   // --------------------------------------------------------------------------
@@ -3145,6 +3268,34 @@ nexus_outbound_webhooks_total ${webhooks}
   });
 
   // --------------------------------------------------------------------------
+  // PLUGGABLE STORAGE BACKEND ROUTES (§3 Backend Connection Manager)
+  // --------------------------------------------------------------------------
+
+  // Get active backends, capability flags, and real-time health metrics
+  app.get('/v1/platform/backends', { preHandler: [authenticate] }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const membership = (req as any).membership;
+    if (membership?.role !== 'owner' && membership?.role !== 'admin') {
+      return reply.status(403).send({ error: 'Forbidden: Instance Admin or Owner role required' });
+    }
+    const overview = await defaultStorageManager.getOverview();
+    return overview;
+  });
+
+  // Safe read-only test connection probe (does NOT write or alter data)
+  app.post('/v1/platform/backends/probe', { preHandler: [authenticate] }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const membership = (req as any).membership;
+    if (membership?.role !== 'owner' && membership?.role !== 'admin') {
+      return reply.status(403).send({ error: 'Forbidden: Instance Admin or Owner role required' });
+    }
+    const { category } = (req.body as any) || {};
+    if (!category || !['database', 'objectStorage', 'queueCache'].includes(category)) {
+      return reply.status(400).send({ error: 'Invalid backend category. Must be database, objectStorage, or queueCache.' });
+    }
+    const health = await defaultStorageManager.probeConnection(category as any);
+    return health;
+  });
+
+  // --------------------------------------------------------------------------
   // AUDIT LOG ROUTES
   // --------------------------------------------------------------------------
 
@@ -3161,11 +3312,71 @@ nexus_outbound_webhooks_total ${webhooks}
     return { valid, checkedEventsCount: db.auditEvents.length };
   });
 
-  // Test reset helper for reproducible E2E runs
-  app.post('/v1/test/reset-demo', async () => {
-    await db.seedDemoData(true);
-    return { ok: true };
+  // Onboarding System: User Onboarding State API (§3.1)
+  app.get('/v1/onboarding/state', async (req: FastifyRequest, reply: FastifyReply) => {
+    const authHeader = req.headers.authorization;
+    let userId = 'anonymous';
+    let workspaceId = 'default';
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const session = db.sessions.get(authHeader.replace('Bearer ', '').trim());
+      if (session) {
+        userId = session.userId;
+        workspaceId = session.workspaceId;
+      }
+    }
+
+    const state = db.onboardingStates.get(userId) || {
+      userId,
+      workspaceId,
+      role: 'admin',
+      template: 'b2b_saas',
+      language: 'en',
+      currency: 'INR',
+      locale: 'en-IN',
+      showWelcome: true,
+      showCarousel: false,
+      activeTourId: null,
+      currentStepIndex: 0,
+      completedTours: [],
+      checklist: {
+        createWorkspace: true,
+        addRecord: false,
+        createDeal: false,
+        connectEmail: false,
+        testCommandPalette: false,
+        generateQuote: false,
+      },
+      isDismissed: false,
+      updatedAt: new Date().toISOString(),
+    };
+    return reply.send(state);
   });
+
+  app.put('/v1/onboarding/state', async (req: FastifyRequest, reply: FastifyReply) => {
+    const authHeader = req.headers.authorization;
+    let userId = 'anonymous';
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const session = db.sessions.get(authHeader.replace('Bearer ', '').trim());
+      if (session) userId = session.userId;
+    }
+
+    const body = (req.body as any) || {};
+    const updated = {
+      ...body,
+      userId,
+      updatedAt: new Date().toISOString(),
+    };
+    db.onboardingStates.set(userId, updated);
+    return reply.send(updated);
+  });
+
+  // Test reset helper: strictly available in automated test environments
+  if (process.env.NODE_ENV === 'test') {
+    app.post('/v1/test/reset-demo', async () => {
+      await db.seedDemoData(true);
+      return { ok: true };
+    });
+  }
 
   return app;
 }
@@ -3180,6 +3391,13 @@ if (process.env.NODE_ENV !== 'test') {
       }
       console.log(`Nexus CRM API running at ${address}`);
       console.log(`OpenAPI documentation at ${address}/docs`);
+      if (!db.isInstanceInitialized) {
+        const setupToken = db.generateSetupToken();
+        console.log('\n============================================================');
+        console.log(`NEXUS CRM SETUP TOKEN: ${setupToken}`);
+        console.log(`Visit http://localhost:3000/setup to complete instance setup.`);
+        console.log('============================================================\n');
+      }
     });
   });
 }

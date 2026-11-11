@@ -1,0 +1,17 @@
+Thank you for deploying Nexus CRM!
+
+1. Get the application URL:
+{{- if .Values.ingress.enabled }}
+  Visit https://{{ .Values.global.domain }}
+{{- else }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ .Chart.Name }},app.kubernetes.io/component=web" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 3000:3000
+  Visit http://localhost:3000
+{{- end }}
+
+2. First-Run Setup Wizard:
+  To retrieve your high-entropy setup token from the API logs:
+  export API_POD=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ .Chart.Name }},app.kubernetes.io/component=api" -o jsonpath="{.items[0].metadata.name}")
+  kubectl logs $API_POD | grep "NEXUS CRM SETUP TOKEN"
+
+  Navigate to https://{{ .Values.global.domain }}/setup and complete your instance provisioning.

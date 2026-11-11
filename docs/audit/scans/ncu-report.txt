@@ -1,0 +1,10 @@
+Using pnpm
+Checking /Users/shreenihilvijayan/Downloads/Projects /CRM/package.json
+
+
+ pnpm        10.33.0  →  12.14.0
+ prettier     ^3.5.0  →  ^3.9.10
+ turbo        ^2.4.0  →  ^2.11.9
+ typescript   ^5.7.3  →   ^7.0.2
+
+Run npx npm-check-updates -u to upgrade package.json

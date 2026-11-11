@@ -121,10 +121,12 @@ export function AppShell({
         <nav className="flex-1 overflow-y-auto p-2 flex flex-col gap-0.5">
           {navItems.map((item) => {
             const isActive = currentPath === item.href;
+            const tourId = item.href === '/deals' ? 'nav-deals' : item.href === '/duplicates' ? 'nav-duplicates' : item.href === '/automations' ? 'nav-automations' : item.href.startsWith('/settings') ? 'nav-settings' : undefined;
             return (
               <button
                 key={item.href}
                 type="button"
+                data-tour-id={tourId}
                 onClick={() => handleNavClick(item.href)}
                 className={cn(
                   'flex items-center gap-3 px-2.5 py-2 rounded-[6px] text-sm font-medium transition-colors select-none w-full text-left',
@@ -182,6 +184,7 @@ export function AppShell({
             {/* Quick Search Trigger */}
             <button
               type="button"
+              data-tour-id="search-command-palette"
               onClick={onSearchClick}
               className="flex items-center gap-2 h-9 px-3 rounded-[6px] bg-[var(--color-bg-subtle)] hover:bg-[var(--color-bg-elevated)] border border-[var(--color-border-default)] text-xs text-[var(--color-text-muted)] transition-colors sm:w-64"
             >

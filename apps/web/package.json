@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@nexus/dedup": "workspace:*",
+    "@nexus/onboarding": "workspace:*",
     "@nexus/permissions": "workspace:*",
     "@nexus/schema": "workspace:*",
     "@nexus/tokens": "workspace:*",

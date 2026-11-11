@@ -198,4 +198,44 @@ describe('Phase 6: Platform Sovereignty, BYOK Envelope Encryption & Single-Tenan
       expect(JSON.parse(importRes.body).error).toContain('integrity verification failed');
     });
   });
+
+  describe('Pluggable Storage Backends (§3 Backend Connection Manager)', () => {
+    it('returns active backends, capabilities, and health metrics', async () => {
+      const res = await app.inject({
+        method: 'GET',
+        url: '/v1/platform/backends',
+        headers: { authorization: `Bearer ${sessionId}` },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const overview = JSON.parse(res.body);
+      expect(overview.database).toBeDefined();
+      expect(overview.database.capabilities.transactions).toBe(true);
+      expect(overview.objectStorage).toBeDefined();
+      expect(overview.queueCache).toBeDefined();
+    });
+
+    it('probes backend connectivity in safe read-only mode', async () => {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/v1/platform/backends/probe',
+        headers: { authorization: `Bearer ${sessionId}` },
+        payload: { category: 'database' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const probe = JSON.parse(res.body);
+      expect(probe.status).toBeDefined();
+      expect(probe.latencyMs).toBeGreaterThanOrEqual(0);
+    });
+
+    it('rejects unauthenticated or non-admin access to backends overview', async () => {
+      const res = await app.inject({
+        method: 'GET',
+        url: '/v1/platform/backends',
+      });
+      expect(res.statusCode).toBe(401);
+    });
+  });
 });
+

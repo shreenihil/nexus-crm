@@ -69,7 +69,7 @@ export function unwrapDek(kek: Buffer, envelope: EncryptedDekEnvelope): Buffer {
   const authTag = Buffer.from(envelope.authTag, 'base64');
   const encryptedDek = Buffer.from(envelope.encryptedDek, 'base64');
 
-  const decipher = createDecipheriv('aes-256-gcm', kek, iv);
+  const decipher = createDecipheriv('aes-256-gcm', kek, iv, { authTagLength: 16 });
   decipher.setAuthTag(authTag);
 
   return Buffer.concat([decipher.update(encryptedDek), decipher.final()]);
@@ -85,7 +85,7 @@ export function encryptData(
   aad?: string
 ): { ciphertext: string; iv: string; authTag: string } {
   const iv = randomBytes(12);
-  const cipher = createCipheriv('aes-256-gcm', dek, iv);
+  const cipher = createCipheriv('aes-256-gcm', dek, iv, { authTagLength: 16 });
 
   if (aad) {
     cipher.setAAD(Buffer.from(aad, 'utf8'));
@@ -115,7 +115,7 @@ export function decryptData(
   const authTag = Buffer.from(encrypted.authTag, 'base64');
   const ciphertext = Buffer.from(encrypted.ciphertext, 'base64');
 
-  const decipher = createDecipheriv('aes-256-gcm', dek, iv);
+  const decipher = createDecipheriv('aes-256-gcm', dek, iv, { authTagLength: 16 });
   decipher.setAuthTag(authTag);
 
   if (aad) {

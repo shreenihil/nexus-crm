@@ -234,10 +234,10 @@ export default function AutomationsPage() {
       setTestPayloadText(
         JSON.stringify(
           {
-            first_name: 'Tony',
-            last_name: 'Stark',
-            title: 'CEO & Chief Engineer',
-            email: 'tony@starkindustries.com',
+            first_name: 'Priya',
+            last_name: 'Sharma',
+            title: 'Chief Technology Officer',
+            email: 'priya.sharma@enterprise.local',
           },
           null,
           2
@@ -247,8 +247,8 @@ export default function AutomationsPage() {
       setTestPayloadText(
         JSON.stringify(
           {
-            name: 'Pied Piper Compression Platform',
-            amount: 150000,
+            name: 'Cloud Infrastructure Migration Deal',
+            amount: 2500000,
             stage: 'Closed Won',
           },
           null,

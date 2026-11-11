@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import {
   Server,
   ShieldCheck,
@@ -166,6 +167,13 @@ export default function PlatformSovereigntyPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/settings/platform/backends"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-[8px] bg-indigo-600/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-600/20 transition-colors"
+          >
+            <Layers className="h-3.5 w-3.5" />
+            Pluggable Backends
+          </Link>
           <Button
             id="btn-refresh-telemetry"
             variant="outline"

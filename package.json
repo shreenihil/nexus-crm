@@ -17,9 +17,11 @@
     "test:e2e": "turbo test:e2e",
     "lint:currency": "tsx scripts/lint-currency.ts",
     "screenshots": "tsx tools/screenshots/capture.ts",
+    "crm": "tsx tools/cli/index.ts",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
   },
   "devDependencies": {
+    "commander": "^15.0.0",
     "prettier": "^3.5.0",
     "tsx": "^4.23.15",
     "turbo": "^2.4.0",

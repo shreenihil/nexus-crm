@@ -38,7 +38,7 @@ ENV PORT=4000
 ENV HOST=0.0.0.0
 
 HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:4000/ready || exit 1
+  CMD ["curl", "-f", "http://localhost:4000/ready"]
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["node", "apps/api/dist/server.js"]

@@ -1,0 +1,26 @@
+
+                     __     _
+   ____  __  _______/ /__  (_)
+  / __ \/ / / / ___/ / _ \/ /
+ / / / / /_/ / /__/ /  __/ /
+/_/ /_/\__,_/\___/_/\___/_/   v3.11.1
+
+		projectdiscovery.io
+
+[[34mINF[0m] nuclei-templates are not installed, installing...
+[[34mINF[0m] Successfully installed nuclei-templates at /Users/shreenihilvijayan/nuclei-templates
+[[34mINF[0m] Current nuclei version: v3.11.1 ([92mlatest[0m)
+[[34mINF[0m] Current nuclei-templates version: v10.5.0 ([92mlatest[0m)
+[[34mINF[0m] New templates added in latest release: 295
+[[34mINF[0m] Templates loaded for current scan: 11144
+[[34mINF[0m] Executing 11144 signed templates from projectdiscovery/nuclei-templates
+[[34mINF[0m] Targets loaded for current scan: 1
+[[34mINF[0m] Templates clustered: 2724 (Reduced 2588 Requests)
+[[34mINF[0m] Using Interactsh Server: oast.me
+[[92mswagger-api[0m] [[94mhttp[0m] [[34minfo[0m] http://127.0.0.1:4000/docs/ [[93mpaths[0m=[93m"/docs/"[0m]
+[[92mcors-misconfig[0m:[1;92marbitrary-origin[0m] [[94mhttp[0m] [[34minfo[0m] http://127.0.0.1:4000 [[93mcors_origin[0m=[93m"https://127.0.0.1.cmlxo.com"[0m]
+[[34mINF[0m] Skipped 127.0.0.1:9780 from target list as found unresponsive permanently: cause="port closed or filtered" address=127.0.0.1:9780 chain="connection refused; got err while executing http://127.0.0.1:9780/api/v1/user_assets/nfc"
+[[34mINF[0m] Skipped 127.0.0.1:4000 from target list as found unresponsive 31 times
+[[34mINF[0m] Skipped 127.0.0.1:4000 from target list as found unresponsive 30 times
+[[34mINF[0m] Scan completed in 1m. 2 matches found.
+[[34mINF[0m] HTTP connections: 8270 total, 2687 new, 5583 reused (67.5%)

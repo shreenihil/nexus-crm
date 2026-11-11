@@ -1,0 +1,15 @@
+apiVersion: v2
+name: nexus-crm
+description: Complete sovereign, multi-tenant, pluggable open-source CRM Helm chart
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - crm
+  - self-hosted
+  - enterprise
+  - sovereign
+home: https://github.com/nexus-crm/nexus
+maintainers:
+  - name: Nexus CRM Team
+    email: maintainers@nexus-crm.local

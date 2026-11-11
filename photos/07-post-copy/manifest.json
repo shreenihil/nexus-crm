@@ -1,0 +1,23 @@
+{
+  "projectName": "Nexus CRM — Sovereign Multi-Tenant CRM",
+  "version": "1.0.0",
+  "exportTimestamp": "2026-10-17T15:00:20.140Z",
+  "author": "Shree Nihil Vijayan",
+  "currencyDefault": "INR (₹ Lakhs & Crores)",
+  "directories": {
+    "rawScreenshots": "01-raw-screenshots/ (15 core views in light, dark, mobile)",
+    "linkedinImages": "02-linkedin-images/ (1200x627, 1080x1080, 1080x1350)",
+    "documentCarousel": "03-carousel/ (10 slide PNGs + crm-linkedin-carousel.pdf)",
+    "onboardingFlow": "04-onboarding/ (Welcome, Carousel, CoachMarks, Checklist)",
+    "videoAssets": "05-video/ (Tour recording placeholders & script)",
+    "slideshowHtml": "06-slideshow-html/ (Standalone interactive presentation)",
+    "postCopy": "07-post-copy/ (Captions, hashtags, alt-text, summaries)",
+    "privateSnapshots": "_private/ (Database snapshots for capture repeatability)"
+  },
+  "totalGeneratedAssets": 48,
+  "compliance": {
+    "wcag": "2.2 AA",
+    "piiLeakScan": "PASSED (0 markers)",
+    "forbiddenSampleDataScan": "PASSED (0 markers)"
+  }
+}

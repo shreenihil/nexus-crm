@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=JetBrains+Mono:wght@700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #090A0F;
+    color: #F8FAFC;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+  }
+  .card {
+    width: 100%;
+    height: 100%;
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.2), transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.15), transparent 45%),
+                #0B0D14;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(99, 102, 241, 0.2);
+    border: 1px solid #6366F1;
+    color: #818CF8;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 16px;
+    font-weight: 700;
+    width: fit-content;
+  }
+  .headline {
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    max-width: 900px;
+  }
+  .subtext {
+    font-size: 22px;
+    color: #94A3B8;
+    line-height: 1.5;
+    max-width: 800px;
+  }
+  .stats-row {
+    display: flex;
+    gap: 24px;
+  }
+  .stat-pill {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 16px 24px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .stat-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 26px;
+    font-weight: 700;
+    color: #60A5FA;
+  }
+  .stat-label {
+    font-size: 13px;
+    color: #94A3B8;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div class="tag">🚀 Product Launch</div>
+      <span style="font-family:'JetBrains Mono', monospace; color:#64748B;">Nexus CRM Monorepo</span>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:20px;">
+      <h1 class="headline">Sovereign, Multi-Tenant CRM Engine Built for INR-First Sales</h1>
+      <p class="subtext">BYOK Envelope Encryption • AST Formula Engine (p95 &lt; 1ms) • 4-Algorithm Fuzzy Deduplication • 18% GST Invoicing</p>
+    </div>
+    <div class="stats-row">
+      <div class="stat-pill"><span class="stat-number">100% Clean</span><span class="stat-label">Zero Sample Data</span></div>
+      <div class="stat-pill"><span class="stat-number">WCAG 2.2 AA</span><span class="stat-label">Accessible System</span></div>
+      <div class="stat-pill"><span class="stat-number">₹ Lakhs/Cr</span><span class="stat-label">Indian Financials</span></div>
+    </div>
+  </div>
+</body>
+</html>

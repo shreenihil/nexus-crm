@@ -1,0 +1,22 @@
+# Forbidden Sample Data Strings for Production Builds
+# Lines starting with # are comments. Empty lines are ignored.
+faker
+mockData
+sampleData
+demoData
+John Doe
+Jane Doe
+Acme Corporation
+Acme India Pvt Ltd
+Stark Industries
+Wayne Enterprises
+Cyberdyne Systems
+Pied Piper Compression
+Initech Software
+Umbrella Health
+Hooli Cloud
+Tony Stark
+Bruce Wayne
+Richard Hendricks
+Peter Parker
+Pepper Potts

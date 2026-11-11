@@ -16,7 +16,9 @@ export function evaluateAST(node: ASTNode, context: RecordContext): any {
       const parts = node.name.split('.');
       let current: any = context;
       for (const part of parts) {
-        if (current == null) return null;
+        if (part === '__proto__' || part === 'constructor' || part === 'prototype') return null;
+        if (current == null || typeof current !== 'object') return null;
+        if (!Object.prototype.hasOwnProperty.call(current, part)) return null;
         current = current[part];
       }
       return current ?? null;

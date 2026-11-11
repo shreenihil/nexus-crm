@@ -1,0 +1,42 @@
+[
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 36,
+  "EndLine": 36,
+  "StartColumn": 2,
+  "EndColumn": 87,
+  "Match": "NEXUS_MASTER_KEY_SEED=4c3f71c4c1e40ebadfbcf6e4ee71321743513b6dcb1e1be92d53c617eb012a9e",
+  "Secret": "4c3f71c4c1e40ebadfbcf6e4ee71321743513b6dcb1e1be92d53c617eb012a9e",
+  "File": ".env.example",
+  "SymlinkFile": "",
+  "Commit": "4daf177e28a106769827fed4b03c651a309feb32",
+  "Entropy": 3.7137964,
+  "Author": "Nexus Product Engineer",
+  "Email": "engineering@nexus-crm.internal",
+  "Date": "2026-10-17T13:45:16Z",
+  "Message": "chore: snapshot before sample data removal",
+  "Tags": [],
+  "Fingerprint": "4daf177e28a106769827fed4b03c651a309feb32:.env.example:generic-api-key:36"
+ },
+ {
+  "RuleID": "stripe-access-token",
+  "Description": "Found a Stripe Access Token, posing a risk to payment processing services and sensitive financial data.",
+  "StartLine": 86,
+  "EndLine": 86,
+  "StartColumn": 52,
+  "EndColumn": 78,
+  "Match": "sk_live_998877665544332211'",
+  "Secret": "sk_live_998877665544332211",
+  "File": "packages/kms/src/__tests__/kms.test.ts",
+  "SymlinkFile": "",
+  "Commit": "4daf177e28a106769827fed4b03c651a309feb32",
+  "Entropy": 3.9312088,
+  "Author": "Nexus Product Engineer",
+  "Email": "engineering@nexus-crm.internal",
+  "Date": "2026-10-17T13:45:16Z",
+  "Message": "chore: snapshot before sample data removal",
+  "Tags": [],
+  "Fingerprint": "4daf177e28a106769827fed4b03c651a309feb32:packages/kms/src/__tests__/kms.test.ts:stripe-access-token:86"
+ }
+]

@@ -1,6 +1,6 @@
 /**
  * Token-Sort and Token-Set ratio matching with corporate legal entity suffix stripping.
- * Resolves permutations like "Wayne Enterprises LLC" vs "Enterprises, Wayne".
+ * Resolves permutations like "Global Logistics LLC" vs "Logistics, Global".
  */
 
 import { damerauLevenshteinSimilarity } from './damerau-levenshtein.js';

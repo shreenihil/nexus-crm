@@ -4,6 +4,7 @@ import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { AppShell } from '@nexus/ui';
 import { CommandPalette } from '@/components/command-palette';
+import { OnboardingProvider } from '@nexus/onboarding';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -33,12 +34,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <>
+    <OnboardingProvider>
       <AppShell
         currentPath={pathname}
-        workspaceName="Acme Corp"
-        userName="Arthur Dent"
-        userEmail="founder@acme.inc"
+        workspaceName="Nexus Sovereign CRM"
+        userName="Alex Rivers"
+        userEmail="alex@nexus-crm.local"
         onNavigate={handleNavigate}
         onLogout={handleLogout}
         onSearchClick={() => setCommandPaletteOpen(true)}
@@ -50,6 +51,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         open={commandPaletteOpen}
         onOpenChange={setCommandPaletteOpen}
       />
-    </>
+    </OnboardingProvider>
   );
 }

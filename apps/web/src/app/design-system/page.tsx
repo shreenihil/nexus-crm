@@ -306,7 +306,7 @@ export default function DesignSystemGalleryPage() {
                   {[
                     { name: 'K. Krithivasan', org: 'Tata Consultancy Services', role: 'CEO', amountSubunits: 12500000000, currency: 'INR', status: 'Closed Won', v: 'success' as const },
                     { name: 'Salil Parekh', org: 'Infosys BPM Ltd', role: 'CEO & MD', amountSubunits: 4800000000, currency: 'INR', status: 'Proposal', v: 'info' as const },
-                    { name: 'Bruce Wayne', org: 'Wayne Enterprises', role: 'CEO', amountSubunits: 45000000, currency: 'USD', status: 'Negotiation', v: 'warning' as const },
+                    { name: 'C. P. Gurnani', org: 'Tech Mahindra Ltd', role: 'Director', amountSubunits: 3600000000, currency: 'INR', status: 'Negotiation', v: 'warning' as const },
                   ].map((row, i) => (
                     <tr key={i} className="hover:bg-[var(--color-bg-subtle)] transition-colors">
                       <td className="py-[var(--density-cell-py)] px-[var(--density-cell-px)] font-medium text-[var(--color-text-primary)]">
