@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Button, Input } from '@nexus/ui';
-import { Building2, User, Mail, Lock, ArrowRight } from 'lucide-react';
+import * as React from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button, Input } from "@nexus/ui";
+import { Building2, User, Mail, Lock, ArrowRight } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [firstName, setFirstName] = React.useState('');
-  const [lastName, setLastName] = React.useState('');
-  const [workspaceName, setWorkspaceName] = React.useState('');
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const [firstName, setFirstName] = React.useState("");
+  const [lastName, setLastName] = React.useState("");
+  const [workspaceName, setWorkspaceName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -22,9 +22,9 @@ export default function RegisterPage() {
     setError(null);
 
     try {
-      const res = await fetch('http://localhost:4000/v1/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("http://localhost:4000/v1/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           firstName,
           lastName,
@@ -36,11 +36,11 @@ export default function RegisterPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to create workspace');
+        throw new Error(data.error || "Failed to create workspace");
       }
 
-      localStorage.setItem('nexus-token', data.sessionId);
-      router.push('/');
+      localStorage.setItem("nexus-token", data.sessionId);
+      router.push("/");
     } catch (err: any) {
       setError(err.message);
     } finally {

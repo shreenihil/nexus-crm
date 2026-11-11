@@ -11,7 +11,7 @@
 You are a principal full-stack engineer, security architect and product designer building a **production-grade, multi-tenant CRM** from scratch. Follow these rules for the entire project:
 
 1. **Plan before you code.** Before each phase, produce an Implementation Plan artifact (scope, files to create, data model changes, risks, test plan). Wait for my approval of the plan for Phase 0 and Phase 1; for later phases proceed unless you hit a blocking question.
-2. **Work in phases (§15).** Do not start a phase until the previous phase's *exit gate* passes. Never leave stubs, `TODO`s, fake data in production paths, or "implement later" comments inside code that a user-facing feature depends on. If something is intentionally deferred, list it in `/docs/DEFERRED.md` with the reason.
+2. **Work in phases (§15).** Do not start a phase until the previous phase's _exit gate_ passes. Never leave stubs, `TODO`s, fake data in production paths, or "implement later" comments inside code that a user-facing feature depends on. If something is intentionally deferred, list it in `/docs/DEFERRED.md` with the reason.
 3. **Verify everything yourself.** After each feature: run type-check, lint, unit/integration tests, and use the browser to click through the real UI at desktop (1440px), tablet (820px) and mobile (390px) widths in both light and dark theme. Attach screenshots / recordings as artifacts. A feature is not done until you have seen it work.
 4. **Security is a feature, not a phase.** Every endpoint, resolver, background job and UI action must respect the security model in §7. If a shortcut would weaken it, don't take the shortcut — ask me.
 5. **Ask only when blocked** by a decision that is mine (e.g. paid third-party credentials, legal/compliance choice). Otherwise pick the sensible default, record it in `/docs/DECISIONS.md` (ADR style: context → decision → consequences) and continue.
@@ -37,40 +37,40 @@ Build a CRM that is:
 
 ### 1.1 Market pain points → design responses (must be visibly addressed)
 
-| Pain point seen in competitors (from G2 / Capterra / Reddit analysis) | Our design response |
-|---|---|
-| Deceptive pricing & feature gating (HubSpot "add-on trap", Pipedrive base-tier gaps) | Everything in §5 is in the core product; no feature flags that hide core capability |
-| Manual data entry kills adoption | Automatic Activity Capture (Gmail/Google Workspace + Microsoft 365), auto-association to records, AI-free deterministic matching first |
-| Overwhelming, dense UI ("products in a trench coat" — Zoho; sluggish — Salesforce) | One coherent design system, progressive disclosure, command palette, saved views, density toggle |
-| Rigid schema (Salesforce) vs. chaotic customisation (Zoho) | Primitive-based data model with guard-rails: schema changes are versioned, previewable, reversible |
-| Steep learning curve / admin overhead | Guided onboarding, templates for common business models (B2B SaaS, agency, marketplace, real-estate, VC), import wizard |
-| Weak pipelines for non-sales processes (Pipedrive) | Any object can have a Kanban view; multiple pipelines; custom objects are first-class |
-| Duplicate records | Native dedup engine + resolution centre (§9) |
-| Data breaches via exposed APIs when RBAC is only in the UI | Server-enforced RBAC + Postgres Row-Level Security as defence in depth (§7) |
+| Pain point seen in competitors (from G2 / Capterra / Reddit analysis)                | Our design response                                                                                                                    |
+| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Deceptive pricing & feature gating (HubSpot "add-on trap", Pipedrive base-tier gaps) | Everything in §5 is in the core product; no feature flags that hide core capability                                                    |
+| Manual data entry kills adoption                                                     | Automatic Activity Capture (Gmail/Google Workspace + Microsoft 365), auto-association to records, AI-free deterministic matching first |
+| Overwhelming, dense UI ("products in a trench coat" — Zoho; sluggish — Salesforce)   | One coherent design system, progressive disclosure, command palette, saved views, density toggle                                       |
+| Rigid schema (Salesforce) vs. chaotic customisation (Zoho)                           | Primitive-based data model with guard-rails: schema changes are versioned, previewable, reversible                                     |
+| Steep learning curve / admin overhead                                                | Guided onboarding, templates for common business models (B2B SaaS, agency, marketplace, real-estate, VC), import wizard                |
+| Weak pipelines for non-sales processes (Pipedrive)                                   | Any object can have a Kanban view; multiple pipelines; custom objects are first-class                                                  |
+| Duplicate records                                                                    | Native dedup engine + resolution centre (§9)                                                                                           |
+| Data breaches via exposed APIs when RBAC is only in the UI                           | Server-enforced RBAC + Postgres Row-Level Security as defence in depth (§7)                                                            |
 
 ---
 
 ## 2. TECHNOLOGY STACK (decided — do not substitute without an ADR)
 
-| Concern | Choice | Notes |
-|---|---|---|
-| Language | **TypeScript (strict)** everywhere | `noUncheckedIndexedAccess`, no `any` without justification |
-| Monorepo | **pnpm + Turborepo** | `apps/web`, `apps/api`, `apps/worker`, `packages/{ui,tokens,schema,permissions,dedup,workflow,sdk,config}` |
-| Frontend | **Next.js (App Router) + React**, **TanStack Query**, **TanStack Table**, **dnd-kit**, **React Flow** (workflow canvas), **Recharts** or **visx** (charts) | Server Components for shell; client components for interactive grids |
-| UI primitives | **Radix UI / shadcn-style components** styled via our own **design tokens** | Accessibility comes from Radix; look comes from tokens |
-| Styling | **Tailwind CSS** bound to CSS custom properties (tokens), no hard-coded hex/px in components | See §11 |
-| API | **NestJS or Fastify (pick one via ADR)** exposing **REST `/v1`** (OpenAPI 3.1) and **GraphQL** (`/graphql`, schema generated dynamically from the metadata model, e.g. Pothos/Yoga) | Single service layer shared by both |
-| Database | **PostgreSQL 16+** | UUIDv7 primary keys, `timestamptz`, soft delete, `pg_trgm`, `fuzzystrmatch` extensions |
-| ORM / migrations | **Drizzle or Prisma + raw SQL migrations** | Migrations are forward-only, reviewed, and tested on a copy of seed data |
-| Queue / jobs | **Redis + BullMQ** | Webhook delivery, email sync, dedup scans, workflows, imports, exports |
-| Search | Postgres full-text + `pg_trgm` first; abstract behind a `SearchProvider` interface so OpenSearch/Meilisearch can be added later | |
-| Auth | **Own auth module**: email+password (Argon2id), **TOTP MFA**, **passkeys (WebAuthn)**, **OIDC/SAML SSO** (Google, Microsoft first) | Short-lived access tokens + rotating refresh tokens in httpOnly, SameSite cookies |
-| File storage | S3-compatible (MinIO locally) with pre-signed URLs and AV-scan hook | Quote PDFs, attachments, exports |
-| PDF | Headless Chromium (Playwright) or `@react-pdf/renderer` for branded quotes/invoices | |
-| Observability | OpenTelemetry traces, structured JSON logs (pino), Prometheus metrics, Sentry-compatible error hook | PII scrubbing in logs |
-| Testing | **Vitest** (unit), **Playwright** (E2E + a11y with axe-core), **Testcontainers** (integration against real Postgres/Redis), **k6** (load) | |
-| Local dev | `docker compose up` brings up Postgres, Redis, MinIO, Mailpit, and the apps | One command, seeded demo tenant |
-| CI | GitHub Actions: typecheck → lint → unit → integration → E2E → a11y → dependency audit → secret scan → build | Must be green before a phase is "done" |
+| Concern          | Choice                                                                                                                                                                              | Notes                                                                                                      |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Language         | **TypeScript (strict)** everywhere                                                                                                                                                  | `noUncheckedIndexedAccess`, no `any` without justification                                                 |
+| Monorepo         | **pnpm + Turborepo**                                                                                                                                                                | `apps/web`, `apps/api`, `apps/worker`, `packages/{ui,tokens,schema,permissions,dedup,workflow,sdk,config}` |
+| Frontend         | **Next.js (App Router) + React**, **TanStack Query**, **TanStack Table**, **dnd-kit**, **React Flow** (workflow canvas), **Recharts** or **visx** (charts)                          | Server Components for shell; client components for interactive grids                                       |
+| UI primitives    | **Radix UI / shadcn-style components** styled via our own **design tokens**                                                                                                         | Accessibility comes from Radix; look comes from tokens                                                     |
+| Styling          | **Tailwind CSS** bound to CSS custom properties (tokens), no hard-coded hex/px in components                                                                                        | See §11                                                                                                    |
+| API              | **NestJS or Fastify (pick one via ADR)** exposing **REST `/v1`** (OpenAPI 3.1) and **GraphQL** (`/graphql`, schema generated dynamically from the metadata model, e.g. Pothos/Yoga) | Single service layer shared by both                                                                        |
+| Database         | **PostgreSQL 16+**                                                                                                                                                                  | UUIDv7 primary keys, `timestamptz`, soft delete, `pg_trgm`, `fuzzystrmatch` extensions                     |
+| ORM / migrations | **Drizzle or Prisma + raw SQL migrations**                                                                                                                                          | Migrations are forward-only, reviewed, and tested on a copy of seed data                                   |
+| Queue / jobs     | **Redis + BullMQ**                                                                                                                                                                  | Webhook delivery, email sync, dedup scans, workflows, imports, exports                                     |
+| Search           | Postgres full-text + `pg_trgm` first; abstract behind a `SearchProvider` interface so OpenSearch/Meilisearch can be added later                                                     |                                                                                                            |
+| Auth             | **Own auth module**: email+password (Argon2id), **TOTP MFA**, **passkeys (WebAuthn)**, **OIDC/SAML SSO** (Google, Microsoft first)                                                  | Short-lived access tokens + rotating refresh tokens in httpOnly, SameSite cookies                          |
+| File storage     | S3-compatible (MinIO locally) with pre-signed URLs and AV-scan hook                                                                                                                 | Quote PDFs, attachments, exports                                                                           |
+| PDF              | Headless Chromium (Playwright) or `@react-pdf/renderer` for branded quotes/invoices                                                                                                 |                                                                                                            |
+| Observability    | OpenTelemetry traces, structured JSON logs (pino), Prometheus metrics, Sentry-compatible error hook                                                                                 | PII scrubbing in logs                                                                                      |
+| Testing          | **Vitest** (unit), **Playwright** (E2E + a11y with axe-core), **Testcontainers** (integration against real Postgres/Redis), **k6** (load)                                           |                                                                                                            |
+| Local dev        | `docker compose up` brings up Postgres, Redis, MinIO, Mailpit, and the apps                                                                                                         | One command, seeded demo tenant                                                                            |
+| CI               | GitHub Actions: typecheck → lint → unit → integration → E2E → a11y → dependency audit → secret scan → build                                                                         | Must be green before a phase is "done"                                                                     |
 
 ---
 
@@ -87,10 +87,13 @@ Build a CRM that is:
 ## 4. DATA MODEL
 
 ### 4.1 Core concepts (from the report)
+
 **Objects → Attributes → Records → Relationships → Lists/Views.** Admins design schema through UI/API with no DDL; developers can additionally define schema as **versioned code** (a `schema/` directory of TypeScript definitions applied through a migration command — "schema-as-code" like Twenty), so CRM schema changes go through Git, PRs and CI.
 
 ### 4.2 Storage strategy for custom objects (decision already made)
+
 Use a **metadata-driven hybrid**:
+
 - **System tables** (real columns, real foreign keys, real indexes) for standard objects: `people`, `companies`, `deals`, `activities` (tasks/notes/emails/meetings/calls), `pipelines`, `pipeline_stages`, `users`, `roles`, etc.
 - **Metadata tables:** `objects`, `attributes`, `relationships`, `views`, `lists`, `object_versions` describe both standard and custom objects.
 - **Custom attributes/objects** stored in a typed **JSONB `data` column** on a generic `records` table partitioned/indexed by `object_id`, with:
@@ -101,6 +104,7 @@ Use a **metadata-driven hybrid**:
 - Document the trade-off in an ADR and provide a **benchmark script** proving list queries on 1M records stay within budget (§13).
 
 ### 4.3 Standard objects (ship enabled)
+
 - **People** (contacts): name, emails[], phones[], title, company link, owner, lifecycle stage, source, tags, address, social links, consent flags (marketing/GDPR).
 - **Companies** (accounts): name, domains[], industry, size, annual revenue (currency attribute), **GSTIN, PAN** (India, validated), address (with Indian state for GST place-of-supply), parent company (hierarchy), owner, tags.
 - **Deals** (opportunities): name, amount + **currency (default ₹ INR, any ISO-4217 allowed)** + base-currency equivalent (§4.7), pipeline, stage, probability (from stage, overridable), expected value (formula), close date, owner, company, people (N:N roles), lost reason, forecast category.
@@ -109,58 +113,67 @@ Use a **metadata-driven hybrid**:
 - **Users, Teams, Roles, Territories** (see §7).
 
 ### 4.4 Attribute types (all required)
+
 Text (short/long/rich), Number, **Currency** (amount + any ISO-4217 code; behaviour defined in §4.7), Date, Date-time, Boolean, **Dropdown single/multi** (with colours), URL, Email, Phone (E.164 validated), Rating, **Relation** (to any object), User, File, JSON (admin-only), and **Formula** (safe expression language: arithmetic, comparisons, `IF`, `COALESCE`, date functions, referencing same-record fields and one hop of related fields; **no arbitrary code execution** — implement a sandboxed parser/evaluator, never `eval`).
 
 ### 4.5 Indexing strategy (report §"Database Optimization" — implemented correctly for Postgres)
+
 - **B-tree**: `created_at`, `updated_at`, `amount`, `close_date`, name sort keys, all `workspace_id`-leading composite indexes.
 - **Foreign-key indexes on every FK** (e.g. `deals.company_id`, `record_links.from/to`).
 - **Hash**: only for pure equality lookups (token hashes, API-key prefix, session id).
-- **Low-cardinality fields** (stage, is_active, lead_source): the report suggests *bitmap* indexes; **PostgreSQL has no persistent bitmap index type**, so use **partial B-tree indexes** and rely on bitmap *scans*; record this in an ADR.
+- **Low-cardinality fields** (stage, is_active, lead_source): the report suggests _bitmap_ indexes; **PostgreSQL has no persistent bitmap index type**, so use **partial B-tree indexes** and rely on bitmap _scans_; record this in an ADR.
 - **GIN**: JSONB attributes, tag arrays, `pg_trgm` for substring/fuzzy search.
-- Ship a **"slow query & index advisor" admin page** (uses `pg_stat_statements` and index usage stats) that *suggests* indexes to an admin and warns about over-indexing; never auto-creates indexes without confirmation.
+- Ship a **"slow query & index advisor" admin page** (uses `pg_stat_statements` and index usage stats) that _suggests_ indexes to an admin and warns about over-indexing; never auto-creates indexes without confirmation.
 - Every list endpoint must have an `EXPLAIN` test in CI that fails on sequential scans over large seed tables.
 
 ### 4.6 Data lifecycle
+
 Soft delete + 30-day recycle bin (restorable), hard-delete job for GDPR erasure, optimistic concurrency (`version` column; 409 on conflict), full **field-level change history** per record (who/what/when/old→new) feeding the record timeline.
 
 ### 4.7 Currency, Localisation & India Compliance (INR-first, all currencies supported)
 
-**Principle:** the product is *currency-agnostic in code and INR-first in defaults*. Never write a literal `$`, `USD`, `100` (as minor-unit divisor), or a US number/date format in any component, query, template or test fixture — everything flows through the currency and locale services below.
+**Principle:** the product is _currency-agnostic in code and INR-first in defaults_. Never write a literal `$`, `USD`, `100` (as minor-unit divisor), or a US number/date format in any component, query, template or test fixture — everything flows through the currency and locale services below.
 
 **A. Workspace currency settings (Settings → Workspace → Currency & Region)**
+
 - **Base (reporting) currency:** default **INR (₹)**; chosen at workspace creation; changing it later is a guarded admin operation (re-computes base equivalents via a background job, audit-logged, previewed first).
 - **Enabled currencies:** admin picks from the **full ISO-4217 list** (searchable, with symbol and name). Default enabled set for a new workspace: INR, USD, EUR, GBP, AED, SGD, AUD, CAD, JPY, CHF, SAR, ZAR — all others one click away. INR is always pinned first in every currency dropdown.
 - **Per-user display preferences:** display currency (default = workspace base), number-grouping style, date format, time zone (default **Asia/Kolkata, IST**), first day of week.
 - **Per-record currency:** every Currency attribute stores `{ amount_minor, currency_code }`. Deals, quotes, invoices, products and price-book entries can each be in any enabled currency.
 
 **B. Money storage & arithmetic (extends §8 safety rules)**
+
 - Store money as **integer minor units + ISO-4217 code**. The minor-unit exponent comes from an **ISO-4217 table** (INR=2 paise, JPY=0, KWD/BHD=3, etc.) — never assume 2 decimals or a ÷100.
 - Use a single `Money` value object in `packages/schema` (add, subtract, multiply by rate/percentage, allocate/split without losing a paisa/cent, compare, format). **Adding or comparing two different currencies throws** unless an explicit `convert(money, toCurrency, rate)` is used. Formula fields follow the same rule.
 - Deterministic rounding policy (default: banker's rounding at line level for display, exact until final rounding for totals), documented and property-tested.
-- For every transactional record (deal, quote, order, invoice, payment) persist **three things**: (1) amount in *transaction currency*, (2) amount in *workspace base currency*, (3) the **FX rate and rate date/source used**. Issued invoices and signed contracts **lock their rate** and never re-convert.
+- For every transactional record (deal, quote, order, invoice, payment) persist **three things**: (1) amount in _transaction currency_, (2) amount in _workspace base currency_, (3) the **FX rate and rate date/source used**. Issued invoices and signed contracts **lock their rate** and never re-convert.
 
 **C. Exchange rates**
+
 - `FxRateProvider` interface with: **manual rates** (admin-entered, always available), a **scheduled daily fetch adapter** (pluggable — e.g. RBI reference rates, ECB, or a commercial API; ship the adapter interface plus a manual/CSV provider, and one real provider where no API key is needed), and per-currency-pair **override** rules.
 - Rate history table (pair, rate, effective date, source), rate-staleness warning in the UI, and a policy setting for which rate applies when (deal created / quote date / invoice date / payment date).
 - Dashboards, forecasts and pipeline totals **aggregate in the base currency** using the stored base-equivalent; any chart/KPI can be toggled to "show in original currencies" (grouped, never silently summed) or re-displayed in another currency with an on-screen note of the rate used.
 
 **D. Indian number, date and language formatting (default for the India locale, selectable)**
-- **Indian digit grouping:** ₹12,34,56,789.50 (lakh/crore system) with a user toggle between *Indian* and *International* grouping; compact forms **₹12.5 L** (lakh) and **₹3.2 Cr** (crore) on KPI tiles, charts and Kanban column totals; a toggle for K/M/B for international users.
-- Use the **ICU/`Intl.NumberFormat`** locale `en-IN` by default (and `hi-IN` when Hindi UI is enabled); formats for other currencies follow the *user's* locale but keep the correct currency symbol/code (e.g. `US$1,200.00` shown beside ₹ amounts without ambiguity — when mixing currencies in one view, show the ISO code).
+
+- **Indian digit grouping:** ₹12,34,56,789.50 (lakh/crore system) with a user toggle between _Indian_ and _International_ grouping; compact forms **₹12.5 L** (lakh) and **₹3.2 Cr** (crore) on KPI tiles, charts and Kanban column totals; a toggle for K/M/B for international users.
+- Use the **ICU/`Intl.NumberFormat`** locale `en-IN` by default (and `hi-IN` when Hindi UI is enabled); formats for other currencies follow the _user's_ locale but keep the correct currency symbol/code (e.g. `US$1,200.00` shown beside ₹ amounts without ambiguity — when mixing currencies in one view, show the ISO code).
 - Dates `DD/MM/YYYY` by default for `en-IN`, ISO 8601 in API/DB, all stored in UTC and rendered in the user's time zone (default IST).
 - **Financial year** configurable per workspace — default **1 April → 31 March** (FY 2026-27 style labels), with quarter definitions (Q1 = Apr–Jun) used by forecasting, quotas, dashboards and "closing this quarter" filters.
 - UI i18n-ready from day one with an **English (India)** default and **Hindi** as the first additional language (other Indian languages addable via message catalogues); fonts must support **Devanagari** and other Indic scripts (Noto Sans family fallback), with correct line-height for Indic scripts in dense tables.
 - **Phone:** default country code **+91**, E.164 storage, national-format display, validation for Indian mobile/landline numbers; country picker for all others. **Address:** India-aware form (PIN code 6-digit validation, state/UT dropdown) with flexible international address fallback.
 
 **E. India compliance layer (GST, invoicing, payments) — shipped as configurable "tax & region packs"**
-- **Tax-pack architecture:** tax logic lives behind a `TaxEngine` interface so India GST is a *pack*, and other regions (EU VAT, UK VAT, US sales tax, UAE VAT, etc.) can be added without touching core code. India pack enabled by default for INR workspaces; other packs selectable.
+
+- **Tax-pack architecture:** tax logic lives behind a `TaxEngine` interface so India GST is a _pack_, and other regions (EU VAT, UK VAT, US sales tax, UAE VAT, etc.) can be added without touching core code. India pack enabled by default for INR workspaces; other packs selectable.
 - **India GST pack:** GSTIN capture + format/checksum validation for Companies and the workspace's own business, **place-of-supply logic** (intra-state → **CGST + SGST**, inter-state/export → **IGST**), product/service **HSN/SAC codes** on the catalog, per-line tax rates (0/5/12/18/28 % configurable, effective-dated since rates change), reverse-charge flag, cess support, **tax-inclusive vs tax-exclusive** pricing toggle, composition-dealer and SEZ/export (LUT) flags.
 - **Indian invoice fields:** sequential, gap-free per-financial-year invoice numbering (configurable prefix e.g. `INV/2026-27/0001`), seller & buyer GSTIN, place of supply, HSN/SAC, tax breakup table, **amount in words using the Indian system** (e.g. "Rupees Twelve Lakh Thirty-Four Thousand Only"), bank details, QR/UPI payment link, authorised signatory. Credit/debit notes for corrections. Provide an **e-invoicing (IRN/QR) adapter interface and a mock adapter** — real GST-portal integration requires the customer's credentials, so ship the hook, document it, and do not fake compliance claims.
 - **TDS** (tax deducted at source) handling as an optional receivable adjustment on payments; **TCS** hook where relevant.
 - **Payments for India:** primary gateway adapter **Razorpay** (UPI, cards, netbanking, wallets, EMI) in sandbox mode, with **UPI payment links/QR** on invoices; Stripe retained as a secondary adapter for international customers; bank-transfer (NEFT/RTGS/IMPS) reconciliation via CSV/bank-statement import. Never store card data (§8). Dunning messages and email/SMS/WhatsApp-style notification templates support English and Hindi.
-- **Honesty rule:** the app produces GST-*ready* data and documents; do **not** claim statutory certification. Add a visible disclaimer in docs that tax configuration must be reviewed by the customer's accountant.
+- **Honesty rule:** the app produces GST-_ready_ data and documents; do **not** claim statutory certification. Add a visible disclaimer in docs that tax configuration must be reviewed by the customer's accountant.
 
 **F. Acceptance tests for this section (all required)**
+
 1. A new workspace defaults to INR / en-IN / IST / April–March FY; a ₹ amount of 1234567.5 renders `₹12,34,567.50` (and `₹12.35 L` compact) and the grouping toggle changes it to `₹1,234,567.50`.
 2. A $10,000 deal in a workspace with INR base stores 3 values (USD amount, INR equivalent, rate+date) and the pipeline total shows the INR sum; changing the displayed currency never mutates stored data.
 3. JPY (0 decimals) and KWD (3 decimals) amounts round-trip through API, UI, CSV import/export and PDF without precision loss.
@@ -175,6 +188,7 @@ Soft delete + 30-day recycle bin (restorable), hard-delete job for GDPR erasure,
 ## 5. FEATURE SPECIFICATION (every item needs acceptance tests)
 
 ### 5.1 Data Architecture
+
 - Standard objects enabled by default (People, Companies, Deals, Activities).
 - **Custom Objects**: unlimited; singular/plural labels, icon (from a fixed icon set), colour, API name (immutable slug), description. Created via UI wizard, REST/GraphQL, or schema-as-code.
 - **Custom Attributes** on all objects (types in §4.4) with: required, unique, default, validation (regex / min / max / allowed list), help text, **filterable/sortable flags**, field-level permission defaults.
@@ -184,6 +198,7 @@ Soft delete + 30-day recycle bin (restorable), hard-delete job for GDPR erasure,
 - Templates: one-click starter schemas (B2B SaaS, Agency, Marketplace [Buyers/Sellers/Transactions], Real Estate [Properties/Listings], VC [Funds/Investments], Blank).
 
 ### 5.2 Sales Enablement
+
 - **Kanban pipelines:** multiple custom pipelines (New Business, Renewals, Partnerships…), custom stages with **win probability**, stage colours, rotting/stale-deal indicators (days in stage), required-fields-per-stage ("gate fields"), drag-and-drop with **optimistic update + undo toast**, keyboard-accessible move (select card → `M` → choose stage), WIP counts and weighted-value totals per column, swimlanes by owner.
 - **Automatic Activity Capture (AAC):** OAuth connect for **Google Workspace** and **Microsoft 365**; background sync of email + calendar; auto-association by participant email/domain to People/Companies/Deals (deterministic rules + dedup engine); per-user **privacy controls** (exclude internal domains, exclude labels/folders, "private" toggle per thread, share level: metadata-only / subject / full); disconnect = revoke tokens and optionally purge captured data; incremental sync (Gmail history IDs / Graph delta tokens), backoff on rate limits. Tokens **encrypted at rest** (envelope encryption), least scopes requested. Note in README the Google restricted-scope verification requirement for production.
 - **Two-way email:** send/reply from the record page via the connected mailbox, templates with merge fields, open/click tracking **opt-in** and disclosed, unsubscribe handling.
@@ -193,6 +208,7 @@ Soft delete + 30-day recycle bin (restorable), hard-delete job for GDPR erasure,
 - **CSV/XLSX import wizard** (upload → map columns → validate → dedupe preview → dry-run → commit as background job with rollback window) and **export** (permission-aware, audit-logged, rate-limited).
 
 ### 5.3 Analytics
+
 - Real-time dashboards with widgets: **Bar, Line, Pie/Donut, Metric (KPI), Funnel, Table**. Every chart **clickable → drill-down** to the exact underlying record list (same filter definition reused as a view).
 - Report builder over any object (group by, aggregate, date bucket, filters), saved reports, dashboard sharing within permissions, scheduled email of a dashboard (optional).
 - **Forecasting:** weighted pipeline, historical win-rate per stage/owner/segment, commit/best-case/pipeline categories, quota attainment. Show methodology on hover — no black boxes.
@@ -201,9 +217,13 @@ Soft delete + 30-day recycle bin (restorable), hard-delete job for GDPR erasure,
 - Chart colour/contrast/legend rules follow §11.
 
 ### 5.4 Workflow Engine — see §6.
+
 ### 5.5 Dedup — see §9.
+
 ### 5.6 API & Integration — see §10.
+
 ### 5.7 Security — see §7.
+
 ### 5.8 CPQ & Quote-to-Cash — see §8.
 
 ---
@@ -211,6 +231,7 @@ Soft delete + 30-day recycle bin (restorable), hard-delete job for GDPR erasure,
 ## 6. WORKFLOW ENGINE (automation)
 
 **Visual builder:** node-based drag-and-drop canvas (React Flow) building an automation **state machine**.
+
 - **Triggers:** record created/updated/deleted, field changed to value, stage changed, deal won/lost, activity completed, form/webhook received, scheduled (cron/relative date, e.g. "3 days before close date"), manual button, quote approved/rejected, payment failed.
 - **Conditions:** AND/OR groups, comparisons across fields and related records, **if / then / else branching**, switch nodes.
 - **Parallel paths:** fork/join nodes with defined join semantics (all / any).
@@ -219,9 +240,9 @@ Soft delete + 30-day recycle bin (restorable), hard-delete job for GDPR erasure,
   - Durable execution: workflow runs persist state per node so they survive worker restarts; **idempotent** steps; per-step retries with exponential backoff + jitter.
   - **Loop protection:** max depth, max executions per record per window, cycle detection at publish time ("this workflow can trigger itself").
   - **Versioning:** draft → test → published; running instances stay on the version they started with.
-  - **Test mode:** run against a sample record with a step-by-step trace; **dry-run** mode that shows what *would* change.
+  - **Test mode:** run against a sample record with a step-by-step trace; **dry-run** mode that shows what _would_ change.
   - **Run history** per workflow and per record with node-level inputs/outputs (PII-aware), error inspector, re-run from failed node.
-  - **Permission model:** a workflow runs as a declared *service identity* with explicit, minimal scopes — never silently as an admin. Changes to workflows are audit-logged and require the `workflows.manage` permission.
+  - **Permission model:** a workflow runs as a declared _service identity_ with explicit, minimal scopes — never silently as an admin. Changes to workflows are audit-logged and require the `workflows.manage` permission.
   - Rate limits and kill-switch per workspace.
 
 ---
@@ -229,29 +250,37 @@ Soft delete + 30-day recycle bin (restorable), hard-delete job for GDPR erasure,
 ## 7. SECURITY ARCHITECTURE (non-negotiable)
 
 ### 7.1 RBAC with Least Privilege enforced at three layers — **on the server**
+
 1. **Object-level:** each role has Create/Read/Update/Delete (+ Export, Import, Share, Manage-schema) per object. Support Customer Support = Read/Update Companies, **no access** to Invoices.
 2. **Record-level (row):** ownership + **teams + territories + role hierarchy** (managers inherit visibility over subordinates' records — ReBAC-style); sharing rules; explicit record shares with expiry. Implemented in the service layer **and** as Postgres RLS policies so a bug in one layer cannot leak data.
 3. **Field-level:** per role, per attribute → `hidden | read | write`. Hidden fields are removed from REST responses, **GraphQL schema introspection results for that user**, search indexes, exports, webhooks payloads (unless webhook identity has the scope), dashboards and audit-log views. (E.g. only Payroll Admin sees `bank_routing_number`, `commission_rate`.)
+
 - One central `packages/permissions` library: `can(user, action, object, record?, field?)` + a **query-scoping** helper that injects row filters into SQL. All modules must use it; add an ESLint rule/test that fails if a repository function runs without a permission scope.
 - **Default-deny.** New objects/attributes are invisible to everyone but admins until granted.
 - **Permission test matrix** auto-generated: for every role × object × action × layer, with automated tests proving UI hiding **and** API denial (direct REST/GraphQL calls with that role's token).
 - Built-in roles: Owner, Admin, Sales Manager, Sales Rep/SDR, Customer Support, Finance, Read-only, Billing Admin; custom roles via UI. "View as role/user" impersonation preview for admins (read-only, audit-logged, visible banner).
 
 ### 7.2 Authentication & session security
+
 Argon2id; MFA (TOTP + WebAuthn passkeys), recovery codes; SSO (OIDC/SAML) + optional SCIM-ready user model; account lockout/progressive delay; breached-password check (k-anonymity API or local list); session list with remote revoke; step-up auth for sensitive actions (schema deletion, role changes, bulk export, API key creation); **API keys / personal access tokens** hashed at rest (shown once), scoped, expirable, revocable, with last-used metadata.
 
 ### 7.3 Application security
+
 OWASP ASVS L2 as the target. CSRF protection, strict CORS allow-list, **Content-Security-Policy** (nonce-based), HSTS, secure headers, input validation (Zod) at every boundary, output encoding, parameterised queries only, **no raw SQL string concatenation** (lint-enforced), rich-text sanitisation (DOMPurify server-side), file upload validation (type sniffing, size caps, AV hook, no executable content), **SSRF protection for outbound webhooks/URL fetches** (block private/link-local/metadata IP ranges, DNS-rebinding-safe resolution, redirects limited), rate limiting and **abuse throttling** per IP/user/token, GraphQL **depth and complexity limits**, persisted-query option, disabled introspection in production for unauthenticated callers.
 
 ### 7.4 Data protection & privacy
+
 TLS everywhere; encryption at rest (DB/volume) **plus application-level envelope encryption** for OAuth tokens, webhook secrets and designated "sensitive" fields; key rotation procedure documented; secrets only via env/secret manager; PII scrubbing in logs. **GDPR/CCPA tooling:** data-subject export, right-to-erasure workflow (with legal-hold override), consent records with timestamps and source, retention policies per object, data-residency setting (region) documented. Hooks for HIPAA/SOC 2 evidence (access reviews, change logs) — documented as readiness, not certification claims.
 
 ### 7.5 Immutable audit log
+
 Append-only `audit_events` capturing: authentication events (success/fail, MFA, SSO), API queries (method, resource, status), record create/update/delete, **schema mutations**, permission/role changes, workflow publishes, **bulk exports/imports**, impersonation, webhook secret views. Each event: `id, workspace_id, actor (user/api-key/service), ip, user_agent, timestamp, action, target, before/after (field-level, sensitive values masked), request_id`.
+
 - **Tamper evidence:** hash-chain (each event stores `hash(prev_hash + payload)`), periodic signed checkpoints; DB role used by the app has **INSERT-only** rights on this table (no UPDATE/DELETE), enforced by privileges and triggers.
 - Admin UI: filterable viewer, export (itself audited), anomaly flags (impossible travel, mass export, off-hours admin actions) as notifications.
 
 ### 7.6 Resilience & operations
+
 Automated encrypted backups + tested restore script, point-in-time recovery notes, health/readiness endpoints, graceful shutdown, zero-downtime migration approach (expand → migrate → contract), dependency vulnerability scanning and SBOM in CI, pre-commit secret scanning.
 
 ---
@@ -260,16 +289,16 @@ Automated encrypted backups + tested restore script, point-in-time recovery note
 
 Implement the report's eight-stage Q2C lifecycle natively where it belongs to a CRM, and via **adapter interfaces** where it belongs to external systems.
 
-| # | Stage | Scope in this build |
-|---|---|---|
-| 1 | **Configure-Price-Quote** | Product catalog + price books (**one price book per currency, INR as the primary/default price book**, with optional auto-derivation of other currencies from INR via the FX provider and manual overrides), bundles/options with rules (requires/excludes), volume & tiered discounts, subscription terms and escalators, **GST/tax via the pluggable `TaxEngine` (§4.7)**, HSN/SAC codes; quote builder UI with live totals; **branded PDF proposal** generation with templates; quote versions |
-| 2 | **Approval workflows** | Rule-driven guard-rails (e.g. role allows ≤10% discount; 20% → auto-halt and route to VP Sales → Finance). Multi-level, sequential/parallel approvers, delegation, SLA reminders, approve/reject with comments, full audit trail, **rep cannot edit a quote while pending** |
-| 3 | **Contract execution (CLM)** | Generate contract from approved quote; version history; redline/diff view between versions; **e-signature adapter interface** (ship a sandbox/mock adapter + one real provider adapter if credentials are supplied); signed PDF stored with hash |
-| 4 | **Order management & provisioning** | On signature: deal → **Closed Won**, create Order, emit `order.created` event → outbound webhooks/workflows for fulfilment or entitlement provisioning |
-| 5 | **Billing** | Billing schedules from contract terms: subscriptions, **proration**, usage-based line items (usage ingest API), taxes via the `TaxEngine` (GST for INR workspaces) |
-| 6 | **Invoicing** | Generate compliant invoices in any enabled currency (gap-free numbering per financial year, GST-compliant layout for India, amount in words, PDF, email delivery, scheduled) — see §4.7-E |
-| 7 | **Payment collection** | **Payment-gateway adapter** (**Razorpay first for INR/UPI/cards/netbanking, Stripe as international adapter**; sandbox mode only until the user enables live keys); card/UPI/NEFT-RTGS-IMPS/ACH/wire status; **dunning** workflows for failed payments (retry schedule, notifications) ; webhook signature verification for inbound gateway events; **never store card data** (hosted fields/tokenisation only — keep PCI scope minimal) |
-| 8 | **Revenue recognition** | **Out of scope for calculation** (ERP territory): export recognised-ready ledger lines (Ind AS 115 / IFRS 15 / ASC 606 fields: performance obligations, term, amounts in transaction and base currency) through an ERP adapter/CSV/API |
+| #   | Stage                               | Scope in this build                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| --- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Configure-Price-Quote**           | Product catalog + price books (**one price book per currency, INR as the primary/default price book**, with optional auto-derivation of other currencies from INR via the FX provider and manual overrides), bundles/options with rules (requires/excludes), volume & tiered discounts, subscription terms and escalators, **GST/tax via the pluggable `TaxEngine` (§4.7)**, HSN/SAC codes; quote builder UI with live totals; **branded PDF proposal** generation with templates; quote versions |
+| 2   | **Approval workflows**              | Rule-driven guard-rails (e.g. role allows ≤10% discount; 20% → auto-halt and route to VP Sales → Finance). Multi-level, sequential/parallel approvers, delegation, SLA reminders, approve/reject with comments, full audit trail, **rep cannot edit a quote while pending**                                                                                                                                                                                                                       |
+| 3   | **Contract execution (CLM)**        | Generate contract from approved quote; version history; redline/diff view between versions; **e-signature adapter interface** (ship a sandbox/mock adapter + one real provider adapter if credentials are supplied); signed PDF stored with hash                                                                                                                                                                                                                                                  |
+| 4   | **Order management & provisioning** | On signature: deal → **Closed Won**, create Order, emit `order.created` event → outbound webhooks/workflows for fulfilment or entitlement provisioning                                                                                                                                                                                                                                                                                                                                            |
+| 5   | **Billing**                         | Billing schedules from contract terms: subscriptions, **proration**, usage-based line items (usage ingest API), taxes via the `TaxEngine` (GST for INR workspaces)                                                                                                                                                                                                                                                                                                                                |
+| 6   | **Invoicing**                       | Generate compliant invoices in any enabled currency (gap-free numbering per financial year, GST-compliant layout for India, amount in words, PDF, email delivery, scheduled) — see §4.7-E                                                                                                                                                                                                                                                                                                         |
+| 7   | **Payment collection**              | **Payment-gateway adapter** (**Razorpay first for INR/UPI/cards/netbanking, Stripe as international adapter**; sandbox mode only until the user enables live keys); card/UPI/NEFT-RTGS-IMPS/ACH/wire status; **dunning** workflows for failed payments (retry schedule, notifications) ; webhook signature verification for inbound gateway events; **never store card data** (hosted fields/tokenisation only — keep PCI scope minimal)                                                          |
+| 8   | **Revenue recognition**             | **Out of scope for calculation** (ERP territory): export recognised-ready ledger lines (Ind AS 115 / IFRS 15 / ASC 606 fields: performance obligations, term, amounts in transaction and base currency) through an ERP adapter/CSV/API                                                                                                                                                                                                                                                            |
 
 Financial safety rules: all money stored as **integer minor units + ISO-4217 currency code** (exponent from the ISO table, never a hard-coded ÷100), never floats, with base-currency equivalent and locked FX rate (§4.7); cross-currency arithmetic is impossible without an explicit conversion; deterministic rounding policy documented; immutable issued invoices (corrections via credit notes); approval and discount limits enforced **server-side**; every price calculation unit-tested with property-based tests.
 
@@ -315,27 +344,32 @@ Build `packages/dedup` as a standalone, well-tested library plus background serv
 ## 11. DESIGN SYSTEM, THEMES, UI/UX
 
 ### 11.1 Design tokens (single source of truth in `packages/tokens`)
+
 - Tokens defined once (JSON/TS) and compiled to CSS custom properties + Tailwind theme. **Zero hard-coded hex values or pixel values in components** (lint rule).
 - Three tiers: **primitive** (`blue-500`) → **semantic** (`color-bg-surface`, `color-text-muted`, `color-border-critical`, `color-accent`, `color-status-success/warn/danger/info`) → **component** (`button-primary-bg`). Components consume only semantic/component tokens.
 - Scales: type (modular scale, 1 UI sans + 1 mono for IDs/numbers with **tabular figures** in tables), spacing (4px grid; `spacing-layout-large` etc.), radii, shadows/elevation, motion (durations/easings), z-index layers, breakpoints, density.
 
 ### 11.2 Themes (must ship all of these, switchable instantly with no flash)
+
 1. **Light** and 2. **Dark** (true dark surfaces, not inverted colours; adjusted elevation using lighter surfaces rather than heavy shadows).
-3. **System** (follows OS, default).
-4. **High-contrast** (meets WCAG AAA contrast for text; stronger borders/focus rings).
-5. **Accent presets:** at least 6 curated accent colours + **workspace brand colour** (admin picks one hex; the system derives a full accessible palette and refuses combinations failing contrast). Brand logo/name on login, quotes and emails.
-6. **Density:** Comfortable / Compact (affects table row height, paddings — data-heavy users love compact).
-7. Reduced-motion respected (`prefers-reduced-motion`); theme choice persisted per user, applied server-side/early to avoid flash of wrong theme.
+2. **System** (follows OS, default).
+3. **High-contrast** (meets WCAG AAA contrast for text; stronger borders/focus rings).
+4. **Accent presets:** at least 6 curated accent colours + **workspace brand colour** (admin picks one hex; the system derives a full accessible palette and refuses combinations failing contrast). Brand logo/name on login, quotes and emails.
+5. **Density:** Comfortable / Compact (affects table row height, paddings — data-heavy users love compact).
+6. Reduced-motion respected (`prefers-reduced-motion`); theme choice persisted per user, applied server-side/early to avoid flash of wrong theme.
+
 - Provide a **/design-system** route (Storybook-equivalent, auth-gated in prod) showing every token, component, state, in all themes — used for visual regression tests.
 - **Visual direction:** calm, minimal, content-first, consumer-grade (think Linear/Attio clarity, not Salesforce density). Generous whitespace used with purpose, subtle borders over heavy shadows, restrained colour (colour carries meaning: status, ownership, priority), crisp iconography (one icon set), purposeful micro-interactions (≤200 ms), skeletons not spinners.
 
 ### 11.3 Component library (`packages/ui`)
+
 Atoms: Button (primary/secondary/ghost/danger, loading, icon-only), Input, Textarea, Select, Combobox, MultiSelect, DatePicker/RangePicker, Checkbox, Radio, Switch, Badge/Tag, Avatar, Tooltip, Kbd, Icon, Skeleton, Spinner.
 Molecules: Modal/Dialog, Drawer/Sheet, Popover, Dropdown/Context menu, Tabs, Accordion, Toast/Snackbar (with Undo), Banner, Breadcrumbs, Pagination/infinite scroll, Empty state, Confirm-destructive dialog (type-to-confirm), Field renderer/editor **per attribute type**, Relation picker, Filter builder, Sort/Group controls.
 Organisms: **Data Table** (virtualised, column resize/reorder/pin/hide, inline cell editing, multi-select + bulk actions, faceted filters, saved views, density, keyboard grid navigation, CSV export of visible), **Kanban Board** (virtualised columns, drag-and-drop with keyboard alternative, WIP/aggregate headers), **Split-pane record view**, **Timeline**, **Workflow canvas**, **Chart widgets**, **Command palette**, **App shell** (collapsible sidebar, top bar with global search, workspace switcher, notifications, user menu).
 Every component: documented props, all states (default/hover/focus/active/disabled/loading/error/empty), tested in light/dark/high-contrast, with unit + a11y tests.
 
 ### 11.4 Interaction patterns
+
 - **Keyboard-first:** `⌘/Ctrl K` palette, `G then D/P/C/…` navigation chords, `C` create, `/` focus search, `E` edit, `?` shortcut cheat-sheet; every mouse action has a keyboard path.
 - **Inline editing** on tables and record pages with optimistic UI; failures roll back with an explanatory toast.
 - **Undo** for destructive/bulk actions (toast with undo, backed by recycle bin).
@@ -347,12 +381,15 @@ Every component: documented props, all states (default/hover/focus/active/disabl
 - **i18n-ready:** all strings externalised (ICU messages), locale-aware date/number/currency formatting (default **en-IN with lakh/crore grouping**, Hindi second, full detail in §4.7-D), RTL-safe layout (logical CSS properties), timezone-correct everywhere.
 
 ### 11.5 Accessibility (WCAG 2.2 AA minimum)
+
 Contrast ≥4.5:1 text / 3:1 UI (enforced in token build via a script), visible focus rings, full keyboard operation including Kanban and workflow canvas alternatives, correct ARIA roles/labels and live regions for toasts/updates, focus trapping and restoration in dialogs, no colour-only meaning (icons/labels with status colours), target sizes ≥24px, `axe-core` checks in Playwright for every route in all themes — CI fails on violations.
 
 ### 11.6 Information architecture (primary navigation)
+
 Home (my tasks, today's meetings, recent records, pinned views) · Inbox/Activity · People · Companies · Deals (pipelines) · [Custom objects, user-orderable] · Lists/Views · Quotes & Contracts · Invoices · Dashboards & Reports · Automations · Duplicates (Resolution Center) · **Settings** (Workspace, Members & Roles, Data model, Integrations & API, Webhooks & DLQ, Security & Audit, Billing/Plan-free, Appearance/Themes).
 
 ### 11.7 Data-visualisation rules
+
 Colour-blind-safe categorical palettes validated for contrast in light and dark; direct labels over legends where possible; consistent axes and number formatting; tooltips with exact values; click = drill-down; accessible data-table fallback for every chart; never encode meaning by colour alone.
 
 ---
@@ -360,6 +397,7 @@ Colour-blind-safe categorical palettes validated for contrast in light and dark;
 ## 12. SEAMLESSNESS — END-TO-END FLOWS THAT MUST FEEL EFFORTLESS
 
 Implement and E2E-test these golden paths; each should need the fewest possible clicks:
+
 1. **Sign-up → first value in < 5 min:** create workspace → choose template → connect Google/Microsoft → first emails appear auto-linked to people/companies.
 2. **Lead → Customer:** web form lead → dedup check → auto-assign (territory/round-robin) → task created → email sequence → deal created → drag across pipeline → quote → approval → e-sign → Closed Won → order → invoice → payment → dashboard updates, all linked on one timeline.
 3. **Import 10k contacts** with mapping, dedup preview and rollback.
@@ -399,22 +437,23 @@ Cross-cutting seamlessness: real-time updates (SSE/WebSocket) so lists/Kanban re
 /infra           docker-compose, CI workflows, deployment manifests
 /seed            demo-data scripts (clearly marked demo)
 ```
-Conventions: strict TS, ESLint + Prettier, import-boundary rules between packages, Conventional Commits, feature flags only for *rollout* (never to gate core features), environment parity (dev = docker compose, prod = container images + manifests).
+
+Conventions: strict TS, ESLint + Prettier, import-boundary rules between packages, Conventional Commits, feature flags only for _rollout_ (never to gate core features), environment parity (dev = docker compose, prod = container images + manifests).
 
 ---
 
 ## 15. PHASED DELIVERY WITH EXIT GATES
 
-| Phase | Scope | Exit gate (all must pass) |
-|---|---|---|
-| **0 — Foundations** | Monorepo, CI, docker-compose, tokens + themes + base components + app shell, auth (password+MFA), workspace/tenant model, RLS scaffolding, audit-log table + hash chain, observability | App boots with one command; login/MFA works; theme switcher works (light/dark/system/high-contrast/accent); `Money` value object, ISO-4217 table, locale/currency formatting services and the CI currency-literal lint gate exist (§4.7); RLS isolation test proves tenant A cannot read tenant B; a11y + visual tests green |
-| **1 — Data core & security** | Metadata engine, standard + custom objects/attributes/relationships, formula engine, views (table), record page, import/export, RBAC at 3 layers + permission test matrix, audit viewer | Create a custom object end-to-end via UI; permission matrix suite 100% green (UI + REST + GraphQL); 1M-record benchmark within budget; Currency attribute works in any ISO currency with base-equivalent + FX snapshot; §4.7-F tests 1–4 and 7 green |
-| **2 — Sales core** | Pipelines/Kanban, activities/tasks, timeline, global search, command palette, split-pane views, notifications | Lead→deal golden path; Kanban DnD with keyboard alternative; E2E green |
-| **3 — Data integrity** | Dedup engine, Resolution Center, safe merge/unmerge, real-time duplicate warnings | Algorithm unit suite green with published fixtures; merge/unmerge round-trip test; 1M-record scan benchmark |
-| **4 — Integrations & events** | Outbox, REST+OpenAPI, GraphQL, SDK, webhooks (HMAC, idempotency, backoff+jitter, DLQ + replay), API keys, Google/Microsoft AAC | Webhook chaos test passes; DLQ replay works; AAC syncs a test mailbox with correct association; SSRF tests pass |
-| **5 — Workflow engine** | Visual builder, executor, versioning, test/dry-run, run history, loop protection | Example workflows from §12.8 work; worker-restart durability test; loop-protection test |
-| **6 — Revenue ops** | Catalog, CPQ, approvals, contracts + e-sign adapter, orders, billing, invoicing, payments (sandbox), dunning, ERP export | Full lead-to-cash golden path in sandbox in **both INR (GST invoice, Razorpay sandbox/UPI) and a foreign currency (USD)**; §4.7-F tests 5–6 and 8 green; pricing property tests; approval bypass tests fail correctly |
-| **7 — Analytics & polish** | Dashboards, report builder, forecasting, drill-down, onboarding, templates, i18n, performance + security hardening, docs | All §12 golden paths green; load test targets met; threat model reviewed; docs complete; `/docs/DEFERRED.md` reviewed with me |
+| Phase                         | Scope                                                                                                                                                                                   | Exit gate (all must pass)                                                                                                                                                                                                                                                                                                    |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **0 — Foundations**           | Monorepo, CI, docker-compose, tokens + themes + base components + app shell, auth (password+MFA), workspace/tenant model, RLS scaffolding, audit-log table + hash chain, observability  | App boots with one command; login/MFA works; theme switcher works (light/dark/system/high-contrast/accent); `Money` value object, ISO-4217 table, locale/currency formatting services and the CI currency-literal lint gate exist (§4.7); RLS isolation test proves tenant A cannot read tenant B; a11y + visual tests green |
+| **1 — Data core & security**  | Metadata engine, standard + custom objects/attributes/relationships, formula engine, views (table), record page, import/export, RBAC at 3 layers + permission test matrix, audit viewer | Create a custom object end-to-end via UI; permission matrix suite 100% green (UI + REST + GraphQL); 1M-record benchmark within budget; Currency attribute works in any ISO currency with base-equivalent + FX snapshot; §4.7-F tests 1–4 and 7 green                                                                         |
+| **2 — Sales core**            | Pipelines/Kanban, activities/tasks, timeline, global search, command palette, split-pane views, notifications                                                                           | Lead→deal golden path; Kanban DnD with keyboard alternative; E2E green                                                                                                                                                                                                                                                       |
+| **3 — Data integrity**        | Dedup engine, Resolution Center, safe merge/unmerge, real-time duplicate warnings                                                                                                       | Algorithm unit suite green with published fixtures; merge/unmerge round-trip test; 1M-record scan benchmark                                                                                                                                                                                                                  |
+| **4 — Integrations & events** | Outbox, REST+OpenAPI, GraphQL, SDK, webhooks (HMAC, idempotency, backoff+jitter, DLQ + replay), API keys, Google/Microsoft AAC                                                          | Webhook chaos test passes; DLQ replay works; AAC syncs a test mailbox with correct association; SSRF tests pass                                                                                                                                                                                                              |
+| **5 — Workflow engine**       | Visual builder, executor, versioning, test/dry-run, run history, loop protection                                                                                                        | Example workflows from §12.8 work; worker-restart durability test; loop-protection test                                                                                                                                                                                                                                      |
+| **6 — Revenue ops**           | Catalog, CPQ, approvals, contracts + e-sign adapter, orders, billing, invoicing, payments (sandbox), dunning, ERP export                                                                | Full lead-to-cash golden path in sandbox in **both INR (GST invoice, Razorpay sandbox/UPI) and a foreign currency (USD)**; §4.7-F tests 5–6 and 8 green; pricing property tests; approval bypass tests fail correctly                                                                                                        |
+| **7 — Analytics & polish**    | Dashboards, report builder, forecasting, drill-down, onboarding, templates, i18n, performance + security hardening, docs                                                                | All §12 golden paths green; load test targets met; threat model reviewed; docs complete; `/docs/DEFERRED.md` reviewed with me                                                                                                                                                                                                |
 
 After each phase deliver: (a) summary of what was built, (b) test & benchmark results, (c) screenshots/recordings across themes and breakpoints, (d) known limitations, (e) proposed next-phase plan.
 
@@ -427,6 +466,7 @@ After each phase deliver: (a) summary of what was built, (b) test & benchmark re
 **Next phases:** "Phase N−1 gate is approved. Read /docs/MASTER_BRIEF.md and /docs/DECISIONS.md. Plan and then implement **Phase N — <name>** exactly per §15, honouring §7 (security), §11 (design system) and §13 (budgets). Verify in the browser at 1440/820/390px in light and dark, attach evidence, and report against the exit gate."
 
 **Review passes (run any time):**
+
 - "Act as an adversarial security reviewer. Using §7 and the STRIDE threat model, try to break authorization (IDOR, field leakage via GraphQL/search/export/webhooks, RLS bypass), SSRF, injection and CSRF. Write failing tests first, then fix."
 - "Act as a UX auditor. Walk every golden path in §12 using only the keyboard, then with a screen reader checklist, then at 390px width. List friction and fix the top issues."
 - "Act as a performance engineer. Run the 1M-record benchmark, read EXPLAIN plans, check index advisor output, and fix anything over budget."

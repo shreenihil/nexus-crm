@@ -1,9 +1,11 @@
-export type OnboardingRole = 'admin' | 'sales' | 'finance' | 'customer_success' | 'other';
-export type OnboardingTemplate = 'b2b_saas' | 'agency' | 'marketplace' | 'real_estate' | 'blank';
-export type OnboardingLanguage = 'en' | 'hi';
+export type OnboardingRole =
+  "admin" | "sales" | "finance" | "customer_success" | "other";
+export type OnboardingTemplate =
+  "b2b_saas" | "agency" | "marketplace" | "real_estate" | "blank";
+export type OnboardingLanguage = "en" | "hi";
 
 export interface TourStepAction {
-  type: 'click' | 'input' | 'navigate';
+  type: "click" | "input" | "navigate";
   targetUrl?: string;
   expectedValue?: string;
 }
@@ -19,7 +21,7 @@ export interface TourStep {
     en: string;
     hi: string;
   };
-  placement?: 'top' | 'bottom' | 'left' | 'right';
+  placement?: "top" | "bottom" | "left" | "right";
   action?: TourStepAction;
   skippable?: boolean;
 }
@@ -27,7 +29,7 @@ export interface TourStep {
 export interface TourDefinition {
   id: string;
   version: number;
-  roles: Array<OnboardingRole | 'all'>;
+  roles: Array<OnboardingRole | "all">;
   steps: TourStep[];
 }
 

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Link from 'next/link';
+import * as React from "react";
+import Link from "next/link";
 import {
   Settings as SettingsIcon,
   Database,
@@ -14,16 +14,16 @@ import {
   ArrowRight,
   Sparkles,
   Server,
-} from 'lucide-react';
-import { Button, Badge, ThemeSwitcher } from '@nexus/ui';
-import { apiFetch } from '@/lib/api';
+} from "lucide-react";
+import { Button, Badge, ThemeSwitcher } from "@nexus/ui";
+import { apiFetch } from "@/lib/api";
 
 export default function SettingsHubPage() {
   const [workspaceInfo, setWorkspaceInfo] = React.useState<any>(null);
-  const [userRole, setUserRole] = React.useState<string>('owner');
+  const [userRole, setUserRole] = React.useState<string>("owner");
 
   React.useEffect(() => {
-    apiFetch('/v1/auth/me')
+    apiFetch("/v1/auth/me")
       .then((data) => {
         setWorkspaceInfo(data.workspace);
         setUserRole(data.role);
@@ -33,39 +33,44 @@ export default function SettingsHubPage() {
 
   const settingCards = [
     {
-      title: 'Platform Sovereignty & BYOK KMS',
-      description: 'Zero-downtime AES-256-GCM envelope encryption, customer-managed keys, and 1-click portable archive exports.',
-      href: '/settings/platform',
+      title: "Platform Sovereignty & BYOK KMS",
+      description:
+        "Zero-downtime AES-256-GCM envelope encryption, customer-managed keys, and 1-click portable archive exports.",
+      href: "/settings/platform",
       icon: <Server className="h-5 w-5 text-indigo-500" />,
-      badge: 'Zero-Downtime BYOK',
+      badge: "Zero-Downtime BYOK",
     },
     {
-      title: 'Schema & Custom Objects',
-      description: 'Manage standard and custom data entities, typed attributes, and formula calculations.',
-      href: '/settings/schema',
+      title: "Schema & Custom Objects",
+      description:
+        "Manage standard and custom data entities, typed attributes, and formula calculations.",
+      href: "/settings/schema",
       icon: <Database className="h-5 w-5 text-[var(--color-accent-primary)]" />,
-      badge: 'Phase 1 Core',
+      badge: "Phase 1 Core",
     },
     {
-      title: 'Tamper-Evident Audit Ledger',
-      description: 'Inspect SHA-256 hash-chained event streams and verify cryptographic ledger integrity.',
-      href: '/settings/audit',
+      title: "Tamper-Evident Audit Ledger",
+      description:
+        "Inspect SHA-256 hash-chained event streams and verify cryptographic ledger integrity.",
+      href: "/settings/audit",
       icon: <History className="h-5 w-5 text-emerald-500" />,
-      badge: 'Cryptographic Proof',
+      badge: "Cryptographic Proof",
     },
     {
-      title: 'Appearance & Themes',
-      description: 'Configure light, dark, high-contrast modes, accent color presets, and interface density.',
-      href: '/design-system',
+      title: "Appearance & Themes",
+      description:
+        "Configure light, dark, high-contrast modes, accent color presets, and interface density.",
+      href: "/design-system",
       icon: <Palette className="h-5 w-5 text-purple-500" />,
-      badge: 'WCAG 2.2 AA',
+      badge: "WCAG 2.2 AA",
     },
     {
-      title: 'Roles & Security',
-      description: '3-layer authorization policies (Object, Record, Field), TOTP MFA, and session controls.',
-      href: '/settings/audit',
+      title: "Roles & Security",
+      description:
+        "3-layer authorization policies (Object, Record, Field), TOTP MFA, and session controls.",
+      href: "/settings/audit",
       icon: <Shield className="h-5 w-5 text-amber-500" />,
-      badge: 'STRIDE Hardened',
+      badge: "STRIDE Hardened",
     },
   ];
 
@@ -81,7 +86,8 @@ export default function SettingsHubPage() {
             <Badge variant="accent">Tenant Management</Badge>
           </div>
           <p className="text-sm text-[var(--color-text-muted)] mt-1">
-            Configure system schemas, security policies, and interface customization
+            Configure system schemas, security policies, and interface
+            customization
           </p>
         </div>
       </div>
@@ -90,19 +96,23 @@ export default function SettingsHubPage() {
       <div className="rounded-[10px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="h-12 w-12 rounded-[10px] bg-[var(--color-accent-primary)] text-white flex items-center justify-center font-bold text-xl shadow-sm shrink-0">
-            {workspaceInfo?.name?.[0] || 'A'}
+            {workspaceInfo?.name?.[0] || "A"}
           </div>
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-bold text-[var(--color-text-primary)]">
-                {workspaceInfo?.name || 'Acme Corp'}
+                {workspaceInfo?.name || "Acme Corp"}
               </h2>
               <span className="text-xs font-mono px-2 py-0.5 rounded bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border-default)]">
-                slug: {workspaceInfo?.slug || 'acme-corp'}
+                slug: {workspaceInfo?.slug || "acme-corp"}
               </span>
             </div>
             <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
-              Active role: <span className="font-semibold capitalize text-[var(--color-text-primary)]">{userRole}</span> (Full administrative privileges)
+              Active role:{" "}
+              <span className="font-semibold capitalize text-[var(--color-text-primary)]">
+                {userRole}
+              </span>{" "}
+              (Full administrative privileges)
             </p>
           </div>
         </div>

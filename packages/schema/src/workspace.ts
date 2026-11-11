@@ -1,13 +1,13 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const workspaceRoles = [
-  'owner',
-  'admin',
-  'sales_manager',
-  'sales_rep',
-  'support',
-  'finance',
-  'read_only',
+  "owner",
+  "admin",
+  "sales_manager",
+  "sales_rep",
+  "support",
+  "finance",
+  "read_only",
 ] as const;
 
 export type WorkspaceRole = (typeof workspaceRoles)[number];
@@ -16,7 +16,7 @@ export const updateWorkspaceSchema = z.object({
   name: z.string().min(2).max(100).trim().optional(),
   brandColor: z
     .string()
-    .regex(/^#[0-9A-Fa-f]{6}$/, 'Must be a valid hex color code (e.g. #3B82F6)')
+    .regex(/^#[0-9A-Fa-f]{6}$/, "Must be a valid hex color code (e.g. #3B82F6)")
     .optional(),
   logoUrl: z.string().url().nullable().optional(),
 });

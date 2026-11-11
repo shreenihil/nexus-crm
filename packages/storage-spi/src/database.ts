@@ -1,4 +1,4 @@
-import type { DatabaseCapabilityFlags, AdapterHealth } from './capabilities.js';
+import type { DatabaseCapabilityFlags, AdapterHealth } from "./capabilities.js";
 
 export interface DatabaseAdapter {
   readonly name: string;
@@ -18,7 +18,7 @@ export interface DatabaseAdapter {
   exportStream(
     table: string,
     cursor?: string,
-    batchSize?: number
+    batchSize?: number,
   ): Promise<{ rows: any[]; nextCursor?: string; checksum: string }>;
   importBatch(table: string, rows: any[]): Promise<{ inserted: number }>;
 }

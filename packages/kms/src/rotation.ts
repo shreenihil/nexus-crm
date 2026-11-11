@@ -3,12 +3,12 @@ import {
   wrapDek,
   unwrapDek,
   type EncryptedDekEnvelope,
-} from './envelope.js';
+} from "./envelope.js";
 
 export interface KeyVersionMetadata {
   version: number;
-  algorithm: 'AES-256-GCM';
-  status: 'ACTIVE' | 'ROTATED' | 'REVOKED';
+  algorithm: "AES-256-GCM";
+  status: "ACTIVE" | "ROTATED" | "REVOKED";
   createdAt: string;
   rotatedAt?: string | null;
 }
@@ -28,7 +28,7 @@ export function rotateMasterKey(
   oldKek: Buffer,
   newKek: Buffer,
   currentVersion: number,
-  existingEnvelopes: EncryptedDekEnvelope[]
+  existingEnvelopes: EncryptedDekEnvelope[],
 ): RotationResult {
   const startTime = performance.now();
   const newVersion = currentVersion + 1;

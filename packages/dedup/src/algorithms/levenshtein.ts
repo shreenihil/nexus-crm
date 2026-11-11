@@ -3,8 +3,8 @@
  */
 
 export function levenshteinDistance(a: string, b: string): number {
-  const s1 = a || '';
-  const s2 = b || '';
+  const s1 = a || "";
+  const s2 = b || "";
 
   if (s1 === s2) return 0;
   if (s1.length === 0) return s2.length;
@@ -46,8 +46,8 @@ export function levenshteinDistance(a: string, b: string): number {
 }
 
 export function levenshteinSimilarity(a: string, b: string): number {
-  const s1 = (a || '').trim().toLowerCase();
-  const s2 = (b || '').trim().toLowerCase();
+  const s1 = (a || "").trim().toLowerCase();
+  const s2 = (b || "").trim().toLowerCase();
 
   if (s1 === s2) return 1.0;
   const maxLen = Math.max(s1.length, s2.length);

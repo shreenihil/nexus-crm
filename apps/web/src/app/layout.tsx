@@ -1,9 +1,10 @@
-import type { Metadata } from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'Nexus CRM — Sovereign, Multi-Tenant CRM',
-  description: 'Production-grade, keyboard-first CRM with programmable architecture and consumer-grade simplicity.',
+  title: "Nexus CRM — Sovereign, Multi-Tenant CRM",
+  description:
+    "Production-grade, keyboard-first CRM with programmable architecture and consumer-grade simplicity.",
 };
 
 export default function RootLayout({

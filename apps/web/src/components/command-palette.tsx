@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { Modal } from '@nexus/ui';
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import { Modal } from "@nexus/ui";
 import {
   Search,
   TrendingUp,
@@ -17,7 +17,7 @@ import {
   Moon,
   Sun,
   Copy,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface CommandPaletteProps {
   open: boolean;
@@ -35,24 +35,69 @@ interface SearchHit {
 
 const STATIC_ACTIONS = [
   {
-    category: 'Navigation',
+    category: "Navigation",
     items: [
-      { id: 'nav-deals', label: 'Sales Pipeline & Kanban Board', href: '/deals/board', icon: TrendingUp },
-      { id: 'nav-people', label: 'People & Contacts Catalog', href: '/records/people', icon: Users },
-      { id: 'nav-companies', label: 'Companies & Accounts', href: '/records/companies', icon: Building2 },
-      { id: 'nav-quotes', label: 'Deals & CPQ Quotes', href: '/records/deals', icon: FileSpreadsheet },
-      { id: 'nav-dedup', label: 'Deduplication Resolution Center', href: '/duplicates', icon: Copy },
-      { id: 'nav-automations', label: 'Workflow Automations & Webhooks', href: '/automations', icon: GitBranch },
-      { id: 'nav-schema', label: 'Schema & Custom Object Builder', href: '/settings/schema', icon: Layers },
-      { id: 'nav-security', label: 'Sovereign BYOK Key Management', href: '/settings/platform', icon: ShieldCheck },
-      { id: 'nav-design', label: 'Design System & Token Showroom', href: '/design-system', icon: Sparkles },
+      {
+        id: "nav-deals",
+        label: "Sales Pipeline & Kanban Board",
+        href: "/deals/board",
+        icon: TrendingUp,
+      },
+      {
+        id: "nav-people",
+        label: "People & Contacts Catalog",
+        href: "/records/people",
+        icon: Users,
+      },
+      {
+        id: "nav-companies",
+        label: "Companies & Accounts",
+        href: "/records/companies",
+        icon: Building2,
+      },
+      {
+        id: "nav-quotes",
+        label: "Deals & CPQ Quotes",
+        href: "/records/deals",
+        icon: FileSpreadsheet,
+      },
+      {
+        id: "nav-dedup",
+        label: "Deduplication Resolution Center",
+        href: "/duplicates",
+        icon: Copy,
+      },
+      {
+        id: "nav-automations",
+        label: "Workflow Automations & Webhooks",
+        href: "/automations",
+        icon: GitBranch,
+      },
+      {
+        id: "nav-schema",
+        label: "Schema & Custom Object Builder",
+        href: "/settings/schema",
+        icon: Layers,
+      },
+      {
+        id: "nav-security",
+        label: "Sovereign BYOK Key Management",
+        href: "/settings/platform",
+        icon: ShieldCheck,
+      },
+      {
+        id: "nav-design",
+        label: "Design System & Token Showroom",
+        href: "/design-system",
+        icon: Sparkles,
+      },
     ],
   },
 ];
 
 export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const router = useRouter();
-  const [query, setQuery] = React.useState('');
+  const [query, setQuery] = React.useState("");
   const [searchResults, setSearchResults] = React.useState<SearchHit[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [selectedIndex, setSelectedIndex] = React.useState(0);
@@ -60,7 +105,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
   React.useEffect(() => {
     if (open) {
-      setQuery('');
+      setQuery("");
       setSearchResults([]);
       setSelectedIndex(0);
       setTimeout(() => inputRef.current?.focus(), 50);
@@ -78,16 +123,19 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     setLoading(true);
     const timer = setTimeout(async () => {
       try {
-        const token = localStorage.getItem('nexus-token');
-        const res = await fetch(`http://localhost:3000/api/v1/search?q=${encodeURIComponent(query.trim())}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const token = localStorage.getItem("nexus-token");
+        const res = await fetch(
+          `http://localhost:3000/api/v1/search?q=${encodeURIComponent(query.trim())}`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          },
+        );
         if (res.ok) {
           const data = await res.json();
           setSearchResults(data.results || []);
         }
       } catch (err) {
-        console.error('Search query failed:', err);
+        console.error("Search query failed:", err);
       } finally {
         setLoading(false);
       }
@@ -101,7 +149,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     const q = query.toLowerCase().trim();
     if (!q) return STATIC_ACTIONS[0]!.items;
     return STATIC_ACTIONS[0]!.items.filter((item) =>
-      item.label.toLowerCase().includes(q)
+      item.label.toLowerCase().includes(q),
     );
   }, [query]);
 
@@ -113,13 +161,17 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowDown') {
+    if (e.key === "ArrowDown") {
       e.preventDefault();
-      setSelectedIndex((prev) => (totalItems > 0 ? (prev + 1) % totalItems : 0));
-    } else if (e.key === 'ArrowUp') {
+      setSelectedIndex((prev) =>
+        totalItems > 0 ? (prev + 1) % totalItems : 0,
+      );
+    } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setSelectedIndex((prev) => (totalItems > 0 ? (prev - 1 + totalItems) % totalItems : 0));
-    } else if (e.key === 'Enter') {
+      setSelectedIndex((prev) =>
+        totalItems > 0 ? (prev - 1 + totalItems) % totalItems : 0,
+      );
+    } else if (e.key === "Enter") {
       e.preventDefault();
       if (selectedIndex < searchResults.length) {
         const hit = searchResults[selectedIndex];
@@ -183,25 +235,29 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                       onClick={() => handleSelect(hit.href)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-xs transition-colors ${
                         isSelected
-                          ? 'bg-[var(--color-accent-primary)] text-white'
-                          : 'hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-primary)]'
+                          ? "bg-[var(--color-accent-primary)] text-white"
+                          : "hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-primary)]"
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <span
                           className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded shrink-0 ${
                             isSelected
-                              ? 'bg-white/20 text-white'
-                              : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border-default)]'
+                              ? "bg-white/20 text-white"
+                              : "bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border-default)]"
                           }`}
                         >
                           {hit.objectLabel}
                         </span>
                         <div className="flex flex-col min-w-0">
-                          <span className="font-semibold truncate">{hit.title}</span>
+                          <span className="font-semibold truncate">
+                            {hit.title}
+                          </span>
                           <span
                             className={`text-[11px] truncate ${
-                              isSelected ? 'text-white/80' : 'text-[var(--color-text-muted)]'
+                              isSelected
+                                ? "text-white/80"
+                                : "text-[var(--color-text-muted)]"
                             }`}
                           >
                             {hit.subtitle}
@@ -234,16 +290,16 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                       onClick={() => handleSelect(item.href)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-xs transition-colors ${
                         isSelected
-                          ? 'bg-[var(--color-accent-primary)] text-white'
-                          : 'hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-primary)]'
+                          ? "bg-[var(--color-accent-primary)] text-white"
+                          : "hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-primary)]"
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
                         <div
                           className={`p-1.5 rounded-md ${
                             isSelected
-                              ? 'bg-white/20 text-white'
-                              : 'bg-[var(--color-bg-subtle)] text-[var(--color-accent-primary)]'
+                              ? "bg-white/20 text-white"
+                              : "bg-[var(--color-bg-subtle)] text-[var(--color-accent-primary)]"
                           }`}
                         >
                           <Icon className="h-4 w-4" />
@@ -252,7 +308,9 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                       </div>
                       <span
                         className={`text-[10px] font-mono ${
-                          isSelected ? 'text-white/75' : 'text-[var(--color-text-muted)]'
+                          isSelected
+                            ? "text-white/75"
+                            : "text-[var(--color-text-muted)]"
                         }`}
                       >
                         Jump ↵
@@ -277,16 +335,16 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             <span>
               <kbd className="font-mono bg-[var(--color-bg-surface)] px-1 py-0.5 rounded border border-[var(--color-border-default)] text-[10px]">
                 ↑
-              </kbd>{' '}
+              </kbd>{" "}
               <kbd className="font-mono bg-[var(--color-bg-surface)] px-1 py-0.5 rounded border border-[var(--color-border-default)] text-[10px]">
                 ↓
-              </kbd>{' '}
+              </kbd>{" "}
               navigate
             </span>
             <span>
               <kbd className="font-mono bg-[var(--color-bg-surface)] px-1 py-0.5 rounded border border-[var(--color-border-default)] text-[10px]">
                 ↵
-              </kbd>{' '}
+              </kbd>{" "}
               open
             </span>
           </div>

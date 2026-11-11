@@ -1,4 +1,7 @@
-import type { ObjectStorageCapabilityFlags, AdapterHealth } from './capabilities.js';
+import type {
+  ObjectStorageCapabilityFlags,
+  AdapterHealth,
+} from "./capabilities.js";
 
 export interface PutObjectResult {
   key: string;
@@ -19,9 +22,17 @@ export interface ObjectStorageAdapter {
   getCapabilities(): ObjectStorageCapabilityFlags;
   healthCheck(): Promise<AdapterHealth>;
 
-  putObject(key: string, data: Buffer | Uint8Array, contentType?: string): Promise<PutObjectResult>;
+  putObject(
+    key: string,
+    data: Buffer | Uint8Array,
+    contentType?: string,
+  ): Promise<PutObjectResult>;
   getObject(key: string): Promise<GetObjectResult>;
   deleteObject(key: string): Promise<void>;
   getSignedUrl(key: string, expiresInSeconds: number): Promise<string>;
-  listObjects(prefix?: string, cursor?: string, limit?: number): Promise<{ keys: string[]; nextCursor?: string }>;
+  listObjects(
+    prefix?: string,
+    cursor?: string,
+    limit?: number,
+  ): Promise<{ keys: string[]; nextCursor?: string }>;
 }

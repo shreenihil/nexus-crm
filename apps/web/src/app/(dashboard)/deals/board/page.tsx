@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import * as React from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   TrendingUp,
   Table as TableIcon,
@@ -20,10 +20,10 @@ import {
   Trophy,
   ChevronLeft,
   ChevronRight,
-} from 'lucide-react';
-import { Button, Badge, Modal, Input, MoneyDisplay } from '@nexus/ui';
-import { Money, formatMoney } from '@nexus/schema';
-import { apiFetch } from '@/lib/api';
+} from "lucide-react";
+import { Button, Badge, Modal, Input, MoneyDisplay } from "@nexus/ui";
+import { Money, formatMoney } from "@nexus/schema";
+import { apiFetch } from "@/lib/api";
 
 interface BoardDeal {
   id: string;
@@ -71,25 +71,29 @@ export default function DealsKanbanBoardPage() {
   const [boardData, setBoardData] = React.useState<BoardData | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [draggingDealId, setDraggingDealId] = React.useState<string | null>(null);
-  const [celebrationMessage, setCelebrationMessage] = React.useState<string | null>(null);
+  const [draggingDealId, setDraggingDealId] = React.useState<string | null>(
+    null,
+  );
+  const [celebrationMessage, setCelebrationMessage] = React.useState<
+    string | null
+  >(null);
   const [announcement, setAnnouncement] = React.useState<string | null>(null);
 
   // New Deal modal
   const [isNewDealOpen, setIsNewDealOpen] = React.useState(false);
-  const [newDealName, setNewDealName] = React.useState('');
-  const [newDealAmount, setNewDealAmount] = React.useState('150000');
-  const [newDealStage, setNewDealStage] = React.useState('Discovery');
+  const [newDealName, setNewDealName] = React.useState("");
+  const [newDealAmount, setNewDealAmount] = React.useState("150000");
+  const [newDealStage, setNewDealStage] = React.useState("Discovery");
   const [submittingDeal, setSubmittingDeal] = React.useState(false);
 
   const fetchBoard = React.useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiFetch<BoardData>('/v1/pipelines/default/board');
+      const data = await apiFetch<BoardData>("/v1/pipelines/default/board");
       setBoardData(data);
     } catch (err: any) {
-      setError(err.message || 'Failed to load deal pipeline board');
+      setError(err.message || "Failed to load deal pipeline board");
     } finally {
       setLoading(false);
     }
@@ -101,7 +105,7 @@ export default function DealsKanbanBoardPage() {
 
   // Drag-and-drop handlers
   const handleDragStart = (e: React.DragEvent, dealId: string) => {
-    e.dataTransfer.setData('text/plain', dealId);
+    e.dataTransfer.setData("text/plain", dealId);
     setDraggingDealId(dealId);
   };
 
@@ -114,7 +118,7 @@ export default function DealsKanbanBoardPage() {
 
     // Find current deal and stage
     let foundDeal: BoardDeal | null = null;
-    let fromStageName = '';
+    let fromStageName = "";
 
     for (const stage of boardData.stages) {
       const match = stage.deals.find((d) => d.id === dealId);
@@ -125,7 +129,10 @@ export default function DealsKanbanBoardPage() {
       }
     }
 
-    if (!foundDeal || fromStageName.toLowerCase() === targetStageName.toLowerCase()) {
+    if (
+      !foundDeal ||
+      fromStageName.toLowerCase() === targetStageName.toLowerCase()
+    ) {
       setDraggingDealId(null);
       return;
     }
@@ -166,8 +173,14 @@ export default function DealsKanbanBoardPage() {
       return st;
     });
 
-    const newTotalAmount = updatedStages.reduce((sum, s) => sum + s.totalAmount, 0);
-    const newWeightedAmount = updatedStages.reduce((sum, s) => sum + s.weightedAmount, 0);
+    const newTotalAmount = updatedStages.reduce(
+      (sum, s) => sum + s.totalAmount,
+      0,
+    );
+    const newWeightedAmount = updatedStages.reduce(
+      (sum, s) => sum + s.weightedAmount,
+      0,
+    );
 
     setBoardData({
       ...boardData,
@@ -179,18 +192,22 @@ export default function DealsKanbanBoardPage() {
       stages: updatedStages,
     });
     setDraggingDealId(null);
-    setAnnouncement(`Moved deal "${foundDeal.name}" to stage ${targetStageName}`);
+    setAnnouncement(
+      `Moved deal "${foundDeal.name}" to stage ${targetStageName}`,
+    );
 
     // If moved to Closed Won, show celebration micro-animation
-    if (targetStageName.toLowerCase() === 'closed won') {
-      setCelebrationMessage(`🎉 Congratulations! "${foundDeal.name}" closed won for ${formatMoney(Money.fromMajor(foundDeal.amount, 'INR'))}!`);
+    if (targetStageName.toLowerCase() === "closed won") {
+      setCelebrationMessage(
+        `🎉 Congratulations! "${foundDeal.name}" closed won for ${formatMoney(Money.fromMajor(foundDeal.amount, "INR"))}!`,
+      );
       setTimeout(() => setCelebrationMessage(null), 5000);
     }
 
     // Server commit
     try {
       await apiFetch(`/v1/pipelines/deals/${dealId}/stage`, {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify({ toStage: targetStageName }),
       });
     } catch (err: any) {
@@ -201,7 +218,7 @@ export default function DealsKanbanBoardPage() {
 
   const handleDrop = async (e: React.DragEvent, targetStageName: string) => {
     e.preventDefault();
-    const dealId = e.dataTransfer.getData('text/plain') || draggingDealId;
+    const dealId = e.dataTransfer.getData("text/plain") || draggingDealId;
     if (dealId) {
       await moveDealToStage(dealId, targetStageName);
     }
@@ -212,8 +229,8 @@ export default function DealsKanbanBoardPage() {
     e.preventDefault();
     setSubmittingDeal(true);
     try {
-      await apiFetch('/v1/records/deals', {
-        method: 'POST',
+      await apiFetch("/v1/records/deals", {
+        method: "POST",
         body: JSON.stringify({
           data: {
             name: newDealName,
@@ -224,8 +241,8 @@ export default function DealsKanbanBoardPage() {
       });
 
       setIsNewDealOpen(false);
-      setNewDealName('');
-      setNewDealAmount('150000');
+      setNewDealName("");
+      setNewDealAmount("150000");
       await fetchBoard();
     } catch (err: any) {
       alert(`Failed to create deal: ${err.message}`);
@@ -238,7 +255,7 @@ export default function DealsKanbanBoardPage() {
   const rottingDealsCount =
     boardData?.stages.reduce(
       (sum, s) => sum + s.deals.filter((d) => d.isRotting).length,
-      0
+      0,
     ) || 0;
 
   return (
@@ -250,10 +267,13 @@ export default function DealsKanbanBoardPage() {
             <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
               Sales Pipeline & Kanban
             </h1>
-            <Badge variant="accent">{boardData?.pipeline.name || 'Standard B2B Pipeline'}</Badge>
+            <Badge variant="accent">
+              {boardData?.pipeline.name || "Standard B2B Pipeline"}
+            </Badge>
           </div>
           <p className="text-sm text-[var(--color-text-muted)] mt-0.5">
-            Real-time drag-and-drop stage execution, weighted pipeline forecasting, and deal velocity tracking
+            Real-time drag-and-drop stage execution, weighted pipeline
+            forecasting, and deal velocity tracking
           </p>
         </div>
 
@@ -264,7 +284,7 @@ export default function DealsKanbanBoardPage() {
               id="btn-switch-table-view"
               variant="ghost"
               size="sm"
-              onClick={() => router.push('/records/deals')}
+              onClick={() => router.push("/records/deals")}
               className="text-xs"
             >
               <TableIcon className="h-3.5 w-3.5" /> Table
@@ -372,11 +392,15 @@ export default function DealsKanbanBoardPage() {
         <div className="p-4 rounded-[10px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] shadow-sm">
           <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)] font-medium">
             <span>Rotting Warnings Alert</span>
-            <AlertTriangle className={`h-4 w-4 ${rottingDealsCount > 0 ? 'text-amber-500' : 'text-emerald-500'}`} />
+            <AlertTriangle
+              className={`h-4 w-4 ${rottingDealsCount > 0 ? "text-amber-500" : "text-emerald-500"}`}
+            />
           </div>
           <div className="mt-2 flex items-center justify-between">
-            <span className={`text-2xl font-bold tracking-tight font-mono ${rottingDealsCount > 0 ? 'text-amber-500' : 'text-[var(--color-text-primary)]'}`}>
-              {rottingDealsCount} {rottingDealsCount === 1 ? 'Deal' : 'Deals'}
+            <span
+              className={`text-2xl font-bold tracking-tight font-mono ${rottingDealsCount > 0 ? "text-amber-500" : "text-[var(--color-text-primary)]"}`}
+            >
+              {rottingDealsCount} {rottingDealsCount === 1 ? "Deal" : "Deals"}
             </span>
             {rottingDealsCount > 0 ? (
               <Badge variant="warning">Requires Action</Badge>
@@ -391,13 +415,18 @@ export default function DealsKanbanBoardPage() {
       </div>
 
       {/* Kanban Board Columns Container */}
-      <div className="overflow-x-auto pb-4 focus:outline-none" tabIndex={0} role="region" aria-label="Kanban pipeline board">
+      <div
+        className="overflow-x-auto pb-4 focus:outline-none"
+        tabIndex={0}
+        role="region"
+        aria-label="Kanban pipeline board"
+      >
         <div className="flex gap-4 min-w-[1280px]">
           {boardData?.stages.map((stage) => (
             <div
               key={stage.id}
-              id={`stage-col-${stage.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
-              data-testid={`kanban-column-${stage.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`}
+              id={`stage-col-${stage.name.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}
+              data-testid={`kanban-column-${stage.name.toLowerCase().replace(/[^a-z0-9]/g, "_")}`}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, stage.name)}
               className="flex-1 min-w-[280px] rounded-[10px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] shadow-sm flex flex-col max-h-[calc(100vh-280px)]"
@@ -408,7 +437,7 @@ export default function DealsKanbanBoardPage() {
                   <div className="flex items-center gap-2">
                     <span
                       className="h-2.5 w-2.5 rounded-full"
-                      style={{ backgroundColor: stage.color || '#6366f1' }}
+                      style={{ backgroundColor: stage.color || "#6366f1" }}
                     />
                     <span className="font-bold text-xs text-[var(--color-text-primary)]">
                       {stage.name}
@@ -420,7 +449,13 @@ export default function DealsKanbanBoardPage() {
                 </div>
 
                 <div className="flex items-center justify-between text-[11px] font-mono text-[var(--color-text-muted)] mt-1">
-                  <MoneyDisplay amount={stage.totalAmount} isSubunits={false} currency="INR" compact size="xs" />
+                  <MoneyDisplay
+                    amount={stage.totalAmount}
+                    isSubunits={false}
+                    currency="INR"
+                    compact
+                    size="xs"
+                  />
                   <span>{stage.winProbability}% win prob</span>
                 </div>
               </div>
@@ -438,11 +473,19 @@ export default function DealsKanbanBoardPage() {
                   </div>
                 ) : (
                   stage.deals.map((deal) => {
-                    const stageIdx = boardData?.stages.findIndex((s) => s.id === stage.id) ?? -1;
+                    const stageIdx =
+                      boardData?.stages.findIndex((s) => s.id === stage.id) ??
+                      -1;
                     const canMoveBack = stageIdx > 0;
-                    const canMoveForward = stageIdx >= 0 && stageIdx < (boardData?.stages.length || 0) - 1;
-                    const prevStage = canMoveBack ? boardData?.stages[stageIdx - 1]?.name : null;
-                    const nextStage = canMoveForward ? boardData?.stages[stageIdx + 1]?.name : null;
+                    const canMoveForward =
+                      stageIdx >= 0 &&
+                      stageIdx < (boardData?.stages.length || 0) - 1;
+                    const prevStage = canMoveBack
+                      ? boardData?.stages[stageIdx - 1]?.name
+                      : null;
+                    const nextStage = canMoveForward
+                      ? boardData?.stages[stageIdx + 1]?.name
+                      : null;
 
                     return (
                       <div
@@ -453,20 +496,26 @@ export default function DealsKanbanBoardPage() {
                         onDragStart={(e) => handleDragStart(e, deal.id)}
                         onClick={() => router.push(`/records/deals/${deal.id}`)}
                         onKeyDown={(e) => {
-                          if (e.key === '[' || (e.shiftKey && e.key === 'ArrowLeft')) {
+                          if (
+                            e.key === "[" ||
+                            (e.shiftKey && e.key === "ArrowLeft")
+                          ) {
                             e.preventDefault();
                             if (prevStage) moveDealToStage(deal.id, prevStage);
-                          } else if (e.key === ']' || (e.shiftKey && e.key === 'ArrowRight')) {
+                          } else if (
+                            e.key === "]" ||
+                            (e.shiftKey && e.key === "ArrowRight")
+                          ) {
                             e.preventDefault();
                             if (nextStage) moveDealToStage(deal.id, nextStage);
-                          } else if (e.key === 'Enter') {
+                          } else if (e.key === "Enter") {
                             router.push(`/records/deals/${deal.id}`);
                           }
                         }}
                         className={`p-3.5 rounded-[8px] border bg-[var(--color-bg-surface)] hover:shadow-md transition-all cursor-grab active:cursor-grabbing flex flex-col gap-2.5 group focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-primary)] ${
                           deal.isRotting
-                            ? 'border-amber-400 dark:border-amber-600 bg-amber-50/20 dark:bg-amber-950/10'
-                            : 'border-[var(--color-border-default)] hover:border-[var(--color-accent-primary)]/50'
+                            ? "border-amber-400 dark:border-amber-600 bg-amber-50/20 dark:bg-amber-950/10"
+                            : "border-[var(--color-border-default)] hover:border-[var(--color-accent-primary)]/50"
                         }`}
                       >
                         {/* Deal Header */}
@@ -475,14 +524,27 @@ export default function DealsKanbanBoardPage() {
                             {deal.name}
                           </span>
                           <div className="shrink-0">
-                            <MoneyDisplay amount={deal.amount} isSubunits={false} currency="INR" compact size="xs" />
+                            <MoneyDisplay
+                              amount={deal.amount}
+                              isSubunits={false}
+                              currency="INR"
+                              compact
+                              size="xs"
+                            />
                           </div>
                         </div>
 
                         {/* Formula Expected Value */}
                         <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] font-mono">
                           <span className="flex items-center gap-1">
-                            Exp: <MoneyDisplay amount={deal.expectedValue} isSubunits={false} currency="INR" compact size="xs" />
+                            Exp:{" "}
+                            <MoneyDisplay
+                              amount={deal.expectedValue}
+                              isSubunits={false}
+                              currency="INR"
+                              compact
+                              size="xs"
+                            />
                           </span>
                           <span>{deal.probability}% Prob</span>
                         </div>
@@ -496,7 +558,10 @@ export default function DealsKanbanBoardPage() {
                               title={`Deal has spent ${deal.daysInStage} days in this stage (Threshold: ${deal.rottingThreshold} days)`}
                             >
                               <AlertTriangle className="h-3 w-3 shrink-0" />
-                              <span>Rotting: {deal.daysInStage}d &gt; {deal.rottingThreshold}d limit</span>
+                              <span>
+                                Rotting: {deal.daysInStage}d &gt;{" "}
+                                {deal.rottingThreshold}d limit
+                              </span>
                             </div>
                           ) : (
                             <div className="flex items-center gap-1 text-[var(--color-text-muted)] font-mono">
@@ -516,7 +581,8 @@ export default function DealsKanbanBoardPage() {
                                   title={`Move back to ${prevStage} ([)`}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    if (prevStage) moveDealToStage(deal.id, prevStage);
+                                    if (prevStage)
+                                      moveDealToStage(deal.id, prevStage);
                                   }}
                                   className="p-0.5 rounded hover:bg-[var(--color-bg-surface)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
                                 >
@@ -531,7 +597,8 @@ export default function DealsKanbanBoardPage() {
                                   title={`Advance to ${nextStage} (])`}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    if (nextStage) moveDealToStage(deal.id, nextStage);
+                                    if (nextStage)
+                                      moveDealToStage(deal.id, nextStage);
                                   }}
                                   className="p-0.5 rounded hover:bg-[var(--color-bg-surface)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
                                 >
@@ -583,7 +650,9 @@ export default function DealsKanbanBoardPage() {
           />
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-[var(--color-text-secondary)]">Pipeline Stage</label>
+            <label className="text-xs font-semibold text-[var(--color-text-secondary)]">
+              Pipeline Stage
+            </label>
             <select
               id="select-deal-stage"
               className="w-full min-w-0 h-10 px-3 rounded-[6px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-primary)] truncate"
@@ -599,10 +668,19 @@ export default function DealsKanbanBoardPage() {
           </div>
 
           <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-[var(--color-border-default)]">
-            <Button variant="ghost" type="button" onClick={() => setIsNewDealOpen(false)}>
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => setIsNewDealOpen(false)}
+            >
               Cancel
             </Button>
-            <Button id="btn-submit-create-deal" variant="primary" type="submit" loading={submittingDeal}>
+            <Button
+              id="btn-submit-create-deal"
+              variant="primary"
+              type="submit"
+              loading={submittingDeal}
+            >
               Create Deal
             </Button>
           </div>

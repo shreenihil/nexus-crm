@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 import {
   ShieldCheck,
   ShieldAlert,
@@ -12,9 +12,9 @@ import {
   ArrowRight,
   Database,
   Lock,
-} from 'lucide-react';
-import { Button, Badge } from '@nexus/ui';
-import { apiFetch } from '@/lib/api';
+} from "lucide-react";
+import { Button, Badge } from "@nexus/ui";
+import { apiFetch } from "@/lib/api";
 
 interface AuditEvent {
   id: string;
@@ -44,10 +44,10 @@ export default function AuditLogPage() {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiFetch<AuditEvent[]>('/v1/audit/events');
+      const data = await apiFetch<AuditEvent[]>("/v1/audit/events");
       setEvents(data);
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch audit events');
+      setError(err.message || "Failed to fetch audit events");
     } finally {
       setLoading(false);
     }
@@ -56,7 +56,10 @@ export default function AuditLogPage() {
   const handleVerifyChain = async () => {
     setVerifying(true);
     try {
-      const res = await apiFetch<{ valid: boolean; checkedEventsCount: number }>('/v1/audit/verify');
+      const res = await apiFetch<{
+        valid: boolean;
+        checkedEventsCount: number;
+      }>("/v1/audit/verify");
       setVerificationResult(res);
     } catch (err: any) {
       setError(`Verification error: ${err.message}`);
@@ -82,7 +85,8 @@ export default function AuditLogPage() {
             <Badge variant="accent">Cryptographic Proof</Badge>
           </div>
           <p className="text-sm text-[var(--color-text-muted)] mt-1">
-            Immutable SHA-256 hash-chained event stream logging all tenant operations and schema changes
+            Immutable SHA-256 hash-chained event stream logging all tenant
+            operations and schema changes
           </p>
         </div>
 
@@ -113,14 +117,16 @@ export default function AuditLogPage() {
           id="audit-verification-banner"
           className={`p-4 rounded-[10px] border flex items-center justify-between gap-4 shadow-sm ${
             verificationResult.valid
-              ? 'bg-emerald-50/80 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
-              : 'bg-rose-50/80 dark:bg-rose-950/20 border-rose-200 dark:border-rose-800 text-rose-900 dark:text-rose-200'
+              ? "bg-emerald-50/80 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200"
+              : "bg-rose-50/80 dark:bg-rose-950/20 border-rose-200 dark:border-rose-800 text-rose-900 dark:text-rose-200"
           }`}
         >
           <div className="flex items-center gap-3">
             <div
               className={`p-2.5 rounded-[8px] ${
-                verificationResult.valid ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'
+                verificationResult.valid
+                  ? "bg-emerald-500 text-white"
+                  : "bg-rose-500 text-white"
               }`}
             >
               {verificationResult.valid ? (
@@ -132,19 +138,21 @@ export default function AuditLogPage() {
             <div>
               <h2 className="text-sm font-bold">
                 {verificationResult.valid
-                  ? 'Cryptographic Ledger Integrity: 100% Verified'
-                  : 'Tampering Detected: Ledger Chain Broken'}
+                  ? "Cryptographic Ledger Integrity: 100% Verified"
+                  : "Tampering Detected: Ledger Chain Broken"}
               </h2>
               <p className="text-xs opacity-90 mt-0.5">
                 {verificationResult.valid
                   ? `All ${verificationResult.checkedEventsCount} events passed recursive SHA-256 genesis hash verification.`
-                  : 'One or more records have mismatched previous/current cryptographic hashes.'}
+                  : "One or more records have mismatched previous/current cryptographic hashes."}
               </p>
             </div>
           </div>
 
-          <Badge variant={verificationResult.valid ? 'success' : 'danger'}>
-            {verificationResult.valid ? 'Valid Hash Chain' : 'Integrity Failure'}
+          <Badge variant={verificationResult.valid ? "success" : "danger"}>
+            {verificationResult.valid
+              ? "Valid Hash Chain"
+              : "Integrity Failure"}
           </Badge>
         </div>
       )}
@@ -169,7 +177,12 @@ export default function AuditLogPage() {
           </span>
         </div>
 
-        <div className="overflow-x-auto focus:outline-none" tabIndex={0} role="region" aria-label="Audit log events">
+        <div
+          className="overflow-x-auto focus:outline-none"
+          tabIndex={0}
+          role="region"
+          aria-label="Audit log events"
+        >
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-[var(--color-border-default)] bg-[var(--color-bg-subtle)]/40 text-[var(--color-text-muted)] font-semibold">
@@ -184,13 +197,21 @@ export default function AuditLogPage() {
             <tbody className="divide-y divide-[var(--color-border-muted)]">
               {events.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-xs text-[var(--color-text-muted)]">
-                    {loading ? 'Verifying audit ledger...' : 'No audit events found.'}
+                  <td
+                    colSpan={6}
+                    className="py-12 text-center text-xs text-[var(--color-text-muted)]"
+                  >
+                    {loading
+                      ? "Verifying audit ledger..."
+                      : "No audit events found."}
                   </td>
                 </tr>
               ) : (
                 events.map((evt) => (
-                  <tr key={evt.id} className="hover:bg-[var(--color-bg-subtle)] transition-colors">
+                  <tr
+                    key={evt.id}
+                    className="hover:bg-[var(--color-bg-subtle)] transition-colors"
+                  >
                     <td className="py-3 px-3 font-mono text-[11px] text-[var(--color-text-secondary)] whitespace-nowrap">
                       {new Date(evt.createdAt).toLocaleString()}
                     </td>
@@ -205,7 +226,9 @@ export default function AuditLogPage() {
                       </span>
                     </td>
                     <td className="py-3 px-3 font-mono text-[11px] text-[var(--color-text-muted)] whitespace-nowrap">
-                      {evt.targetType ? `${evt.targetType}:${evt.targetId?.slice(0, 8)}...` : '—'}
+                      {evt.targetType
+                        ? `${evt.targetType}:${evt.targetId?.slice(0, 8)}...`
+                        : "—"}
                     </td>
                     <td className="py-3 px-3 text-[var(--color-text-secondary)] max-w-xs truncate">
                       {JSON.stringify(evt.payload)}

@@ -3,7 +3,8 @@
 ---
 
 ### Option 1: Punchy & Direct (Short — ~550 chars)
-*Best for feed scrollers and mobile impressions*
+
+_Best for feed scrollers and mobile impressions_
 
 Most CRMs force an uncomfortable choice: pay exorbitant per-seat taxes on proprietary clouds, or struggle with rigid currencies and bloat.
 
@@ -20,9 +21,11 @@ Full architecture tour in the document below 👇
 ---
 
 ### Option 2: Technical Deep-Dive (Medium — ~1,100 chars)
-*Best for engineering leads, architects, and product managers*
+
+_Best for engineering leads, architects, and product managers_
 
 Building a multi-tenant CRM is often treated as a standard CRUD problem. But when you look under the hood of real enterprise sales, the bottlenecks are stark:
+
 1. **Dynamic Schemas:** Businesses need custom attributes and formula fields without waiting on database migrations or downtime.
 2. **Data Custody:** Enterprise tenants demand total encryption isolation where even database administrators cannot inspect records without tenant KMS keys.
 3. **Locale & Currency Realism:** Most tools treat INR as a currency symbol afterthought, breaking on Lakhs/Crores formatting and Indian fiscal years.
@@ -39,11 +42,12 @@ Check out the 10-slide architectural carousel attached!
 ---
 
 ### Option 3: Founder Story (Long — ~1,600 chars)
-*Best for high-engagement storytelling and LinkedIn newsletter format*
+
+_Best for high-engagement storytelling and LinkedIn newsletter format_
 
 A few months ago, I set out to answer a question:
 
-*What does a modern CRM look like if it is built with sovereign data privacy, consumer-grade speed, and native INR financials from line one?*
+_What does a modern CRM look like if it is built with sovereign data privacy, consumer-grade speed, and native INR financials from line one?_
 
 We rely on tools that feel bloated and disconnected from how modern global and Indian businesses operate. Formulas are sluggish, customer data is fragmented across duplicate entries, and multi-currency reporting often truncates native financial conventions.
 

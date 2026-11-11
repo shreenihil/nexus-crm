@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import * as React from "react";
+import { useParams, useRouter } from "next/navigation";
 import {
   useReactTable,
   getCoreRowModel,
@@ -12,7 +12,7 @@ import {
   type ColumnDef,
   type SortingState,
   type VisibilityState,
-} from '@tanstack/react-table';
+} from "@tanstack/react-table";
 import {
   Plus,
   Upload,
@@ -33,9 +33,9 @@ import {
   Kanban,
   AlertTriangle,
   ExternalLink,
-} from 'lucide-react';
-import { Button, Input, Badge, Modal } from '@nexus/ui';
-import { apiFetch } from '@/lib/api';
+} from "lucide-react";
+import { Button, Input, Badge, Modal } from "@nexus/ui";
+import { apiFetch } from "@/lib/api";
 
 interface ObjectMeta {
   id: string;
@@ -68,7 +68,7 @@ interface RecordItem {
 export default function RecordListPage() {
   const params = useParams();
   const router = useRouter();
-  const objectApiName = (params.object as string) || '';
+  const objectApiName = (params.object as string) || "";
 
   const [objectMeta, setObjectMeta] = React.useState<ObjectMeta | null>(null);
   const [attributes, setAttributes] = React.useState<AttributeMeta[]>([]);
@@ -77,15 +77,20 @@ export default function RecordListPage() {
   const [error, setError] = React.useState<string | null>(null);
 
   // Table options
-  const [density, setDensity] = React.useState<'comfortable' | 'compact'>('comfortable');
-  const [globalFilter, setGlobalFilter] = React.useState('');
+  const [density, setDensity] = React.useState<"comfortable" | "compact">(
+    "comfortable",
+  );
+  const [globalFilter, setGlobalFilter] = React.useState("");
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
   const [isColumnDropdownOpen, setIsColumnDropdownOpen] = React.useState(false);
 
   // New Record Dialog
   const [isNewRecordOpen, setIsNewRecordOpen] = React.useState(false);
-  const [newRecordData, setNewRecordData] = React.useState<Record<string, any>>({});
+  const [newRecordData, setNewRecordData] = React.useState<Record<string, any>>(
+    {},
+  );
   const [submittingRecord, setSubmittingRecord] = React.useState(false);
   const [duplicateWarning, setDuplicateWarning] = React.useState<{
     isDuplicate: boolean;
@@ -116,8 +121,8 @@ export default function RecordListPage() {
     const timer = setTimeout(async () => {
       try {
         setCheckingDuplicate(true);
-        const res = await apiFetch<any>('/v1/duplicates/check', {
-          method: 'POST',
+        const res = await apiFetch<any>("/v1/duplicates/check", {
+          method: "POST",
           body: JSON.stringify({
             entityName: objectApiName,
             data: newRecordData,
@@ -129,8 +134,8 @@ export default function RecordListPage() {
           const candidateData = top.record?.data || {};
           const candidateName =
             candidateData.name ||
-            `${candidateData.first_name || ''} ${candidateData.last_name || ''}`.trim() ||
-            'Existing record';
+            `${candidateData.first_name || ""} ${candidateData.last_name || ""}`.trim() ||
+            "Existing record";
 
           setDuplicateWarning({
             isDuplicate: true,
@@ -153,8 +158,10 @@ export default function RecordListPage() {
 
   // CSV Import Dialog
   const [isImportOpen, setIsImportOpen] = React.useState(false);
-  const [csvRawText, setCsvRawText] = React.useState('');
-  const [importDryRunResult, setImportDryRunResult] = React.useState<any | null>(null);
+  const [csvRawText, setCsvRawText] = React.useState("");
+  const [importDryRunResult, setImportDryRunResult] = React.useState<
+    any | null
+  >(null);
   const [importing, setImporting] = React.useState(false);
 
   // Toast
@@ -167,22 +174,28 @@ export default function RecordListPage() {
       setError(null);
 
       // 1. Fetch Objects to find meta
-      const allObjects = await apiFetch<ObjectMeta[]>('/v1/metadata/objects');
+      const allObjects = await apiFetch<ObjectMeta[]>("/v1/metadata/objects");
       const found = allObjects.find((o) => o.apiName === objectApiName);
       if (!found) {
-        throw new Error(`Object "${objectApiName}" not found in this workspace schema.`);
+        throw new Error(
+          `Object "${objectApiName}" not found in this workspace schema.`,
+        );
       }
       setObjectMeta(found);
 
       // 2. Fetch Attributes
-      const attrs = await apiFetch<AttributeMeta[]>(`/v1/metadata/objects/${found.id}/attributes`);
+      const attrs = await apiFetch<AttributeMeta[]>(
+        `/v1/metadata/objects/${found.id}/attributes`,
+      );
       setAttributes(attrs);
 
       // 3. Fetch Records
-      const res = await apiFetch<{ records: RecordItem[]; total: number }>(`/v1/records/${objectApiName}`);
+      const res = await apiFetch<{ records: RecordItem[]; total: number }>(
+        `/v1/records/${objectApiName}`,
+      );
       setRecords(res.records);
     } catch (err: any) {
-      setError(err.message || 'Failed to load records');
+      setError(err.message || "Failed to load records");
     } finally {
       setLoading(false);
     }
@@ -202,13 +215,13 @@ export default function RecordListPage() {
       header: ({ column }: { column: any }) => (
         <button
           type="button"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="flex items-center gap-1.5 font-semibold text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors select-none"
         >
           <span>{attr.label}</span>
-          {column.getIsSorted() === 'asc' ? (
+          {column.getIsSorted() === "asc" ? (
             <ChevronUp className="h-3 w-3" />
-          ) : column.getIsSorted() === 'desc' ? (
+          ) : column.getIsSorted() === "desc" ? (
             <ChevronDown className="h-3 w-3" />
           ) : (
             <ArrowUpDown className="h-3 w-3 opacity-40" />
@@ -217,11 +230,15 @@ export default function RecordListPage() {
       ),
       cell: ({ getValue }: { getValue: () => any }) => {
         const val = getValue();
-        if (val === undefined || val === null || val === '') {
-          return <span className="text-[var(--color-text-muted)] italic text-xs">—</span>;
+        if (val === undefined || val === null || val === "") {
+          return (
+            <span className="text-[var(--color-text-muted)] italic text-xs">
+              —
+            </span>
+          );
         }
 
-        if (attr.type === 'currency') {
+        if (attr.type === "currency") {
           return (
             <span className="font-mono text-xs font-semibold text-[var(--color-text-primary)]">
               ${Number(val).toLocaleString()}
@@ -229,19 +246,19 @@ export default function RecordListPage() {
           );
         }
 
-        if (attr.type === 'formula') {
+        if (attr.type === "formula") {
           return (
             <span className="font-mono text-xs px-2 py-0.5 rounded bg-[var(--color-accent-muted)] text-[var(--color-accent-primary)] font-semibold border border-[var(--color-accent-primary)]/20">
-              {typeof val === 'number' ? val.toLocaleString() : String(val)}
+              {typeof val === "number" ? val.toLocaleString() : String(val)}
             </span>
           );
         }
 
-        if (attr.type === 'dropdown_single') {
+        if (attr.type === "dropdown_single") {
           return <Badge variant="accent">{String(val)}</Badge>;
         }
 
-        if (attr.type === 'url') {
+        if (attr.type === "url") {
           return (
             <a
               href={String(val)}
@@ -255,7 +272,11 @@ export default function RecordListPage() {
           );
         }
 
-        return <span className="text-xs text-[var(--color-text-primary)]">{String(val)}</span>;
+        return (
+          <span className="text-xs text-[var(--color-text-primary)]">
+            {String(val)}
+          </span>
+        );
       },
     }));
   }, [attributes]);
@@ -283,10 +304,13 @@ export default function RecordListPage() {
     setSubmittingRecord(true);
     setError(null);
     try {
-      const created = await apiFetch<RecordItem>(`/v1/records/${objectApiName}`, {
-        method: 'POST',
-        body: JSON.stringify({ data: newRecordData }),
-      });
+      const created = await apiFetch<RecordItem>(
+        `/v1/records/${objectApiName}`,
+        {
+          method: "POST",
+          body: JSON.stringify({ data: newRecordData }),
+        },
+      );
 
       setRecords((prev) => [created, ...prev]);
       setIsNewRecordOpen(false);
@@ -294,7 +318,7 @@ export default function RecordListPage() {
       setToastMessage(`Record created in ${objectMeta?.singularLabel}!`);
       setTimeout(() => setToastMessage(null), 4000);
     } catch (err: any) {
-      setError(err.message || 'Failed to create record');
+      setError(err.message || "Failed to create record");
     } finally {
       setSubmittingRecord(false);
     }
@@ -303,14 +327,16 @@ export default function RecordListPage() {
   // Handle CSV Export
   const handleExportCsv = async () => {
     try {
-      const res = await apiFetch<{ records: Array<Record<string, any>> }>(`/v1/export/${objectApiName}`);
+      const res = await apiFetch<{ records: Array<Record<string, any>> }>(
+        `/v1/export/${objectApiName}`,
+      );
       if (!res.records || res.records.length === 0) {
-        alert('No records available to export.');
+        alert("No records available to export.");
         return;
       }
 
       const headers = attributes.map((a) => a.apiName);
-      const csvLines = [headers.join(',')];
+      const csvLines = [headers.join(",")];
 
       for (const row of res.records) {
         const line = headers.map((h) => {
@@ -318,14 +344,16 @@ export default function RecordListPage() {
           if (val === undefined || val === null) return '""';
           return `"${String(val).replace(/"/g, '""')}"`;
         });
-        csvLines.push(line.join(','));
+        csvLines.push(line.join(","));
       }
 
-      const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob([csvLines.join("\n")], {
+        type: "text/csv;charset=utf-8;",
+      });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', `${objectApiName}-export.csv`);
+      link.setAttribute("download", `${objectApiName}-export.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -342,25 +370,31 @@ export default function RecordListPage() {
     if (!csvRawText.trim()) return;
     setImporting(true);
     try {
-      const lines = csvRawText.trim().split('\n');
+      const lines = csvRawText.trim().split("\n");
       if (lines.length < 2) {
-        throw new Error('CSV must contain a header row and at least one data row.');
+        throw new Error(
+          "CSV must contain a header row and at least one data row.",
+        );
       }
 
-      const headers = lines[0]!.split(',').map((h) => h.trim().replace(/^"|"$/g, ''));
+      const headers = lines[0]!
+        .split(",")
+        .map((h) => h.trim().replace(/^"|"$/g, ""));
       const parsedRows: Array<Record<string, any>> = [];
 
       for (let i = 1; i < lines.length; i++) {
-        const cells = lines[i]!.split(',').map((c) => c.trim().replace(/^"|"$/g, ''));
+        const cells = lines[i]!.split(",").map((c) =>
+          c.trim().replace(/^"|"$/g, ""),
+        );
         const rowObj: Record<string, any> = {};
         headers.forEach((h, idx) => {
-          rowObj[h] = cells[idx] || '';
+          rowObj[h] = cells[idx] || "";
         });
         parsedRows.push(rowObj);
       }
 
       const dryRun = await apiFetch(`/v1/import/${objectApiName}/dry-run`, {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify({ rows: parsedRows }),
       });
 
@@ -382,12 +416,12 @@ export default function RecordListPage() {
     try {
       for (const row of importDryRunResult.parsedRows) {
         await apiFetch(`/v1/records/${objectApiName}`, {
-          method: 'POST',
+          method: "POST",
           body: JSON.stringify({ data: row }),
         });
       }
       setIsImportOpen(false);
-      setCsvRawText('');
+      setCsvRawText("");
       setImportDryRunResult(null);
       await loadData();
       setToastMessage(`Imported ${importDryRunResult.validRowsCount} records!`);
@@ -411,17 +445,18 @@ export default function RecordListPage() {
             <Badge variant="accent">{records.length} Records</Badge>
           </div>
           <p className="text-sm text-[var(--color-text-muted)] mt-0.5">
-            {objectMeta?.description || `Live records catalog for ${objectMeta?.singularLabel || objectApiName}`}
+            {objectMeta?.description ||
+              `Live records catalog for ${objectMeta?.singularLabel || objectApiName}`}
           </p>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          {objectApiName === 'deals' && (
+          {objectApiName === "deals" && (
             <Button
               id="btn-switch-kanban"
               variant="secondary"
               size="sm"
-              onClick={() => router.push('/deals/board')}
+              onClick={() => router.push("/deals/board")}
             >
               <Kanban className="h-4 w-4" /> Pipeline Board
             </Button>
@@ -451,7 +486,8 @@ export default function RecordListPage() {
             size="md"
             onClick={() => setIsNewRecordOpen(true)}
           >
-            <Plus className="h-4 w-4" /> New {objectMeta?.singularLabel || 'Record'}
+            <Plus className="h-4 w-4" /> New{" "}
+            {objectMeta?.singularLabel || "Record"}
           </Button>
         </div>
       </div>
@@ -478,7 +514,7 @@ export default function RecordListPage() {
             <input
               id="input-record-search"
               type="text"
-              placeholder={`Search ${objectMeta?.pluralLabel || 'records'}...`}
+              placeholder={`Search ${objectMeta?.pluralLabel || "records"}...`}
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
               className="w-full h-9 pl-9 pr-3 rounded-[6px] text-xs bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-primary)]"
@@ -491,11 +527,11 @@ export default function RecordListPage() {
               <button
                 type="button"
                 id="btn-density-comfortable"
-                onClick={() => setDensity('comfortable')}
+                onClick={() => setDensity("comfortable")}
                 className={`p-1.5 rounded-[4px] text-xs font-medium transition-colors ${
-                  density === 'comfortable'
-                    ? 'bg-[var(--color-accent-muted)] text-[var(--color-accent-primary)] font-bold'
-                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+                  density === "comfortable"
+                    ? "bg-[var(--color-accent-muted)] text-[var(--color-accent-primary)] font-bold"
+                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
                 }`}
                 title="Comfortable Density"
               >
@@ -504,11 +540,11 @@ export default function RecordListPage() {
               <button
                 type="button"
                 id="btn-density-compact"
-                onClick={() => setDensity('compact')}
+                onClick={() => setDensity("compact")}
                 className={`p-1.5 rounded-[4px] text-xs font-medium transition-colors ${
-                  density === 'compact'
-                    ? 'bg-[var(--color-accent-muted)] text-[var(--color-accent-primary)] font-bold'
-                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+                  density === "compact"
+                    ? "bg-[var(--color-accent-muted)] text-[var(--color-accent-primary)] font-bold"
+                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
                 }`}
                 title="Compact Density"
               >
@@ -543,7 +579,9 @@ export default function RecordListPage() {
                         onChange={column.getToggleVisibilityHandler()}
                         className="rounded border-[var(--color-border-default)] text-[var(--color-accent-primary)]"
                       />
-                      <span className="capitalize">{column.id.replace(/_/g, ' ')}</span>
+                      <span className="capitalize">
+                        {column.id.replace(/_/g, " ")}
+                      </span>
                     </label>
                   ))}
                 </div>
@@ -557,12 +595,18 @@ export default function RecordListPage() {
           <table className="w-full text-left text-sm border-collapse">
             <thead>
               {table.getHeaderGroups().map((headerGroup: any) => (
-                <tr key={headerGroup.id} className="border-b border-[var(--color-border-default)] bg-[var(--color-bg-subtle)]/50">
+                <tr
+                  key={headerGroup.id}
+                  className="border-b border-[var(--color-border-default)] bg-[var(--color-bg-subtle)]/50"
+                >
                   {headerGroup.headers.map((header: any) => (
                     <th key={header.id} className="py-2.5 px-3">
                       {header.isPlaceholder
                         ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </th>
                   ))}
                 </tr>
@@ -571,8 +615,13 @@ export default function RecordListPage() {
             <tbody className="divide-y divide-[var(--color-border-muted)]">
               {table.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} className="py-12 text-center text-xs text-[var(--color-text-muted)]">
-                    {loading ? 'Loading records...' : 'No records found matching your filters.'}
+                  <td
+                    colSpan={columns.length}
+                    className="py-12 text-center text-xs text-[var(--color-text-muted)]"
+                  >
+                    {loading
+                      ? "Loading records..."
+                      : "No records found matching your filters."}
                   </td>
                 </tr>
               ) : (
@@ -580,17 +629,24 @@ export default function RecordListPage() {
                   <tr
                     key={row.id}
                     id={`row-${row.original.id}`}
-                    onClick={() => router.push(`/records/${objectApiName}/${row.original.id}`)}
+                    onClick={() =>
+                      router.push(
+                        `/records/${objectApiName}/${row.original.id}`,
+                      )
+                    }
                     className="hover:bg-[var(--color-bg-subtle)] transition-colors cursor-pointer group"
                   >
                     {row.getVisibleCells().map((cell: any) => (
                       <td
                         key={cell.id}
                         className={`px-3 transition-all ${
-                          density === 'compact' ? 'py-1.5' : 'py-3'
+                          density === "compact" ? "py-1.5" : "py-3"
                         }`}
                       >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
                       </td>
                     ))}
                   </tr>
@@ -603,7 +659,8 @@ export default function RecordListPage() {
         {/* Table Footer with Pagination */}
         <div className="p-3 border-t border-[var(--color-border-default)] flex items-center justify-between text-xs text-[var(--color-text-muted)] bg-[var(--color-bg-subtle)]/40">
           <span>
-            Showing {table.getRowModel().rows.length} of {records.length} records
+            Showing {table.getRowModel().rows.length} of {records.length}{" "}
+            records
           </span>
 
           <div className="flex items-center gap-1.5">
@@ -616,7 +673,7 @@ export default function RecordListPage() {
               Previous
             </Button>
             <span className="px-2 font-mono">
-              Page {table.getState().pagination.pageIndex + 1} of{' '}
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
               {table.getPageCount() || 1}
             </span>
             <Button
@@ -636,10 +693,13 @@ export default function RecordListPage() {
         open={isNewRecordOpen}
         onOpenChange={setIsNewRecordOpen}
         size="lg"
-        title={`New ${objectMeta?.singularLabel || 'Record'}`}
-        description={`Add a new ${objectMeta?.singularLabel || 'record'} with schema validation.`}
+        title={`New ${objectMeta?.singularLabel || "Record"}`}
+        description={`Add a new ${objectMeta?.singularLabel || "record"} with schema validation.`}
       >
-        <form onSubmit={handleCreateRecord} className="flex flex-col gap-4 mt-2 max-h-[70vh] overflow-y-auto pr-1">
+        <form
+          onSubmit={handleCreateRecord}
+          className="flex flex-col gap-4 mt-2 max-h-[70vh] overflow-y-auto pr-1"
+        >
           {duplicateWarning && (
             <div
               id="pre-creation-duplicate-warning"
@@ -652,7 +712,9 @@ export default function RecordListPage() {
                   Potential Duplicate ({duplicateWarning.score}% Match)
                 </span>
                 <p className="mt-0.5 text-[var(--color-text-secondary)] text-[11px]">
-                  Matches existing record <strong>{duplicateWarning.candidateName}</strong> ({duplicateWarning.summary}).
+                  Matches existing record{" "}
+                  <strong>{duplicateWarning.candidateName}</strong> (
+                  {duplicateWarning.summary}).
                 </p>
                 <div className="mt-1.5 flex items-center gap-2">
                   <a
@@ -668,20 +730,26 @@ export default function RecordListPage() {
             </div>
           )}
           {attributes
-            .filter((attr) => attr.type !== 'formula') // formulas are calculated automatically
+            .filter((attr) => attr.type !== "formula") // formulas are calculated automatically
             .map((attr) => {
-              if (attr.type === 'dropdown_single') {
+              if (attr.type === "dropdown_single") {
                 return (
                   <div key={attr.id} className="flex flex-col gap-1.5">
                     <label className="text-xs font-semibold text-[var(--color-text-secondary)]">
-                      {attr.label} {attr.isRequired && <span className="text-rose-500">*</span>}
+                      {attr.label}{" "}
+                      {attr.isRequired && (
+                        <span className="text-rose-500">*</span>
+                      )}
                     </label>
                     <select
                       id={`input-attr-${attr.apiName}`}
                       className="w-full min-w-0 h-10 px-3 rounded-[6px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-primary)] truncate"
-                      value={newRecordData[attr.apiName] || ''}
+                      value={newRecordData[attr.apiName] || ""}
                       onChange={(e) =>
-                        setNewRecordData({ ...newRecordData, [attr.apiName]: e.target.value })
+                        setNewRecordData({
+                          ...newRecordData,
+                          [attr.apiName]: e.target.value,
+                        })
                       }
                       required={attr.isRequired}
                     >
@@ -700,14 +768,20 @@ export default function RecordListPage() {
                 <Input
                   key={attr.id}
                   id={`input-attr-${attr.apiName}`}
-                  label={`${attr.label} ${attr.isRequired ? '*' : ''}`}
-                  type={attr.type === 'number' || attr.type === 'currency' ? 'number' : attr.type === 'date' ? 'date' : 'text'}
-                  value={newRecordData[attr.apiName] || ''}
+                  label={`${attr.label} ${attr.isRequired ? "*" : ""}`}
+                  type={
+                    attr.type === "number" || attr.type === "currency"
+                      ? "number"
+                      : attr.type === "date"
+                        ? "date"
+                        : "text"
+                  }
+                  value={newRecordData[attr.apiName] || ""}
                   onChange={(e) =>
                     setNewRecordData({
                       ...newRecordData,
                       [attr.apiName]:
-                        attr.type === 'number' || attr.type === 'currency'
+                        attr.type === "number" || attr.type === "currency"
                           ? parseFloat(e.target.value) || 0
                           : e.target.value,
                     })
@@ -718,10 +792,19 @@ export default function RecordListPage() {
             })}
 
           <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-[var(--color-border-default)]">
-            <Button variant="ghost" type="button" onClick={() => setIsNewRecordOpen(false)}>
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => setIsNewRecordOpen(false)}
+            >
               Cancel
             </Button>
-            <Button id="btn-submit-new-record" variant="primary" type="submit" loading={submittingRecord}>
+            <Button
+              id="btn-submit-new-record"
+              variant="primary"
+              type="submit"
+              loading={submittingRecord}
+            >
               Create Record
             </Button>
           </div>
@@ -755,7 +838,11 @@ export default function RecordListPage() {
 
               <div className="flex items-center justify-between pt-2">
                 <span className="text-[10px] text-[var(--color-text-muted)]">
-                  Schema requires: {attributes.filter((a) => a.isRequired).map((a) => a.apiName).join(', ')}
+                  Schema requires:{" "}
+                  {attributes
+                    .filter((a) => a.isRequired)
+                    .map((a) => a.apiName)
+                    .join(", ")}
                 </span>
                 <Button
                   id="btn-run-dryrun"
@@ -784,8 +871,16 @@ export default function RecordListPage() {
                     </span>
                   </div>
                 </div>
-                <Badge variant={importDryRunResult.errorRowsCount === 0 ? 'success' : 'warning'}>
-                  {importDryRunResult.errorRowsCount === 0 ? 'Ready to Import' : 'Errors Detected'}
+                <Badge
+                  variant={
+                    importDryRunResult.errorRowsCount === 0
+                      ? "success"
+                      : "warning"
+                  }
+                >
+                  {importDryRunResult.errorRowsCount === 0
+                    ? "Ready to Import"
+                    : "Errors Detected"}
                 </Badge>
               </div>
 
@@ -793,14 +888,18 @@ export default function RecordListPage() {
                 <div className="max-h-36 overflow-y-auto p-2 rounded bg-rose-50 dark:bg-rose-950/30 text-rose-600 text-xs flex flex-col gap-1 border border-rose-200 dark:border-rose-900">
                   {importDryRunResult.errors.map((err: any, idx: number) => (
                     <div key={idx}>
-                      Row {err.rowIndex + 1}: {err.errors.join(', ')}
+                      Row {err.rowIndex + 1}: {err.errors.join(", ")}
                     </div>
                   ))}
                 </div>
               )}
 
               <div className="flex items-center justify-end gap-2 mt-2 pt-3 border-t border-[var(--color-border-default)]">
-                <Button variant="ghost" size="sm" onClick={() => setImportDryRunResult(null)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setImportDryRunResult(null)}
+                >
                   Back
                 </Button>
                 <Button

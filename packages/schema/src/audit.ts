@@ -1,9 +1,9 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const auditEventSchema = z.object({
   id: z.string().uuid(),
   workspaceId: z.string().uuid(),
-  actorType: z.enum(['user', 'api_key', 'system']),
+  actorType: z.enum(["user", "api_key", "system"]),
   actorId: z.string().uuid().nullable().optional(),
   action: z.string().min(1).max(128),
   targetType: z.string().max(64).nullable().optional(),

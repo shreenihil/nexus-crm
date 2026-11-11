@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 import {
   TrendingUp,
   Users,
@@ -13,10 +13,10 @@ import {
   Layers,
   Inbox,
   FileSpreadsheet,
-} from 'lucide-react';
-import { Button, Badge, Avatar, MoneyDisplay } from '@nexus/ui';
-import { OnboardingChecklist, useOnboarding } from '@nexus/onboarding';
-import Link from 'next/link';
+} from "lucide-react";
+import { Button, Badge, Avatar, MoneyDisplay } from "@nexus/ui";
+import { OnboardingChecklist, useOnboarding } from "@nexus/onboarding";
+import Link from "next/link";
 
 export default function DashboardHomePage() {
   const { state, dismissChecklist } = useOnboarding();
@@ -28,11 +28,11 @@ export default function DashboardHomePage() {
     async function loadData() {
       try {
         const [dealsRes, actRes] = await Promise.all([
-          fetch('http://localhost:4000/v1/records/deals', {
-            headers: { Authorization: 'Bearer demo-session-token' },
+          fetch("http://localhost:4000/v1/records/deals", {
+            headers: { Authorization: "Bearer demo-session-token" },
           }).catch(() => null),
-          fetch('http://localhost:4000/v1/records/activities', {
-            headers: { Authorization: 'Bearer demo-session-token' },
+          fetch("http://localhost:4000/v1/records/activities", {
+            headers: { Authorization: "Bearer demo-session-token" },
           }).catch(() => null),
         ]);
 
@@ -53,34 +53,73 @@ export default function DashboardHomePage() {
     loadData();
   }, []);
 
-  const totalPipelineAmount = deals.reduce((sum, d) => sum + (Number(d.data?.amount) || 0), 0);
-  const activeDealsCount = deals.filter((d) => d.data?.stage !== 'Closed Lost').length;
-  const wonDealsCount = deals.filter((d) => d.data?.stage === 'Closed Won').length;
-  const winRate = activeDealsCount > 0 ? Math.round((wonDealsCount / activeDealsCount) * 100) : 0;
+  const totalPipelineAmount = deals.reduce(
+    (sum, d) => sum + (Number(d.data?.amount) || 0),
+    0,
+  );
+  const activeDealsCount = deals.filter(
+    (d) => d.data?.stage !== "Closed Lost",
+  ).length;
+  const wonDealsCount = deals.filter(
+    (d) => d.data?.stage === "Closed Won",
+  ).length;
+  const winRate =
+    activeDealsCount > 0
+      ? Math.round((wonDealsCount / activeDealsCount) * 100)
+      : 0;
 
   const kpis = [
     {
-      title: 'Total Pipeline',
-      renderValue: <MoneyDisplay amount={totalPipelineAmount} currency="INR" compact size="2xl" />,
-      change: deals.length > 0 ? '+14.2% vs last month' : 'No deals active',
-      icon: <IndianRupee className="h-4 w-4 text-[var(--color-accent-primary)]" />,
+      title: "Total Pipeline",
+      renderValue: (
+        <MoneyDisplay
+          amount={totalPipelineAmount}
+          currency="INR"
+          compact
+          size="2xl"
+        />
+      ),
+      change: deals.length > 0 ? "+14.2% vs last month" : "No deals active",
+      icon: (
+        <IndianRupee className="h-4 w-4 text-[var(--color-accent-primary)]" />
+      ),
     },
     {
-      title: 'Active Deals',
-      renderValue: <span className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">{activeDealsCount}</span>,
-      change: activeDealsCount > 0 ? `${activeDealsCount} active in pipeline` : 'Pipeline ready',
-      icon: <TrendingUp className="h-4 w-4 text-[var(--color-accent-primary)]" />,
+      title: "Active Deals",
+      renderValue: (
+        <span className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
+          {activeDealsCount}
+        </span>
+      ),
+      change:
+        activeDealsCount > 0
+          ? `${activeDealsCount} active in pipeline`
+          : "Pipeline ready",
+      icon: (
+        <TrendingUp className="h-4 w-4 text-[var(--color-accent-primary)]" />
+      ),
     },
     {
-      title: 'Avg. Win Rate',
-      renderValue: <span className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">{winRate}%</span>,
-      change: deals.length > 0 ? 'Verified metric' : 'Awaiting closed deals',
+      title: "Avg. Win Rate",
+      renderValue: (
+        <span className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
+          {winRate}%
+        </span>
+      ),
+      change: deals.length > 0 ? "Verified metric" : "Awaiting closed deals",
       icon: <Sparkles className="h-4 w-4 text-[var(--color-accent-primary)]" />,
     },
     {
-      title: 'Engaged Activities',
-      renderValue: <span className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">{activities.length}</span>,
-      change: activities.length > 0 ? `${activities.length} automated events` : 'Ready to capture',
+      title: "Engaged Activities",
+      renderValue: (
+        <span className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
+          {activities.length}
+        </span>
+      ),
+      change:
+        activities.length > 0
+          ? `${activities.length} automated events`
+          : "Ready to capture",
       icon: <Users className="h-4 w-4 text-[var(--color-accent-primary)]" />,
     },
   ];
@@ -94,7 +133,8 @@ export default function DashboardHomePage() {
             Executive Sales Overview
           </h1>
           <p className="text-sm text-[var(--color-text-muted)] mt-0.5">
-            Real-time pipeline metrics and activity across your sovereign workspace
+            Real-time pipeline metrics and activity across your sovereign
+            workspace
           </p>
         </div>
         <div className="flex items-center gap-2.5">
@@ -174,7 +214,8 @@ export default function DashboardHomePage() {
                 No deals in pipeline yet
               </h3>
               <p className="text-xs text-[var(--color-text-muted)] mt-1 max-w-sm">
-                Create your first sales deal or import customer records to track pipeline velocity and revenue forecasts.
+                Create your first sales deal or import customer records to track
+                pipeline velocity and revenue forecasts.
               </p>
               <div className="mt-4 flex gap-2">
                 <Link href="/deals">
@@ -202,15 +243,15 @@ export default function DashboardHomePage() {
                     >
                       <td className="py-3 px-4">
                         <div className="font-medium text-[var(--color-text-primary)]">
-                          {deal.data?.name || 'Deal'}
+                          {deal.data?.name || "Deal"}
                         </div>
                         <div className="text-[11px] text-[var(--color-text-muted)]">
-                          {deal.data?.company_name || 'Organization'}
+                          {deal.data?.company_name || "Organization"}
                         </div>
                       </td>
                       <td className="py-3 px-4">
                         <Badge variant="accent">
-                          {deal.data?.stage || 'Discovery'}
+                          {deal.data?.stage || "Discovery"}
                         </Badge>
                       </td>
                       <td className="py-3 px-4 text-right font-mono font-medium text-[var(--color-text-primary)]">
@@ -247,20 +288,24 @@ export default function DashboardHomePage() {
                 No recent activity
               </h3>
               <p className="text-[11px] text-[var(--color-text-muted)] mt-1 max-w-[200px]">
-                Inbound customer communications, telephony calls, and meeting logs will stream here.
+                Inbound customer communications, telephony calls, and meeting
+                logs will stream here.
               </p>
             </div>
           ) : (
             <div className="flex flex-col gap-4">
               {activities.slice(0, 5).map((act, idx) => (
-                <div key={act.id || idx} className="flex items-start gap-3 text-xs">
-                  <Avatar name={act.data?.participant || 'User'} size="sm" />
+                <div
+                  key={act.id || idx}
+                  className="flex items-start gap-3 text-xs"
+                >
+                  <Avatar name={act.data?.participant || "User"} size="sm" />
                   <div className="flex flex-col gap-0.5">
                     <span className="text-[var(--color-text-primary)] font-medium">
-                      {act.data?.title || 'Communication logged'}
+                      {act.data?.title || "Communication logged"}
                     </span>
                     <span className="text-[var(--color-text-muted)] line-clamp-2">
-                      {act.data?.summary || 'No summary'}
+                      {act.data?.summary || "No summary"}
                     </span>
                   </div>
                 </div>

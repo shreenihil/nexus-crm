@@ -1,9 +1,12 @@
-import type { QueueCacheAdapter, LockHandle } from '../queue-cache.js';
-import type { QueueCacheCapabilityFlags, AdapterHealth } from '../capabilities.js';
-import type { RedisConfig } from '../config.js';
+import type { QueueCacheAdapter, LockHandle } from "../queue-cache.js";
+import type {
+  QueueCacheCapabilityFlags,
+  AdapterHealth,
+} from "../capabilities.js";
+import type { RedisConfig } from "../config.js";
 
 export class MemoryQueueCacheAdapter implements QueueCacheAdapter {
-  readonly name = 'in-memory-queue-cache';
+  readonly name = "in-memory-queue-cache";
   readonly tier = 2 as const;
   private cache = new Map<string, { value: string; expiresAt?: number }>();
   private queues = new Map<string, any[]>();
@@ -23,7 +26,7 @@ export class MemoryQueueCacheAdapter implements QueueCacheAdapter {
   async healthCheck(): Promise<AdapterHealth> {
     const start = performance.now();
     return {
-      status: 'healthy',
+      status: "healthy",
       latencyMs: Math.round(performance.now() - start),
       details: {
         cacheKeys: this.cache.size,
@@ -61,7 +64,9 @@ export class MemoryQueueCacheAdapter implements QueueCacheAdapter {
     return { jobId };
   }
 
-  async dequeue(queueName: string): Promise<{ jobId: string; payload: any } | null> {
+  async dequeue(
+    queueName: string,
+  ): Promise<{ jobId: string; payload: any } | null> {
     const q = this.queues.get(queueName);
     if (!q || q.length === 0) return null;
     return q.shift();
@@ -76,7 +81,10 @@ export class MemoryQueueCacheAdapter implements QueueCacheAdapter {
     return subs.size;
   }
 
-  async subscribe(channel: string, handler: (message: string) => void): Promise<() => void> {
+  async subscribe(
+    channel: string,
+    handler: (message: string) => void,
+  ): Promise<() => void> {
     if (!this.subscribers.has(channel)) {
       this.subscribers.set(channel, new Set());
     }
@@ -86,7 +94,10 @@ export class MemoryQueueCacheAdapter implements QueueCacheAdapter {
     };
   }
 
-  async acquireLock(lockKey: string, ttlMs: number): Promise<LockHandle | null> {
+  async acquireLock(
+    lockKey: string,
+    ttlMs: number,
+  ): Promise<LockHandle | null> {
     if (this.locks.has(lockKey)) return null;
     this.locks.add(lockKey);
     const timeout = setTimeout(() => {
@@ -102,7 +113,7 @@ export class MemoryQueueCacheAdapter implements QueueCacheAdapter {
 }
 
 export class RedisQueueCacheAdapter implements QueueCacheAdapter {
-  readonly name = 'redis-valkey';
+  readonly name = "redis-valkey";
   readonly tier = 1 as const;
   private config: RedisConfig;
 
@@ -124,7 +135,7 @@ export class RedisQueueCacheAdapter implements QueueCacheAdapter {
     const start = performance.now();
     // In production, executes PING command
     return {
-      status: 'healthy',
+      status: "healthy",
       latencyMs: Math.round(performance.now() - start),
       details: {
         host: this.config.host,
@@ -139,7 +150,11 @@ export class RedisQueueCacheAdapter implements QueueCacheAdapter {
     return null;
   }
 
-  async set(_key: string, _value: string, _ttlSeconds?: number): Promise<void> {}
+  async set(
+    _key: string,
+    _value: string,
+    _ttlSeconds?: number,
+  ): Promise<void> {}
 
   async delete(_key: string): Promise<boolean> {
     return true;
@@ -149,7 +164,9 @@ export class RedisQueueCacheAdapter implements QueueCacheAdapter {
     return { jobId: Math.random().toString(36).substring(2, 10) };
   }
 
-  async dequeue(_queueName: string): Promise<{ jobId: string; payload: any } | null> {
+  async dequeue(
+    _queueName: string,
+  ): Promise<{ jobId: string; payload: any } | null> {
     return null;
   }
 
@@ -157,11 +174,17 @@ export class RedisQueueCacheAdapter implements QueueCacheAdapter {
     return 1;
   }
 
-  async subscribe(_channel: string, _handler: (message: string) => void): Promise<() => void> {
+  async subscribe(
+    _channel: string,
+    _handler: (message: string) => void,
+  ): Promise<() => void> {
     return () => {};
   }
 
-  async acquireLock(_lockKey: string, _ttlMs: number): Promise<LockHandle | null> {
+  async acquireLock(
+    _lockKey: string,
+    _ttlMs: number,
+  ): Promise<LockHandle | null> {
     return {
       release: async () => {},
     };

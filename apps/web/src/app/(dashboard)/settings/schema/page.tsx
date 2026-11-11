@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 import {
   Boxes,
   Plus,
@@ -20,9 +20,9 @@ import {
   Calendar,
   List,
   CheckSquare,
-} from 'lucide-react';
-import { Button, Input, Badge, Modal } from '@nexus/ui';
-import { apiFetch } from '@/lib/api';
+} from "lucide-react";
+import { Button, Input, Badge, Modal } from "@nexus/ui";
+import { apiFetch } from "@/lib/api";
 
 interface ObjectMeta {
   id: string;
@@ -61,32 +61,38 @@ interface RelationshipMeta {
 
 export default function SchemaBuilderPage() {
   const [objects, setObjects] = React.useState<ObjectMeta[]>([]);
-  const [selectedObjectId, setSelectedObjectId] = React.useState<string | null>(null);
+  const [selectedObjectId, setSelectedObjectId] = React.useState<string | null>(
+    null,
+  );
   const [attributes, setAttributes] = React.useState<AttributeMeta[]>([]);
-  const [relationships, setRelationships] = React.useState<RelationshipMeta[]>([]);
+  const [relationships, setRelationships] = React.useState<RelationshipMeta[]>(
+    [],
+  );
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
   // Dialog states
   const [isNewObjectOpen, setIsNewObjectOpen] = React.useState(false);
-  const [newObjSingular, setNewObjSingular] = React.useState('');
-  const [newObjPlural, setNewObjPlural] = React.useState('');
-  const [newObjApiName, setNewObjApiName] = React.useState('');
-  const [newObjDesc, setNewObjDesc] = React.useState('');
+  const [newObjSingular, setNewObjSingular] = React.useState("");
+  const [newObjPlural, setNewObjPlural] = React.useState("");
+  const [newObjApiName, setNewObjApiName] = React.useState("");
+  const [newObjDesc, setNewObjDesc] = React.useState("");
 
   const [isNewAttrOpen, setIsNewAttrOpen] = React.useState(false);
-  const [newAttrLabel, setNewAttrLabel] = React.useState('');
-  const [newAttrApiName, setNewAttrApiName] = React.useState('');
-  const [newAttrType, setNewAttrType] = React.useState('text');
+  const [newAttrLabel, setNewAttrLabel] = React.useState("");
+  const [newAttrApiName, setNewAttrApiName] = React.useState("");
+  const [newAttrType, setNewAttrType] = React.useState("text");
   const [newAttrRequired, setNewAttrRequired] = React.useState(false);
-  const [newAttrFormula, setNewAttrFormula] = React.useState('');
-  const [newAttrChoices, setNewAttrChoices] = React.useState('');
+  const [newAttrFormula, setNewAttrFormula] = React.useState("");
+  const [newAttrChoices, setNewAttrChoices] = React.useState("");
 
   const [isNewRelOpen, setIsNewRelOpen] = React.useState(false);
-  const [relTargetObjId, setRelTargetObjId] = React.useState('');
-  const [relCardinality, setRelCardinality] = React.useState<'1:1' | '1:N' | 'N:N'>('1:N');
-  const [relFromLabel, setRelFromLabel] = React.useState('');
-  const [relToLabel, setRelToLabel] = React.useState('');
+  const [relTargetObjId, setRelTargetObjId] = React.useState("");
+  const [relCardinality, setRelCardinality] = React.useState<
+    "1:1" | "1:N" | "N:N"
+  >("1:N");
+  const [relFromLabel, setRelFromLabel] = React.useState("");
+  const [relToLabel, setRelToLabel] = React.useState("");
 
   const [submitting, setSubmitting] = React.useState(false);
   const [successToast, setSuccessToast] = React.useState<string | null>(null);
@@ -95,13 +101,13 @@ export default function SchemaBuilderPage() {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiFetch<ObjectMeta[]>('/v1/metadata/objects');
+      const data = await apiFetch<ObjectMeta[]>("/v1/metadata/objects");
       setObjects(data);
       if (data.length > 0 && !selectedObjectId) {
         setSelectedObjectId(data[0]!.id);
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to load schema objects');
+      setError(err.message || "Failed to load schema objects");
     } finally {
       setLoading(false);
     }
@@ -109,7 +115,9 @@ export default function SchemaBuilderPage() {
 
   const fetchAttributes = React.useCallback(async (objId: string) => {
     try {
-      const data = await apiFetch<AttributeMeta[]>(`/v1/metadata/objects/${objId}/attributes`);
+      const data = await apiFetch<AttributeMeta[]>(
+        `/v1/metadata/objects/${objId}/attributes`,
+      );
       setAttributes(data);
     } catch (err: any) {
       console.error(err);
@@ -118,7 +126,9 @@ export default function SchemaBuilderPage() {
 
   const fetchRelationships = React.useCallback(async () => {
     try {
-      const data = await apiFetch<RelationshipMeta[]>('/v1/metadata/relationships');
+      const data = await apiFetch<RelationshipMeta[]>(
+        "/v1/metadata/relationships",
+      );
       setRelationships(data);
     } catch (err: any) {
       console.error(err);
@@ -141,15 +151,15 @@ export default function SchemaBuilderPage() {
   // Auto-generate API names from singular labels
   const handleSingularChange = (val: string) => {
     setNewObjSingular(val);
-    setNewObjApiName(val.toLowerCase().replace(/[^a-z0-9]/g, '_'));
+    setNewObjApiName(val.toLowerCase().replace(/[^a-z0-9]/g, "_"));
     if (!newObjPlural) {
-      setNewObjPlural(val ? `${val}s` : '');
+      setNewObjPlural(val ? `${val}s` : "");
     }
   };
 
   const handleAttrLabelChange = (val: string) => {
     setNewAttrLabel(val);
-    setNewAttrApiName(val.toLowerCase().replace(/[^a-z0-9]/g, '_'));
+    setNewAttrApiName(val.toLowerCase().replace(/[^a-z0-9]/g, "_"));
   };
 
   // Create Custom Object
@@ -158,29 +168,31 @@ export default function SchemaBuilderPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const created = await apiFetch<ObjectMeta>('/v1/metadata/objects', {
-        method: 'POST',
+      const created = await apiFetch<ObjectMeta>("/v1/metadata/objects", {
+        method: "POST",
         body: JSON.stringify({
           singularLabel: newObjSingular,
           pluralLabel: newObjPlural,
           apiName: newObjApiName,
           description: newObjDesc,
-          icon: 'Box',
-          color: '#6366F1',
+          icon: "Box",
+          color: "#6366F1",
         }),
       });
 
       setObjects((prev) => [...prev, created]);
       setSelectedObjectId(created.id);
       setIsNewObjectOpen(false);
-      setNewObjSingular('');
-      setNewObjPlural('');
-      setNewObjApiName('');
-      setNewObjDesc('');
-      setSuccessToast(`Custom object "${created.singularLabel}" created successfully!`);
+      setNewObjSingular("");
+      setNewObjPlural("");
+      setNewObjApiName("");
+      setNewObjDesc("");
+      setSuccessToast(
+        `Custom object "${created.singularLabel}" created successfully!`,
+      );
       setTimeout(() => setSuccessToast(null), 4000);
     } catch (err: any) {
-      setError(err.message || 'Failed to create object');
+      setError(err.message || "Failed to create object");
     } finally {
       setSubmitting(false);
     }
@@ -200,32 +212,43 @@ export default function SchemaBuilderPage() {
       isRequired: newAttrRequired,
     };
 
-    if (newAttrType === 'formula') {
+    if (newAttrType === "formula") {
       payload.formulaDefinition = newAttrFormula;
-    } else if (newAttrType === 'dropdown_single' || newAttrType === 'dropdown_multi') {
+    } else if (
+      newAttrType === "dropdown_single" ||
+      newAttrType === "dropdown_multi"
+    ) {
       payload.optionsConfig = {
-        choices: newAttrChoices.split(',').map((c) => c.trim()).filter(Boolean),
+        choices: newAttrChoices
+          .split(",")
+          .map((c) => c.trim())
+          .filter(Boolean),
       };
     }
 
     try {
-      const created = await apiFetch<AttributeMeta>(`/v1/metadata/objects/${selectedObjectId}/attributes`, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
+      const created = await apiFetch<AttributeMeta>(
+        `/v1/metadata/objects/${selectedObjectId}/attributes`,
+        {
+          method: "POST",
+          body: JSON.stringify(payload),
+        },
+      );
 
       setAttributes((prev) => [...prev, created]);
       setIsNewAttrOpen(false);
-      setNewAttrLabel('');
-      setNewAttrApiName('');
-      setNewAttrType('text');
+      setNewAttrLabel("");
+      setNewAttrApiName("");
+      setNewAttrType("text");
       setNewAttrRequired(false);
-      setNewAttrFormula('');
-      setNewAttrChoices('');
-      setSuccessToast(`Attribute "${created.label}" added to ${selectedObject?.singularLabel}`);
+      setNewAttrFormula("");
+      setNewAttrChoices("");
+      setSuccessToast(
+        `Attribute "${created.label}" added to ${selectedObject?.singularLabel}`,
+      );
       setTimeout(() => setSuccessToast(null), 4000);
     } catch (err: any) {
-      setError(err.message || 'Failed to add attribute');
+      setError(err.message || "Failed to add attribute");
     } finally {
       setSubmitting(false);
     }
@@ -239,26 +262,29 @@ export default function SchemaBuilderPage() {
     setError(null);
 
     try {
-      const created = await apiFetch<RelationshipMeta>('/v1/metadata/relationships', {
-        method: 'POST',
-        body: JSON.stringify({
-          fromObjectId: selectedObjectId,
-          toObjectId: relTargetObjId,
-          cardinality: relCardinality,
-          fromLabel: relFromLabel,
-          toLabel: relToLabel,
-        }),
-      });
+      const created = await apiFetch<RelationshipMeta>(
+        "/v1/metadata/relationships",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            fromObjectId: selectedObjectId,
+            toObjectId: relTargetObjId,
+            cardinality: relCardinality,
+            fromLabel: relFromLabel,
+            toLabel: relToLabel,
+          }),
+        },
+      );
 
       setRelationships((prev) => [...prev, created]);
       setIsNewRelOpen(false);
-      setRelTargetObjId('');
-      setRelFromLabel('');
-      setRelToLabel('');
-      setSuccessToast('Object relationship created successfully!');
+      setRelTargetObjId("");
+      setRelFromLabel("");
+      setRelToLabel("");
+      setSuccessToast("Object relationship created successfully!");
       setTimeout(() => setSuccessToast(null), 4000);
     } catch (err: any) {
-      setError(err.message || 'Failed to create relationship');
+      setError(err.message || "Failed to create relationship");
     } finally {
       setSubmitting(false);
     }
@@ -266,19 +292,21 @@ export default function SchemaBuilderPage() {
 
   const getAttrIcon = (type: string) => {
     switch (type) {
-      case 'formula':
-        return <Calculator className="h-3.5 w-3.5 text-[var(--color-accent-primary)]" />;
-      case 'number':
+      case "formula":
+        return (
+          <Calculator className="h-3.5 w-3.5 text-[var(--color-accent-primary)]" />
+        );
+      case "number":
         return <Hash className="h-3.5 w-3.5 text-blue-500" />;
-      case 'currency':
+      case "currency":
         return <DollarSign className="h-3.5 w-3.5 text-emerald-500" />;
-      case 'date':
-      case 'datetime':
+      case "date":
+      case "datetime":
         return <Calendar className="h-3.5 w-3.5 text-amber-500" />;
-      case 'dropdown_single':
-      case 'dropdown_multi':
+      case "dropdown_single":
+      case "dropdown_multi":
         return <List className="h-3.5 w-3.5 text-purple-500" />;
-      case 'boolean':
+      case "boolean":
         return <CheckSquare className="h-3.5 w-3.5 text-teal-500" />;
       default:
         return <Type className="h-3.5 w-3.5 text-[var(--color-text-muted)]" />;
@@ -286,7 +314,8 @@ export default function SchemaBuilderPage() {
   };
 
   const objectRelationships = relationships.filter(
-    (r) => r.fromObjectId === selectedObjectId || r.toObjectId === selectedObjectId
+    (r) =>
+      r.fromObjectId === selectedObjectId || r.toObjectId === selectedObjectId,
   );
 
   return (
@@ -301,7 +330,8 @@ export default function SchemaBuilderPage() {
             <Badge variant="accent">Phase 1 Data Core</Badge>
           </div>
           <p className="text-sm text-[var(--color-text-muted)] mt-1">
-            Define custom entities, polymorphic attributes, safe formulas, and bidirectional relationships
+            Define custom entities, polymorphic attributes, safe formulas, and
+            bidirectional relationships
           </p>
         </div>
 
@@ -349,14 +379,17 @@ export default function SchemaBuilderPage() {
                   onClick={() => setSelectedObjectId(obj.id)}
                   className={`flex items-center justify-between p-2.5 rounded-[6px] text-sm font-medium transition-all text-left ${
                     isSelected
-                      ? 'bg-[var(--color-accent-muted)] text-[var(--color-accent-primary)] font-semibold shadow-xs'
-                      : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-primary)]'
+                      ? "bg-[var(--color-accent-muted)] text-[var(--color-accent-primary)] font-semibold shadow-xs"
+                      : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-primary)]"
                   }`}
                 >
                   <div className="flex items-center gap-2.5 truncate">
                     <span
                       className="h-2 w-2 rounded-full shrink-0"
-                      style={{ backgroundColor: obj.color || 'var(--color-accent-primary)' }}
+                      style={{
+                        backgroundColor:
+                          obj.color || "var(--color-accent-primary)",
+                      }}
                     />
                     <span className="truncate">{obj.pluralLabel}</span>
                   </div>
@@ -384,7 +417,9 @@ export default function SchemaBuilderPage() {
                 <div className="flex items-start gap-4">
                   <div
                     className="h-12 w-12 rounded-[10px] flex items-center justify-center text-white font-bold text-lg shadow-sm shrink-0"
-                    style={{ backgroundColor: selectedObject.color || '#6366f1' }}
+                    style={{
+                      backgroundColor: selectedObject.color || "#6366f1",
+                    }}
                   >
                     <Boxes className="h-6 w-6" />
                   </div>
@@ -403,7 +438,8 @@ export default function SchemaBuilderPage() {
                       )}
                     </div>
                     <p className="text-xs text-[var(--color-text-muted)] mt-1">
-                      {selectedObject.description || 'Custom business data entity configured in this tenant'}
+                      {selectedObject.description ||
+                        "Custom business data entity configured in this tenant"}
                     </p>
                   </div>
                 </div>
@@ -436,12 +472,18 @@ export default function SchemaBuilderPage() {
                       Fields & Attributes ({attributes.length})
                     </h3>
                     <p className="text-xs text-[var(--color-text-muted)]">
-                      Typed schema attributes including calculated and formula fields
+                      Typed schema attributes including calculated and formula
+                      fields
                     </p>
                   </div>
                 </div>
 
-                <div className="overflow-x-auto focus:outline-none" tabIndex={0} role="region" aria-label="Attributes table">
+                <div
+                  className="overflow-x-auto focus:outline-none"
+                  tabIndex={0}
+                  role="region"
+                  aria-label="Attributes table"
+                >
                   <table className="w-full text-left text-sm">
                     <thead>
                       <tr className="border-b border-[var(--color-border-default)] text-xs text-[var(--color-text-muted)] font-medium">
@@ -454,7 +496,10 @@ export default function SchemaBuilderPage() {
                     </thead>
                     <tbody className="divide-y divide-[var(--color-border-muted)]">
                       {attributes.map((attr) => (
-                        <tr key={attr.id} className="hover:bg-[var(--color-bg-subtle)] transition-colors">
+                        <tr
+                          key={attr.id}
+                          className="hover:bg-[var(--color-bg-subtle)] transition-colors"
+                        >
                           <td className="py-3 px-3 font-medium text-[var(--color-text-primary)] flex items-center gap-2">
                             {getAttrIcon(attr.type)}
                             <span>{attr.label}</span>
@@ -480,7 +525,9 @@ export default function SchemaBuilderPage() {
                                 </span>
                               )}
                               {!attr.isRequired && !attr.isUnique && (
-                                <span className="text-[10px] text-[var(--color-text-muted)]">—</span>
+                                <span className="text-[10px] text-[var(--color-text-muted)]">
+                                  —
+                                </span>
                               )}
                             </div>
                           </td>
@@ -491,11 +538,17 @@ export default function SchemaBuilderPage() {
                               </span>
                             ) : attr.optionsConfig?.choices ? (
                               <span className="text-xs truncate max-w-[200px] inline-block">
-                                [{attr.optionsConfig.choices.slice(0, 3).join(', ')}
-                                {attr.optionsConfig.choices.length > 3 ? '...' : ''}]
+                                [
+                                {attr.optionsConfig.choices
+                                  .slice(0, 3)
+                                  .join(", ")}
+                                {attr.optionsConfig.choices.length > 3
+                                  ? "..."
+                                  : ""}
+                                ]
                               </span>
                             ) : (
-                              '—'
+                              "—"
                             )}
                           </td>
                         </tr>
@@ -513,21 +566,26 @@ export default function SchemaBuilderPage() {
                       Entity Relationships ({objectRelationships.length})
                     </h3>
                     <p className="text-xs text-[var(--color-text-muted)]">
-                      Bidirectional associations with cascade and reverse lookups
+                      Bidirectional associations with cascade and reverse
+                      lookups
                     </p>
                   </div>
                 </div>
 
                 {objectRelationships.length === 0 ? (
                   <div className="p-6 text-center text-xs text-[var(--color-text-muted)] border border-dashed border-[var(--color-border-default)] rounded-[8px]">
-                    No explicit relationships defined for {selectedObject.singularLabel}. Click &quot;Link Entity&quot; to connect to another object.
+                    No explicit relationships defined for{" "}
+                    {selectedObject.singularLabel}. Click &quot;Link
+                    Entity&quot; to connect to another object.
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {objectRelationships.map((rel) => {
                       const isSource = rel.fromObjectId === selectedObjectId;
                       const otherObj = objects.find(
-                        (o) => o.id === (isSource ? rel.toObjectId : rel.fromObjectId)
+                        (o) =>
+                          o.id ===
+                          (isSource ? rel.toObjectId : rel.fromObjectId),
                       );
                       return (
                         <div
@@ -540,12 +598,21 @@ export default function SchemaBuilderPage() {
                             </div>
                             <div>
                               <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-primary)]">
-                                <span>{isSource ? selectedObject.singularLabel : otherObj?.singularLabel}</span>
+                                <span>
+                                  {isSource
+                                    ? selectedObject.singularLabel
+                                    : otherObj?.singularLabel}
+                                </span>
                                 <ArrowRight className="h-3 w-3 text-[var(--color-text-muted)]" />
-                                <span>{isSource ? otherObj?.singularLabel : selectedObject.singularLabel}</span>
+                                <span>
+                                  {isSource
+                                    ? otherObj?.singularLabel
+                                    : selectedObject.singularLabel}
+                                </span>
                               </div>
                               <span className="text-[10px] font-mono text-[var(--color-text-muted)]">
-                                {rel.cardinality} ({isSource ? rel.toLabel : rel.fromLabel})
+                                {rel.cardinality} (
+                                {isSource ? rel.toLabel : rel.fromLabel})
                               </span>
                             </div>
                           </div>
@@ -573,7 +640,10 @@ export default function SchemaBuilderPage() {
         title="Create Custom Object"
         description="Define a new first-class sovereign data entity for your CRM tenant."
       >
-        <form onSubmit={handleCreateObject} className="flex flex-col gap-4 mt-2">
+        <form
+          onSubmit={handleCreateObject}
+          className="flex flex-col gap-4 mt-2"
+        >
           <Input
             id="input-obj-singular"
             label="Singular Label"
@@ -606,10 +676,19 @@ export default function SchemaBuilderPage() {
           />
 
           <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-[var(--color-border-default)]">
-            <Button variant="ghost" type="button" onClick={() => setIsNewObjectOpen(false)}>
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => setIsNewObjectOpen(false)}
+            >
               Cancel
             </Button>
-            <Button id="btn-submit-create-object" variant="primary" type="submit" loading={submitting}>
+            <Button
+              id="btn-submit-create-object"
+              variant="primary"
+              type="submit"
+              loading={submitting}
+            >
               Create Object
             </Button>
           </div>
@@ -624,7 +703,10 @@ export default function SchemaBuilderPage() {
         title={`Add Field to ${selectedObject?.singularLabel}`}
         description="Add a typed attribute to this object schema."
       >
-        <form onSubmit={handleCreateAttribute} className="flex flex-col gap-4 mt-2">
+        <form
+          onSubmit={handleCreateAttribute}
+          className="flex flex-col gap-4 mt-2"
+        >
           <Input
             id="input-attr-label"
             label="Field Label"
@@ -642,7 +724,9 @@ export default function SchemaBuilderPage() {
           />
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-[var(--color-text-secondary)]">Field Type</label>
+            <label className="text-xs font-semibold text-[var(--color-text-secondary)]">
+              Field Type
+            </label>
             <select
               id="select-attr-type"
               className="w-full min-w-0 h-10 px-3 rounded-[6px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-primary)] truncate"
@@ -660,7 +744,7 @@ export default function SchemaBuilderPage() {
             </select>
           </div>
 
-          {newAttrType === 'formula' && (
+          {newAttrType === "formula" && (
             <div className="flex flex-col gap-1.5 p-3 rounded-[8px] bg-[var(--color-bg-subtle)] border border-[var(--color-border-default)]">
               <label className="text-xs font-semibold text-[var(--color-accent-primary)] flex items-center gap-1.5">
                 <Calculator className="h-3.5 w-3.5" /> Formula AST Expression
@@ -675,12 +759,14 @@ export default function SchemaBuilderPage() {
                 required
               />
               <span className="text-[10px] text-[var(--color-text-muted)]">
-                Sandboxed recursive descent AST engine. Reference field variables inside braces <code>{`{field_name}`}</code>.
+                Sandboxed recursive descent AST engine. Reference field
+                variables inside braces <code>{`{field_name}`}</code>.
               </span>
             </div>
           )}
 
-          {(newAttrType === 'dropdown_single' || newAttrType === 'dropdown_multi') && (
+          {(newAttrType === "dropdown_single" ||
+            newAttrType === "dropdown_multi") && (
             <Input
               id="input-attr-choices"
               label="Choices (comma-separated)"
@@ -699,16 +785,28 @@ export default function SchemaBuilderPage() {
               checked={newAttrRequired}
               onChange={(e) => setNewAttrRequired(e.target.checked)}
             />
-            <label htmlFor="chk-attr-required" className="text-xs text-[var(--color-text-secondary)] font-medium">
+            <label
+              htmlFor="chk-attr-required"
+              className="text-xs text-[var(--color-text-secondary)] font-medium"
+            >
               This field is required
             </label>
           </div>
 
           <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-[var(--color-border-default)]">
-            <Button variant="ghost" type="button" onClick={() => setIsNewAttrOpen(false)}>
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => setIsNewAttrOpen(false)}
+            >
               Cancel
             </Button>
-            <Button id="btn-submit-add-attr" variant="primary" type="submit" loading={submitting}>
+            <Button
+              id="btn-submit-add-attr"
+              variant="primary"
+              type="submit"
+              loading={submitting}
+            >
               Add Field
             </Button>
           </div>
@@ -723,9 +821,14 @@ export default function SchemaBuilderPage() {
         title={`Link ${selectedObject?.singularLabel} to Another Object`}
         description="Establish bidirectional associations across entities."
       >
-        <form onSubmit={handleCreateRelationship} className="flex flex-col gap-4 mt-2">
+        <form
+          onSubmit={handleCreateRelationship}
+          className="flex flex-col gap-4 mt-2"
+        >
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-[var(--color-text-secondary)]">Target Entity</label>
+            <label className="text-xs font-semibold text-[var(--color-text-secondary)]">
+              Target Entity
+            </label>
             <select
               id="select-rel-target"
               className="w-full min-w-0 h-10 px-3 rounded-[6px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-primary)] truncate"
@@ -735,8 +838,8 @@ export default function SchemaBuilderPage() {
                 setRelTargetObjId(targetId);
                 const targetObj = objects.find((o) => o.id === targetId);
                 if (targetObj) {
-                  setRelFromLabel(selectedObject?.singularLabel || 'Parent');
-                  setRelToLabel(targetObj.pluralLabel || 'Children');
+                  setRelFromLabel(selectedObject?.singularLabel || "Parent");
+                  setRelToLabel(targetObj.pluralLabel || "Children");
                 }
               }}
               required
@@ -753,7 +856,9 @@ export default function SchemaBuilderPage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-[var(--color-text-secondary)]">Cardinality</label>
+            <label className="text-xs font-semibold text-[var(--color-text-secondary)]">
+              Cardinality
+            </label>
             <select
               id="select-rel-cardinality"
               className="w-full min-w-0 h-10 px-3 rounded-[6px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-primary)] truncate"
@@ -784,10 +889,19 @@ export default function SchemaBuilderPage() {
           />
 
           <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-[var(--color-border-default)]">
-            <Button variant="ghost" type="button" onClick={() => setIsNewRelOpen(false)}>
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => setIsNewRelOpen(false)}
+            >
               Cancel
             </Button>
-            <Button id="btn-submit-rel" variant="primary" type="submit" loading={submitting}>
+            <Button
+              id="btn-submit-rel"
+              variant="primary"
+              type="submit"
+              loading={submitting}
+            >
               Establish Relationship
             </Button>
           </div>

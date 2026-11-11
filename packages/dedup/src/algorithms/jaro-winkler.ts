@@ -4,8 +4,8 @@
  */
 
 export function jaroSimilarity(s1: string, s2: string): number {
-  const str1 = (s1 || '').trim().toLowerCase();
-  const str2 = (s2 || '').trim().toLowerCase();
+  const str1 = (s1 || "").trim().toLowerCase();
+  const str2 = (s2 || "").trim().toLowerCase();
 
   if (str1 === str2) return 1.0;
   if (str1.length === 0 || str2.length === 0) return 0.0;
@@ -60,10 +60,10 @@ export function jaroWinklerSimilarity(
   s1: string,
   s2: string,
   prefixScale = 0.1,
-  boostThreshold = 0.7
+  boostThreshold = 0.7,
 ): number {
-  const str1 = (s1 || '').trim().toLowerCase();
-  const str2 = (s2 || '').trim().toLowerCase();
+  const str1 = (s1 || "").trim().toLowerCase();
+  const str2 = (s2 || "").trim().toLowerCase();
 
   const jaro = jaroSimilarity(str1, str2);
 

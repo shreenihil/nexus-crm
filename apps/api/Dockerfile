@@ -1,11 +1,11 @@
 # Multi-stage production Dockerfile for @nexus/api
 FROM node:22-alpine AS builder
 
-RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
+RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
 WORKDIR /app
 
 # Copy root manifest and workspace packages configuration
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json tsconfig.base.json ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
 COPY packages ./packages
 COPY apps/api ./apps/api
 
@@ -20,7 +20,7 @@ RUN apk add --no-cache dumb-init curl
 ENV NODE_ENV=production
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
+RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
 
 # Copy build artifacts and dependencies
 COPY --from=builder /app/package.json ./package.json

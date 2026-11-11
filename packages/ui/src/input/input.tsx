@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { cn } from '../lib/utils';
+import * as React from "react";
+import { cn } from "../lib/utils";
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -10,7 +10,20 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type = 'text', label, error, helperText, prefixIcon, suffixIcon, id, ...props }, ref) => {
+  (
+    {
+      className,
+      type = "text",
+      label,
+      error,
+      helperText,
+      prefixIcon,
+      suffixIcon,
+      id,
+      ...props
+    },
+    ref,
+  ) => {
     const inputId = id || React.useId();
     const errorId = `${inputId}-error`;
     const helperId = `${inputId}-helper`;
@@ -18,9 +31,16 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full flex flex-col gap-1.5 text-left">
         {label && (
-          <label htmlFor={inputId} className="text-sm font-medium text-[var(--color-text-secondary)]">
+          <label
+            htmlFor={inputId}
+            className="text-sm font-medium text-[var(--color-text-secondary)]"
+          >
             {label}
-            {props.required && <span className="text-[var(--color-status-danger-text)] ml-1">*</span>}
+            {props.required && (
+              <span className="text-[var(--color-status-danger-text)] ml-1">
+                *
+              </span>
+            )}
           </label>
         )}
         <div className="relative flex items-center">
@@ -34,17 +54,20 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             type={type}
             aria-invalid={!!error}
-            aria-describedby={error ? errorId : helperText ? helperId : undefined}
+            aria-describedby={
+              error ? errorId : helperText ? helperId : undefined
+            }
             className={cn(
-              'w-full h-[var(--density-input-height)] rounded-[6px] px-3 text-sm transition-colors duration-150',
-              'bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]',
-              'border border-[var(--color-border-default)]',
-              'focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)] focus:border-transparent',
-              'disabled:opacity-50 disabled:bg-[var(--color-bg-subtle)] disabled:cursor-not-allowed',
-              error && 'border-[var(--color-status-danger-border)] focus:ring-[var(--color-status-danger-border)]',
-              prefixIcon && 'pl-9',
-              suffixIcon && 'pr-9',
-              className
+              "w-full h-[var(--density-input-height)] rounded-[6px] px-3 text-sm transition-colors duration-150",
+              "bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]",
+              "border border-[var(--color-border-default)]",
+              "focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)] focus:border-transparent",
+              "disabled:opacity-50 disabled:bg-[var(--color-bg-subtle)] disabled:cursor-not-allowed",
+              error &&
+                "border-[var(--color-status-danger-border)] focus:ring-[var(--color-status-danger-border)]",
+              prefixIcon && "pl-9",
+              suffixIcon && "pr-9",
+              className,
             )}
             {...props}
           />
@@ -55,7 +78,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {error && (
-          <p id={errorId} className="text-xs font-medium text-[var(--color-status-danger-text)]">
+          <p
+            id={errorId}
+            className="text-xs font-medium text-[var(--color-status-danger-text)]"
+          >
             {error}
           </p>
         )}
@@ -66,7 +92,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
-Input.displayName = 'Input';
+Input.displayName = "Input";

@@ -11,6 +11,7 @@
 The following mock and sample data records were identified across the codebase:
 
 ### A. Demo Business Records (`apps/api/src/db/index.ts`)
+
 - **Companies (8 records):**
   - Stark Industries (`starkindustries.com`, Manufacturing / Defense, ₹450 Cr ARR)
   - Wayne Enterprises (`waynecorp.com`, Defense & Technology, ₹850 Cr ARR)
@@ -44,6 +45,7 @@ The following mock and sample data records were identified across the codebase:
   - Quote `Q-2026-001` with SaaS licensing line items.
 
 ### B. Seed Scripts & Test Helpers
+
 - `apps/api/src/db/index.ts`: `seedDemoData(force = false)` method.
 - `apps/api/src/server.ts`: `POST /v1/test/reset-demo` endpoint.
 
@@ -55,11 +57,12 @@ Per §2.3, **System Defaults** are explicitly preserved in the production codeba
 
 **Clean Workspace Invariant:**
 When any workspace is created or sign-up occurs:
+
 ```ts
-people.length === 0
-companies.length === 0
-deals.length === 0
-activities.length === 0
-quotes.length === 0
-invoices.length === 0
+people.length === 0;
+companies.length === 0;
+deals.length === 0;
+activities.length === 0;
+quotes.length === 0;
+invoices.length === 0;
 ```

@@ -3,7 +3,7 @@ import {
   createCipheriv,
   createDecipheriv,
   scryptSync,
-} from 'node:crypto';
+} from "node:crypto";
 
 export interface EncryptedDekEnvelope {
   dekId: string;
@@ -20,7 +20,7 @@ export interface EncryptedFieldPayload {
   authTag: string; // base64
   dekId: string;
   keyVersion: number;
-  algorithm: 'AES-256-GCM';
+  algorithm: "AES-256-GCM";
 }
 
 /**
@@ -33,7 +33,10 @@ export function generateKey(): Buffer {
 /**
  * Derives a 256-bit key from a customer passphrase using Scrypt KDF.
  */
-export function deriveKeyFromPassphrase(passphrase: string, salt: Buffer): Buffer {
+export function deriveKeyFromPassphrase(
+  passphrase: string,
+  salt: Buffer,
+): Buffer {
   return scryptSync(passphrase, salt, 32);
 }
 
@@ -44,10 +47,10 @@ export function wrapDek(
   kek: Buffer,
   dek: Buffer,
   dekId: string,
-  keyVersion: number
+  keyVersion: number,
 ): EncryptedDekEnvelope {
   const iv = randomBytes(12);
-  const cipher = createCipheriv('aes-256-gcm', kek, iv);
+  const cipher = createCipheriv("aes-256-gcm", kek, iv);
 
   const encryptedDek = Buffer.concat([cipher.update(dek), cipher.final()]);
   const authTag = cipher.getAuthTag();
@@ -55,9 +58,9 @@ export function wrapDek(
   return {
     dekId,
     keyVersion,
-    encryptedDek: encryptedDek.toString('base64'),
-    iv: iv.toString('base64'),
-    authTag: authTag.toString('base64'),
+    encryptedDek: encryptedDek.toString("base64"),
+    iv: iv.toString("base64"),
+    authTag: authTag.toString("base64"),
   };
 }
 
@@ -65,11 +68,13 @@ export function wrapDek(
  * Decrypts an encrypted Data Encryption Key (DEK) using the Master Key Encryption Key (KEK).
  */
 export function unwrapDek(kek: Buffer, envelope: EncryptedDekEnvelope): Buffer {
-  const iv = Buffer.from(envelope.iv, 'base64');
-  const authTag = Buffer.from(envelope.authTag, 'base64');
-  const encryptedDek = Buffer.from(envelope.encryptedDek, 'base64');
+  const iv = Buffer.from(envelope.iv, "base64");
+  const authTag = Buffer.from(envelope.authTag, "base64");
+  const encryptedDek = Buffer.from(envelope.encryptedDek, "base64");
 
-  const decipher = createDecipheriv('aes-256-gcm', kek, iv, { authTagLength: 16 });
+  const decipher = createDecipheriv("aes-256-gcm", kek, iv, {
+    authTagLength: 16,
+  });
   decipher.setAuthTag(authTag);
 
   return Buffer.concat([decipher.update(encryptedDek), decipher.final()]);
@@ -82,23 +87,24 @@ export function unwrapDek(kek: Buffer, envelope: EncryptedDekEnvelope): Buffer {
 export function encryptData(
   dek: Buffer,
   plaintext: string | Buffer,
-  aad?: string
+  aad?: string,
 ): { ciphertext: string; iv: string; authTag: string } {
   const iv = randomBytes(12);
-  const cipher = createCipheriv('aes-256-gcm', dek, iv, { authTagLength: 16 });
+  const cipher = createCipheriv("aes-256-gcm", dek, iv, { authTagLength: 16 });
 
   if (aad) {
-    cipher.setAAD(Buffer.from(aad, 'utf8'));
+    cipher.setAAD(Buffer.from(aad, "utf8"));
   }
 
-  const inputBuffer = typeof plaintext === 'string' ? Buffer.from(plaintext, 'utf8') : plaintext;
+  const inputBuffer =
+    typeof plaintext === "string" ? Buffer.from(plaintext, "utf8") : plaintext;
   const encrypted = Buffer.concat([cipher.update(inputBuffer), cipher.final()]);
   const authTag = cipher.getAuthTag();
 
   return {
-    ciphertext: encrypted.toString('base64'),
-    iv: iv.toString('base64'),
-    authTag: authTag.toString('base64'),
+    ciphertext: encrypted.toString("base64"),
+    iv: iv.toString("base64"),
+    authTag: authTag.toString("base64"),
   };
 }
 
@@ -109,17 +115,19 @@ export function encryptData(
 export function decryptData(
   dek: Buffer,
   encrypted: { ciphertext: string; iv: string; authTag: string },
-  aad?: string
+  aad?: string,
 ): Buffer {
-  const iv = Buffer.from(encrypted.iv, 'base64');
-  const authTag = Buffer.from(encrypted.authTag, 'base64');
-  const ciphertext = Buffer.from(encrypted.ciphertext, 'base64');
+  const iv = Buffer.from(encrypted.iv, "base64");
+  const authTag = Buffer.from(encrypted.authTag, "base64");
+  const ciphertext = Buffer.from(encrypted.ciphertext, "base64");
 
-  const decipher = createDecipheriv('aes-256-gcm', dek, iv, { authTagLength: 16 });
+  const decipher = createDecipheriv("aes-256-gcm", dek, iv, {
+    authTagLength: 16,
+  });
   decipher.setAuthTag(authTag);
 
   if (aad) {
-    decipher.setAAD(Buffer.from(aad, 'utf8'));
+    decipher.setAAD(Buffer.from(aad, "utf8"));
   }
 
   return Buffer.concat([decipher.update(ciphertext), decipher.final()]);

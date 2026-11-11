@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Link from 'next/link';
+import * as React from "react";
+import Link from "next/link";
 import {
   Button,
   Input,
@@ -24,7 +24,7 @@ import {
   ToastAction,
   ToastClose,
   MoneyDisplay,
-} from '@nexus/ui';
+} from "@nexus/ui";
 import {
   CheckCircle,
   AlertTriangle,
@@ -37,24 +37,66 @@ import {
   Check,
   Send,
   Trash2,
-} from 'lucide-react';
+} from "lucide-react";
 
 export default function DesignSystemGalleryPage() {
   const [toastOpen, setToastOpen] = React.useState(false);
-  const [toastMessage, setToastMessage] = React.useState('Opportunity moved to Closed Won');
+  const [toastMessage, setToastMessage] = React.useState(
+    "Opportunity moved to Closed Won",
+  );
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const colors = [
-    { name: 'Canvas Background', token: 'var(--color-bg-canvas)', text: 'Default app background' },
-    { name: 'Surface Background', token: 'var(--color-bg-surface)', text: 'Card & panel surface' },
-    { name: 'Subtle Background', token: 'var(--color-bg-subtle)', text: 'Secondary/hover surface' },
-    { name: 'Elevated Background', token: 'var(--color-bg-elevated)', text: 'Elevated popovers & menus' },
-    { name: 'Text Primary', token: 'var(--color-text-primary)', text: 'Headings & primary copy' },
-    { name: 'Text Secondary', token: 'var(--color-text-secondary)', text: 'Body labels & descriptions' },
-    { name: 'Text Muted', token: 'var(--color-text-muted)', text: 'Timestamps & placeholders' },
-    { name: 'Border Default', token: 'var(--color-border-default)', text: 'Card & divider borders' },
-    { name: 'Border Focus', token: 'var(--color-border-focus)', text: 'High-visibility focus ring' },
-    { name: 'Accent Primary', token: 'var(--color-accent-primary)', text: 'Active brand CTA' },
+    {
+      name: "Canvas Background",
+      token: "var(--color-bg-canvas)",
+      text: "Default app background",
+    },
+    {
+      name: "Surface Background",
+      token: "var(--color-bg-surface)",
+      text: "Card & panel surface",
+    },
+    {
+      name: "Subtle Background",
+      token: "var(--color-bg-subtle)",
+      text: "Secondary/hover surface",
+    },
+    {
+      name: "Elevated Background",
+      token: "var(--color-bg-elevated)",
+      text: "Elevated popovers & menus",
+    },
+    {
+      name: "Text Primary",
+      token: "var(--color-text-primary)",
+      text: "Headings & primary copy",
+    },
+    {
+      name: "Text Secondary",
+      token: "var(--color-text-secondary)",
+      text: "Body labels & descriptions",
+    },
+    {
+      name: "Text Muted",
+      token: "var(--color-text-muted)",
+      text: "Timestamps & placeholders",
+    },
+    {
+      name: "Border Default",
+      token: "var(--color-border-default)",
+      text: "Card & divider borders",
+    },
+    {
+      name: "Border Focus",
+      token: "var(--color-border-focus)",
+      text: "High-visibility focus ring",
+    },
+    {
+      name: "Accent Primary",
+      token: "var(--color-accent-primary)",
+      text: "Active brand CTA",
+    },
   ];
 
   return (
@@ -77,7 +119,8 @@ export default function DesignSystemGalleryPage() {
                 Nexus Design System
               </h1>
               <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-                Living component showcase & token engine with instant theme, accent, and density switching.
+                Living component showcase & token engine with instant theme,
+                accent, and density switching.
               </p>
             </div>
 
@@ -184,13 +227,22 @@ export default function DesignSystemGalleryPage() {
             </h2>
             <div className="p-6 rounded-[10px] border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
               <div className="flex flex-wrap items-center gap-2.5">
-                <Badge variant="success" icon={<CheckCircle className="h-3 w-3" />}>
+                <Badge
+                  variant="success"
+                  icon={<CheckCircle className="h-3 w-3" />}
+                >
                   Closed Won
                 </Badge>
-                <Badge variant="warning" icon={<AlertTriangle className="h-3 w-3" />}>
+                <Badge
+                  variant="warning"
+                  icon={<AlertTriangle className="h-3 w-3" />}
+                >
                   Under Review
                 </Badge>
-                <Badge variant="danger" icon={<AlertCircle className="h-3 w-3" />}>
+                <Badge
+                  variant="danger"
+                  icon={<AlertCircle className="h-3 w-3" />}
+                >
                   Payment Past Due
                 </Badge>
                 <Badge variant="info" icon={<Info className="h-3 w-3" />}>
@@ -210,7 +262,9 @@ export default function DesignSystemGalleryPage() {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Kbd>G</Kbd>
-                  <span className="text-xs text-[var(--color-text-muted)]">then</span>
+                  <span className="text-xs text-[var(--color-text-muted)]">
+                    then
+                  </span>
                   <Kbd>D</Kbd>
                 </div>
               </div>
@@ -232,14 +286,21 @@ export default function DesignSystemGalleryPage() {
                   <DialogHeader>
                     <DialogTitle>Confirm Workspace Deletion</DialogTitle>
                     <DialogDescription>
-                      This will archive all contacts, deals, and records for 30 days before permanent deletion.
+                      This will archive all contacts, deals, and records for 30
+                      days before permanent deletion.
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
-                    <Button variant="secondary" onClick={() => setDialogOpen(false)}>
+                    <Button
+                      variant="secondary"
+                      onClick={() => setDialogOpen(false)}
+                    >
                       Cancel
                     </Button>
-                    <Button variant="danger" onClick={() => setDialogOpen(false)}>
+                    <Button
+                      variant="danger"
+                      onClick={() => setDialogOpen(false)}
+                    >
                       Confirm Archive
                     </Button>
                   </DialogFooter>
@@ -257,7 +318,11 @@ export default function DesignSystemGalleryPage() {
                 Trigger Undo Toast
               </Button>
 
-              <Toast open={toastOpen} onOpenChange={setToastOpen} variant="success">
+              <Toast
+                open={toastOpen}
+                onOpenChange={setToastOpen}
+                variant="success"
+              >
                 <div className="flex flex-col gap-1">
                   <ToastTitle className="flex items-center gap-1.5">
                     <Check className="h-4 w-4 text-[var(--color-status-success-text)]" />
@@ -268,7 +333,7 @@ export default function DesignSystemGalleryPage() {
                 <ToastAction
                   altText="Undo deal move"
                   onClick={() => {
-                    alert('Action undone successfully!');
+                    alert("Action undone successfully!");
                     setToastOpen(false);
                   }}
                 >
@@ -304,11 +369,38 @@ export default function DesignSystemGalleryPage() {
                 </thead>
                 <tbody className="divide-y divide-[var(--color-border-muted)]">
                   {[
-                    { name: 'K. Krithivasan', org: 'Tata Consultancy Services', role: 'CEO', amountSubunits: 12500000000, currency: 'INR', status: 'Closed Won', v: 'success' as const },
-                    { name: 'Salil Parekh', org: 'Infosys BPM Ltd', role: 'CEO & MD', amountSubunits: 4800000000, currency: 'INR', status: 'Proposal', v: 'info' as const },
-                    { name: 'C. P. Gurnani', org: 'Tech Mahindra Ltd', role: 'Director', amountSubunits: 3600000000, currency: 'INR', status: 'Negotiation', v: 'warning' as const },
+                    {
+                      name: "K. Krithivasan",
+                      org: "Tata Consultancy Services",
+                      role: "CEO",
+                      amountSubunits: 12500000000,
+                      currency: "INR",
+                      status: "Closed Won",
+                      v: "success" as const,
+                    },
+                    {
+                      name: "Salil Parekh",
+                      org: "Infosys BPM Ltd",
+                      role: "CEO & MD",
+                      amountSubunits: 4800000000,
+                      currency: "INR",
+                      status: "Proposal",
+                      v: "info" as const,
+                    },
+                    {
+                      name: "C. P. Gurnani",
+                      org: "Tech Mahindra Ltd",
+                      role: "Director",
+                      amountSubunits: 3600000000,
+                      currency: "INR",
+                      status: "Negotiation",
+                      v: "warning" as const,
+                    },
                   ].map((row, i) => (
-                    <tr key={i} className="hover:bg-[var(--color-bg-subtle)] transition-colors">
+                    <tr
+                      key={i}
+                      className="hover:bg-[var(--color-bg-subtle)] transition-colors"
+                    >
                       <td className="py-[var(--density-cell-py)] px-[var(--density-cell-px)] font-medium text-[var(--color-text-primary)]">
                         {row.name}
                       </td>
@@ -319,7 +411,12 @@ export default function DesignSystemGalleryPage() {
                         {row.role}
                       </td>
                       <td className="py-[var(--density-cell-py)] px-[var(--density-cell-px)] font-mono font-semibold text-[var(--color-text-primary)]">
-                        <MoneyDisplay amount={row.amountSubunits} currency={row.currency} compact size="sm" />
+                        <MoneyDisplay
+                          amount={row.amountSubunits}
+                          currency={row.currency}
+                          compact
+                          size="sm"
+                        />
                       </td>
                       <td className="py-[var(--density-cell-py)] px-[var(--density-cell-px)]">
                         <Badge variant={row.v}>{row.status}</Badge>
@@ -336,11 +433,14 @@ export default function DesignSystemGalleryPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
               <div>
                 <h2 className="text-lg font-bold text-[var(--color-text-primary)] flex items-center gap-2">
-                  <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-[var(--color-accent-primary)]/10 text-[var(--color-accent-primary)] text-xs font-black">₹</span>
+                  <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-[var(--color-accent-primary)]/10 text-[var(--color-accent-primary)] text-xs font-black">
+                    ₹
+                  </span>
                   Sovereign Currency Engine & India-First Formatting (§4.7)
                 </h2>
                 <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
-                  Integer minor units, Indian Lakh/Crore digit grouping, compact forms, in-words generation, and ISO-4217 pinning.
+                  Integer minor units, Indian Lakh/Crore digit grouping, compact
+                  forms, in-words generation, and ISO-4217 pinning.
                 </p>
               </div>
               <Badge variant="accent">Rule 8 Enforced</Badge>
@@ -354,16 +454,32 @@ export default function DesignSystemGalleryPage() {
                 </span>
                 <div className="flex flex-col gap-2">
                   <div>
-                    <span className="text-xs text-[var(--color-text-muted)] block">Standard Digit Grouping:</span>
+                    <span className="text-xs text-[var(--color-text-muted)] block">
+                      Standard Digit Grouping:
+                    </span>
                     <MoneyDisplay amount={123456750} currency="INR" size="xl" />
                   </div>
                   <div className="pt-2 border-t border-[var(--color-border-muted)]">
-                    <span className="text-xs text-[var(--color-text-muted)] block">Compact Crore Notation:</span>
-                    <MoneyDisplay amount={25000000000} currency="INR" compact size="lg" />
+                    <span className="text-xs text-[var(--color-text-muted)] block">
+                      Compact Crore Notation:
+                    </span>
+                    <MoneyDisplay
+                      amount={25000000000}
+                      currency="INR"
+                      compact
+                      size="lg"
+                    />
                   </div>
                   <div className="pt-2 border-t border-[var(--color-border-muted)]">
-                    <span className="text-xs text-[var(--color-text-muted)] block">Compact Lakh Notation:</span>
-                    <MoneyDisplay amount={125000000} currency="INR" compact size="lg" />
+                    <span className="text-xs text-[var(--color-text-muted)] block">
+                      Compact Lakh Notation:
+                    </span>
+                    <MoneyDisplay
+                      amount={125000000}
+                      currency="INR"
+                      compact
+                      size="lg"
+                    />
                   </div>
                 </div>
               </div>
@@ -374,11 +490,25 @@ export default function DesignSystemGalleryPage() {
                   Indian Legal &quot;In Words&quot; Generator
                 </span>
                 <div className="flex flex-col gap-2">
-                  <span className="text-xs text-[var(--color-text-muted)] block">Amount with Legal Words:</span>
-                  <MoneyDisplay amount={123456750} currency="INR" showWords size="lg" />
+                  <span className="text-xs text-[var(--color-text-muted)] block">
+                    Amount with Legal Words:
+                  </span>
+                  <MoneyDisplay
+                    amount={123456750}
+                    currency="INR"
+                    showWords
+                    size="lg"
+                  />
                   <div className="pt-2 border-t border-[var(--color-border-muted)]">
-                    <span className="text-xs text-[var(--color-text-muted)] block">Small Amount with Paise:</span>
-                    <MoneyDisplay amount={54325} currency="INR" showWords size="md" />
+                    <span className="text-xs text-[var(--color-text-muted)] block">
+                      Small Amount with Paise:
+                    </span>
+                    <MoneyDisplay
+                      amount={54325}
+                      currency="INR"
+                      showWords
+                      size="md"
+                    />
                   </div>
                 </div>
               </div>
@@ -390,19 +520,27 @@ export default function DesignSystemGalleryPage() {
                 </span>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div className="p-2 rounded border border-[var(--color-border-muted)] bg-[var(--color-bg-subtle)]">
-                    <span className="text-[10px] text-[var(--color-text-muted)] block font-mono">INR (Default)</span>
+                    <span className="text-[10px] text-[var(--color-text-muted)] block font-mono">
+                      INR (Default)
+                    </span>
                     <MoneyDisplay amount={50000000} currency="INR" size="sm" />
                   </div>
                   <div className="p-2 rounded border border-[var(--color-border-muted)] bg-[var(--color-bg-subtle)]">
-                    <span className="text-[10px] text-[var(--color-text-muted)] block font-mono">USD</span>
+                    <span className="text-[10px] text-[var(--color-text-muted)] block font-mono">
+                      USD
+                    </span>
                     <MoneyDisplay amount={150000000} currency="USD" size="sm" />
                   </div>
                   <div className="p-2 rounded border border-[var(--color-border-muted)] bg-[var(--color-bg-subtle)]">
-                    <span className="text-[10px] text-[var(--color-text-muted)] block font-mono">EUR</span>
+                    <span className="text-[10px] text-[var(--color-text-muted)] block font-mono">
+                      EUR
+                    </span>
                     <MoneyDisplay amount={8500000} currency="EUR" size="sm" />
                   </div>
                   <div className="p-2 rounded border border-[var(--color-border-muted)] bg-[var(--color-bg-subtle)]">
-                    <span className="text-[10px] text-[var(--color-text-muted)] block font-mono">AED</span>
+                    <span className="text-[10px] text-[var(--color-text-muted)] block font-mono">
+                      AED
+                    </span>
                     <MoneyDisplay amount={45000000} currency="AED" size="sm" />
                   </div>
                 </div>

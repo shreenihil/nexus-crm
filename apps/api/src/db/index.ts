@@ -1,5 +1,9 @@
-import { createHash, timingSafeEqual } from 'node:crypto';
-import { generateUuidV7, calculateAuditHash, hashPassword } from '../lib/crypto';
+import { createHash, timingSafeEqual } from "node:crypto";
+import {
+  generateUuidV7,
+  calculateAuditHash,
+  hashPassword,
+} from "../lib/crypto";
 import type {
   WorkspaceRole,
   Pipeline,
@@ -13,7 +17,7 @@ import type {
   TelephonyCall,
   CommunicationPreferences,
   CannedSnippet,
-} from '@nexus/schema';
+} from "@nexus/schema";
 import {
   evaluateFormula,
   DEFAULT_PIPELINE_STAGES,
@@ -23,14 +27,14 @@ import {
   detectSmsOptOut,
   substituteTemplateVariables,
   stitchEmailThread,
-} from '@nexus/schema';
+} from "@nexus/schema";
 import {
   evaluateDuplicateMatch,
   InvertedCandidateIndex,
   type DedupRecord,
   type ScoreFactor,
   type MatchScoreResult,
-} from '@nexus/dedup';
+} from "@nexus/dedup";
 import {
   type WorkflowNode,
   type WorkflowNodeType,
@@ -40,7 +44,7 @@ import {
   signWebhookPayload,
   verifyWebhookSignature,
   validateWorkflowDAG,
-} from '@nexus/workflow';
+} from "@nexus/workflow";
 import {
   generateKey,
   wrapDek,
@@ -50,14 +54,14 @@ import {
   rotateMasterKey,
   type EncryptedDekEnvelope,
   type RotationResult,
-} from '@nexus/kms';
+} from "@nexus/kms";
 
 export interface KmsMasterKeyRecord {
   id: string;
   workspaceId: string;
   version: number;
-  status: 'ACTIVE' | 'ROTATED' | 'REVOKED';
-  algorithm: 'AES-256-GCM';
+  status: "ACTIVE" | "ROTATED" | "REVOKED";
+  algorithm: "AES-256-GCM";
   keyHex: string;
   createdAt: string;
   rotatedAt?: string | null;
@@ -65,7 +69,7 @@ export interface KmsMasterKeyRecord {
 
 export interface TenantExportArchive {
   manifest: {
-    formatVersion: '1.0.0';
+    formatVersion: "1.0.0";
     workspaceId: string;
     workspaceName: string;
     exportedAt: string;
@@ -89,18 +93,17 @@ export interface TenantExportArchive {
     outboundWebhooks: OutboundWebhookSubscription[];
   };
   security: {
-    kmsKeys: Array<Omit<KmsMasterKeyRecord, 'keyHex'>>;
+    kmsKeys: Array<Omit<KmsMasterKeyRecord, "keyHex">>;
     auditLedger: AuditEventRecord[];
   };
 }
 
-
 export type WorkflowTriggerType =
-  | 'record.created'
-  | 'record.updated'
-  | 'record.stage_changed'
-  | 'webhook.inbound'
-  | 'manual';
+  | "record.created"
+  | "record.updated"
+  | "record.stage_changed"
+  | "webhook.inbound"
+  | "manual";
 
 export interface WorkflowTriggerConfig {
   objectApiName?: string;
@@ -127,7 +130,7 @@ export interface WorkflowRunRecord {
   id: string;
   workspaceId: string;
   workflowId: string;
-  status: 'completed' | 'failed';
+  status: "completed" | "failed";
   triggerEvent: string;
   triggerRecordId?: string;
   context: Record<string, any>;
@@ -160,7 +163,7 @@ export interface WebhookDeliveryLog {
   signature: string;
   timestamp: string;
   statusCode: number;
-  status: 'SUCCESS' | 'FAILED';
+  status: "SUCCESS" | "FAILED";
   responseSummary?: string;
   durationMs: number;
   deliveredAt: string;
@@ -171,7 +174,7 @@ export interface OutboxEvent {
   workspaceId: string;
   eventType: string;
   payload: Record<string, any>;
-  status: 'PENDING' | 'PROCESSING' | 'DELIVERED' | 'FAILED' | 'DLQ';
+  status: "PENDING" | "PROCESSING" | "DELIVERED" | "FAILED" | "DLQ";
   attempts: number;
   maxAttempts: number;
   lastAttemptAt?: string;
@@ -193,7 +196,7 @@ export interface DeadLetterQueueItem {
   lastStatusCode?: number;
   lastError: string;
   responseSnippet?: string;
-  status: 'PENDING' | 'REPLAYING' | 'REPLAYED' | 'DISCARDED';
+  status: "PENDING" | "REPLAYING" | "REPLAYED" | "DISCARDED";
   replayedAt?: string;
   createdAt: string;
 }
@@ -201,21 +204,20 @@ export interface DeadLetterQueueItem {
 export interface AACConnection {
   id: string;
   workspaceId: string;
-  provider: 'google' | 'microsoft';
+  provider: "google" | "microsoft";
   email: string;
-  status: 'CONNECTED' | 'DISCONNECTED';
+  status: "CONNECTED" | "DISCONNECTED";
   accessTokenEncrypted: string;
   privacySettings: {
     excludeInternalDomains: string[];
     excludeLabels: string[];
-    shareLevel: 'metadata' | 'subject' | 'full';
+    shareLevel: "metadata" | "subject" | "full";
   };
   syncedEmailsCount: number;
   lastSyncedAt?: string;
   deltaToken?: string;
   createdAt: string;
 }
-
 
 export interface DuplicatePairRecord {
   id: string;
@@ -224,9 +226,9 @@ export interface DuplicatePairRecord {
   primaryRecordId: string;
   duplicateRecordId: string;
   confidenceScore: number;
-  confidenceTier: 'HIGH' | 'MEDIUM' | 'LOW';
+  confidenceTier: "HIGH" | "MEDIUM" | "LOW";
   isAutoMergeCandidate: boolean;
-  status: 'PENDING' | 'MERGED' | 'DISMISSED';
+  status: "PENDING" | "MERGED" | "DISMISSED";
   matchFactors: ScoreFactor[];
   summary: string;
   createdAt: string;
@@ -245,15 +247,23 @@ export interface MergeHistoryRecord {
   mergedData: Record<string, any>;
   transferredLinksCount: number;
   transferredActivitiesCount: number;
-  repointedLinks: Array<{ linkId: string; previousRecordId: string; role: 'from' | 'to' }>;
-  repointedEntities: Array<{ type: string; id: string; field: string; previousId: string }>;
+  repointedLinks: Array<{
+    linkId: string;
+    previousRecordId: string;
+    role: "from" | "to";
+  }>;
+  repointedEntities: Array<{
+    type: string;
+    id: string;
+    field: string;
+    previousId: string;
+  }>;
   mergedBy: string;
   mergedAt: string;
   unmergedAt?: string | null;
   unmergedBy?: string | null;
-  status: 'MERGED' | 'UNMERGED';
+  status: "MERGED" | "UNMERGED";
 }
-
 
 export interface WorkspaceRecord {
   id: string;
@@ -307,7 +317,7 @@ export interface SessionRecord {
 export interface MfaFactorRecord {
   id: string;
   userId: string;
-  type: 'totp';
+  type: "totp";
   secret: string;
   isVerified: boolean;
   createdAt: string;
@@ -324,7 +334,7 @@ export interface RecoveryCodeRecord {
 export interface AuditEventRecord {
   id: string;
   workspaceId: string;
-  actorType: 'user' | 'api_key' | 'system';
+  actorType: "user" | "api_key" | "system";
   actorId?: string | null;
   action: string;
   targetType?: string | null;
@@ -338,21 +348,21 @@ export interface AuditEventRecord {
 }
 
 export type AttributeType =
-  | 'text'
-  | 'number'
-  | 'currency'
-  | 'date'
-  | 'datetime'
-  | 'boolean'
-  | 'dropdown_single'
-  | 'dropdown_multi'
-  | 'url'
-  | 'email'
-  | 'phone'
-  | 'rating'
-  | 'relation'
-  | 'user'
-  | 'formula';
+  | "text"
+  | "number"
+  | "currency"
+  | "date"
+  | "datetime"
+  | "boolean"
+  | "dropdown_single"
+  | "dropdown_multi"
+  | "url"
+  | "email"
+  | "phone"
+  | "rating"
+  | "relation"
+  | "user"
+  | "formula";
 
 export interface ObjectRecord {
   id: string;
@@ -391,7 +401,7 @@ export interface RelationshipRecord {
   workspaceId: string;
   fromObjectId: string;
   toObjectId: string;
-  cardinality: '1:1' | '1:N' | 'N:N';
+  cardinality: "1:1" | "1:N" | "N:N";
   fromLabel: string;
   toLabel: string;
   createdAt: string;
@@ -424,7 +434,7 @@ export interface ViewRecord {
   workspaceId: string;
   objectId: string;
   name: string;
-  type: 'table' | 'kanban' | 'calendar' | 'gallery';
+  type: "table" | "kanban" | "calendar" | "gallery";
   filters: any[];
   sorts: any[];
   columns: string[];
@@ -435,12 +445,12 @@ export interface ViewRecord {
   updatedAt: string;
 }
 
-export const DEMO_WORKSPACE_ID = '01910000-0000-7000-8000-000000000001';
-export const DEMO_USER_ID = '01910000-0000-7000-8000-000000000002';
-export const DEMO_COMPANIES_OBJ_ID = '01910000-0000-7000-8000-000000000003';
-export const DEMO_PEOPLE_OBJ_ID = '01910000-0000-7000-8000-000000000004';
-export const DEMO_DEALS_OBJ_ID = '01910000-0000-7000-8000-000000000005';
-export const DEMO_PIPELINE_ID = '01910000-0000-7000-8000-000000000006';
+export const DEMO_WORKSPACE_ID = "01910000-0000-7000-8000-000000000001";
+export const DEMO_USER_ID = "01910000-0000-7000-8000-000000000002";
+export const DEMO_COMPANIES_OBJ_ID = "01910000-0000-7000-8000-000000000003";
+export const DEMO_PEOPLE_OBJ_ID = "01910000-0000-7000-8000-000000000004";
+export const DEMO_DEALS_OBJ_ID = "01910000-0000-7000-8000-000000000005";
+export const DEMO_PIPELINE_ID = "01910000-0000-7000-8000-000000000006";
 
 /**
  * Production-ready Multi-Tenant Database & Metadata Store.
@@ -514,20 +524,26 @@ export class DatabaseStore {
   setupTokenExpiresAt: number | null = null;
 
   generateSetupToken(): string {
-    const token = process.env.NEXUS_SETUP_TOKEN || createHash('sha256').update(generateUuidV7()).digest('hex').slice(0, 32);
-    this.setupTokenHash = createHash('sha256').update(token).digest('hex');
+    const token =
+      process.env.NEXUS_SETUP_TOKEN ||
+      createHash("sha256").update(generateUuidV7()).digest("hex").slice(0, 32);
+    this.setupTokenHash = createHash("sha256").update(token).digest("hex");
     this.setupTokenExpiresAt = Date.now() + 3600 * 1000;
     return token;
   }
 
   verifySetupToken(token: string): boolean {
-    if (this.isInstanceInitialized || !this.setupTokenHash || !this.setupTokenExpiresAt) {
+    if (
+      this.isInstanceInitialized ||
+      !this.setupTokenHash ||
+      !this.setupTokenExpiresAt
+    ) {
       return false;
     }
     if (Date.now() > this.setupTokenExpiresAt) {
       return false;
     }
-    const hash = createHash('sha256').update(token).digest('hex');
+    const hash = createHash("sha256").update(token).digest("hex");
     return timingSafeEqual(Buffer.from(hash), Buffer.from(this.setupTokenHash));
   }
 
@@ -540,7 +556,11 @@ export class DatabaseStore {
     baseCurrency?: string;
     timezone?: string;
     locale?: string;
-  }): Promise<{ user: UserRecord; workspace: WorkspaceRecord; sessionToken: string }> {
+  }): Promise<{
+    user: UserRecord;
+    workspace: WorkspaceRecord;
+    sessionToken: string;
+  }> {
     const now = new Date().toISOString();
     const userId = generateUuidV7();
     const workspaceId = generateUuidV7();
@@ -561,13 +581,28 @@ export class DatabaseStore {
 
     const workspace: WorkspaceRecord = {
       id: workspaceId,
-      name: params.instanceName || 'Primary Workspace',
-      slug: (params.instanceName || 'primary').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      brandColor: '#4f46e5',
-      baseCurrency: params.baseCurrency || 'INR',
-      enabledCurrencies: ['INR', 'USD', 'EUR', 'GBP', 'AED', 'SGD', 'AUD', 'CAD', 'JPY', 'CHF', 'SAR', 'ZAR'],
-      locale: params.locale || 'en-IN',
-      timezone: params.timezone || 'Asia/Kolkata',
+      name: params.instanceName || "Primary Workspace",
+      slug: (params.instanceName || "primary")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-"),
+      brandColor: "#4f46e5",
+      baseCurrency: params.baseCurrency || "INR",
+      enabledCurrencies: [
+        "INR",
+        "USD",
+        "EUR",
+        "GBP",
+        "AED",
+        "SGD",
+        "AUD",
+        "CAD",
+        "JPY",
+        "CHF",
+        "SAR",
+        "ZAR",
+      ],
+      locale: params.locale || "en-IN",
+      timezone: params.timezone || "Asia/Kolkata",
       fiscalYearStartMonth: 4,
       createdAt: now,
       updatedAt: now,
@@ -579,7 +614,7 @@ export class DatabaseStore {
       id: membershipId,
       workspaceId,
       userId,
-      role: 'owner',
+      role: "owner",
       createdAt: now,
       updatedAt: now,
     });
@@ -589,7 +624,7 @@ export class DatabaseStore {
       id: sessionToken,
       userId,
       workspaceId,
-      refreshTokenHash: 'hash',
+      refreshTokenHash: "hash",
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       createdAt: now,
       lastUsedAt: now,
@@ -598,18 +633,18 @@ export class DatabaseStore {
     await this.seedStandardObjects(workspaceId);
 
     const masterKek = generateKey();
-    this.kmsKeys.set('1', {
-      id: '1',
+    this.kmsKeys.set("1", {
+      id: "1",
       workspaceId,
       version: 1,
-      status: 'ACTIVE',
-      algorithm: 'AES-256-GCM',
-      keyHex: masterKek.toString('hex'),
+      status: "ACTIVE",
+      algorithm: "AES-256-GCM",
+      keyHex: masterKek.toString("hex"),
       createdAt: now,
     });
     const initialDek = generateKey();
     const initialEnvelope = {
-      ...wrapDek(masterKek, initialDek, 'dek-tenant-main', 1),
+      ...wrapDek(masterKek, initialDek, "dek-tenant-main", 1),
       workspaceId,
     };
     this.encryptedDeks.set(initialEnvelope.dekId, initialEnvelope);
@@ -620,9 +655,9 @@ export class DatabaseStore {
 
     await this.appendAuditEvent({
       workspaceId,
-      actorType: 'user',
+      actorType: "user",
       actorId: userId,
-      action: 'system.setup_completed',
+      action: "system.setup_completed",
       payload: {
         instanceName: workspace.name,
         adminEmail: user.email,
@@ -634,10 +669,9 @@ export class DatabaseStore {
     return { user, workspace, sessionToken };
   }
 
-
-
   // Genesis hash for tamper-evident audit ledger
-  private latestAuditHash = '0000000000000000000000000000000000000000000000000000000000000000';
+  private latestAuditHash =
+    "0000000000000000000000000000000000000000000000000000000000000000";
 
   /**
    * Initializes standard objects for a new workspace.
@@ -651,30 +685,108 @@ export class DatabaseStore {
     this.objects.set(companiesObjId, {
       id: companiesObjId,
       workspaceId,
-      apiName: 'companies',
-      singularLabel: 'Company',
-      pluralLabel: 'Companies',
-      icon: 'Building2',
-      color: '#3B82F6',
-      description: 'Business accounts, organizations, and clients',
+      apiName: "companies",
+      singularLabel: "Company",
+      pluralLabel: "Companies",
+      icon: "Building2",
+      color: "#3B82F6",
+      description: "Business accounts, organizations, and clients",
       isSystem: true,
       createdAt: now,
       updatedAt: now,
     });
 
-    const companyAttrs: Array<Omit<AttributeRecord, 'id' | 'workspaceId' | 'objectId' | 'createdAt' | 'updatedAt'>> = [
-      { apiName: 'name', label: 'Company Name', type: 'text', isRequired: true, isUnique: false, isFilterable: true, isSortable: true },
-      { apiName: 'domain', label: 'Primary Domain', type: 'url', isRequired: false, isUnique: true, isFilterable: true, isSortable: true },
-      { apiName: 'industry', label: 'Industry', type: 'dropdown_single', isRequired: false, isUnique: false, isFilterable: true, isSortable: true, optionsConfig: { choices: ['SaaS', 'Healthcare', 'Finance', 'Manufacturing', 'Retail', 'Other'] } },
-      { apiName: 'annual_revenue', label: 'Annual Revenue', type: 'currency', isRequired: false, isUnique: false, isFilterable: true, isSortable: true },
-      { apiName: 'employee_count', label: 'Employee Count', type: 'number', isRequired: false, isUnique: false, isFilterable: true, isSortable: true },
-      { apiName: 'gstin', label: 'GSTIN', type: 'text', isRequired: false, isUnique: false, isFilterable: true, isSortable: true },
-      { apiName: 'pan', label: 'PAN', type: 'text', isRequired: false, isUnique: false, isFilterable: true, isSortable: true },
+    const companyAttrs: Array<
+      Omit<
+        AttributeRecord,
+        "id" | "workspaceId" | "objectId" | "createdAt" | "updatedAt"
+      >
+    > = [
+      {
+        apiName: "name",
+        label: "Company Name",
+        type: "text",
+        isRequired: true,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+      },
+      {
+        apiName: "domain",
+        label: "Primary Domain",
+        type: "url",
+        isRequired: false,
+        isUnique: true,
+        isFilterable: true,
+        isSortable: true,
+      },
+      {
+        apiName: "industry",
+        label: "Industry",
+        type: "dropdown_single",
+        isRequired: false,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+        optionsConfig: {
+          choices: [
+            "SaaS",
+            "Healthcare",
+            "Finance",
+            "Manufacturing",
+            "Retail",
+            "Other",
+          ],
+        },
+      },
+      {
+        apiName: "annual_revenue",
+        label: "Annual Revenue",
+        type: "currency",
+        isRequired: false,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+      },
+      {
+        apiName: "employee_count",
+        label: "Employee Count",
+        type: "number",
+        isRequired: false,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+      },
+      {
+        apiName: "gstin",
+        label: "GSTIN",
+        type: "text",
+        isRequired: false,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+      },
+      {
+        apiName: "pan",
+        label: "PAN",
+        type: "text",
+        isRequired: false,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+      },
     ];
 
     for (const attr of companyAttrs) {
       const attrId = generateUuidV7();
-      this.attributes.set(attrId, { ...attr, id: attrId, workspaceId, objectId: companiesObjId, createdAt: now, updatedAt: now });
+      this.attributes.set(attrId, {
+        ...attr,
+        id: attrId,
+        workspaceId,
+        objectId: companiesObjId,
+        createdAt: now,
+        updatedAt: now,
+      });
     }
 
     // 2. People Object
@@ -682,29 +794,99 @@ export class DatabaseStore {
     this.objects.set(peopleObjId, {
       id: peopleObjId,
       workspaceId,
-      apiName: 'people',
-      singularLabel: 'Person',
-      pluralLabel: 'People',
-      icon: 'Users',
-      color: '#10B981',
-      description: 'Individual contacts, leads, and decision makers',
+      apiName: "people",
+      singularLabel: "Person",
+      pluralLabel: "People",
+      icon: "Users",
+      color: "#10B981",
+      description: "Individual contacts, leads, and decision makers",
       isSystem: true,
       createdAt: now,
       updatedAt: now,
     });
 
-    const peopleAttrs: Array<Omit<AttributeRecord, 'id' | 'workspaceId' | 'objectId' | 'createdAt' | 'updatedAt'>> = [
-      { apiName: 'first_name', label: 'First Name', type: 'text', isRequired: true, isUnique: false, isFilterable: true, isSortable: true },
-      { apiName: 'last_name', label: 'Last Name', type: 'text', isRequired: true, isUnique: false, isFilterable: true, isSortable: true },
-      { apiName: 'email', label: 'Email Address', type: 'email', isRequired: true, isUnique: false, isFilterable: true, isSortable: true },
-      { apiName: 'phone', label: 'Phone Number', type: 'phone', isRequired: false, isUnique: false, isFilterable: true, isSortable: false },
-      { apiName: 'title', label: 'Job Title', type: 'text', isRequired: false, isUnique: false, isFilterable: true, isSortable: true },
-      { apiName: 'lifecycle_stage', label: 'Lifecycle Stage', type: 'dropdown_single', isRequired: false, isUnique: false, isFilterable: true, isSortable: true, optionsConfig: { choices: ['Lead', 'MQL', 'SQL', 'Opportunity', 'Customer', 'Evangelist'] } },
+    const peopleAttrs: Array<
+      Omit<
+        AttributeRecord,
+        "id" | "workspaceId" | "objectId" | "createdAt" | "updatedAt"
+      >
+    > = [
+      {
+        apiName: "first_name",
+        label: "First Name",
+        type: "text",
+        isRequired: true,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+      },
+      {
+        apiName: "last_name",
+        label: "Last Name",
+        type: "text",
+        isRequired: true,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+      },
+      {
+        apiName: "email",
+        label: "Email Address",
+        type: "email",
+        isRequired: true,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+      },
+      {
+        apiName: "phone",
+        label: "Phone Number",
+        type: "phone",
+        isRequired: false,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: false,
+      },
+      {
+        apiName: "title",
+        label: "Job Title",
+        type: "text",
+        isRequired: false,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+      },
+      {
+        apiName: "lifecycle_stage",
+        label: "Lifecycle Stage",
+        type: "dropdown_single",
+        isRequired: false,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+        optionsConfig: {
+          choices: [
+            "Lead",
+            "MQL",
+            "SQL",
+            "Opportunity",
+            "Customer",
+            "Evangelist",
+          ],
+        },
+      },
     ];
 
     for (const attr of peopleAttrs) {
       const attrId = generateUuidV7();
-      this.attributes.set(attrId, { ...attr, id: attrId, workspaceId, objectId: peopleObjId, createdAt: now, updatedAt: now });
+      this.attributes.set(attrId, {
+        ...attr,
+        id: attrId,
+        workspaceId,
+        objectId: peopleObjId,
+        createdAt: now,
+        updatedAt: now,
+      });
     }
 
     // 3. Deals Object
@@ -712,43 +894,151 @@ export class DatabaseStore {
     this.objects.set(dealsObjId, {
       id: dealsObjId,
       workspaceId,
-      apiName: 'deals',
-      singularLabel: 'Deal',
-      pluralLabel: 'Deals',
-      icon: 'TrendingUp',
-      color: '#F59E0B',
-      description: 'Sales opportunities, renewals, and pipelines',
+      apiName: "deals",
+      singularLabel: "Deal",
+      pluralLabel: "Deals",
+      icon: "TrendingUp",
+      color: "#F59E0B",
+      description: "Sales opportunities, renewals, and pipelines",
       isSystem: true,
       createdAt: now,
       updatedAt: now,
     });
 
-    const dealsAttrs: Array<Omit<AttributeRecord, 'id' | 'workspaceId' | 'objectId' | 'createdAt' | 'updatedAt'>> = [
-      { apiName: 'name', label: 'Deal Name', type: 'text', isRequired: true, isUnique: false, isFilterable: true, isSortable: true },
-      { apiName: 'amount', label: 'Deal Amount', type: 'currency', isRequired: true, isUnique: false, isFilterable: true, isSortable: true },
-      { apiName: 'currency', label: 'Currency', type: 'dropdown_single', isRequired: false, isUnique: false, isFilterable: true, isSortable: true, defaultValue: 'INR', optionsConfig: { choices: ['INR', 'USD', 'EUR', 'GBP', 'AED', 'SGD', 'JPY'] } },
-      { apiName: 'exchange_rate', label: 'Exchange Rate', type: 'number', isRequired: false, isUnique: false, isFilterable: false, isSortable: false, defaultValue: 1.0 },
-      { apiName: 'base_amount', label: 'Base Currency Amount (INR)', type: 'currency', isRequired: false, isUnique: false, isFilterable: true, isSortable: true },
-      { apiName: 'stage', label: 'Pipeline Stage', type: 'dropdown_single', isRequired: true, isUnique: false, isFilterable: true, isSortable: true, optionsConfig: { choices: ['Qualified', 'Discovery', 'Proposal Sent', 'Negotiation', 'Closed Won', 'Closed Lost'] } },
-      { apiName: 'probability', label: 'Win Probability %', type: 'number', isRequired: false, isUnique: false, isFilterable: true, isSortable: true, defaultValue: 50 },
+    const dealsAttrs: Array<
+      Omit<
+        AttributeRecord,
+        "id" | "workspaceId" | "objectId" | "createdAt" | "updatedAt"
+      >
+    > = [
       {
-        apiName: 'expected_value',
-        label: 'Expected Value',
-        type: 'formula',
+        apiName: "name",
+        label: "Deal Name",
+        type: "text",
+        isRequired: true,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+      },
+      {
+        apiName: "amount",
+        label: "Deal Amount",
+        type: "currency",
+        isRequired: true,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+      },
+      {
+        apiName: "currency",
+        label: "Currency",
+        type: "dropdown_single",
         isRequired: false,
         isUnique: false,
         isFilterable: true,
         isSortable: true,
-        formulaDefinition: '{amount} * ({probability} / 100)',
+        defaultValue: "INR",
+        optionsConfig: {
+          choices: ["INR", "USD", "EUR", "GBP", "AED", "SGD", "JPY"],
+        },
       },
-      { apiName: 'close_date', label: 'Target Close Date', type: 'date', isRequired: false, isUnique: false, isFilterable: true, isSortable: true },
-      { apiName: 'commission_rate', label: 'Commission Rate %', type: 'number', isRequired: false, isUnique: false, isFilterable: false, isSortable: false },
-      { apiName: 'cost_basis', label: 'Internal Cost Basis', type: 'currency', isRequired: false, isUnique: false, isFilterable: false, isSortable: false },
+      {
+        apiName: "exchange_rate",
+        label: "Exchange Rate",
+        type: "number",
+        isRequired: false,
+        isUnique: false,
+        isFilterable: false,
+        isSortable: false,
+        defaultValue: 1.0,
+      },
+      {
+        apiName: "base_amount",
+        label: "Base Currency Amount (INR)",
+        type: "currency",
+        isRequired: false,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+      },
+      {
+        apiName: "stage",
+        label: "Pipeline Stage",
+        type: "dropdown_single",
+        isRequired: true,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+        optionsConfig: {
+          choices: [
+            "Qualified",
+            "Discovery",
+            "Proposal Sent",
+            "Negotiation",
+            "Closed Won",
+            "Closed Lost",
+          ],
+        },
+      },
+      {
+        apiName: "probability",
+        label: "Win Probability %",
+        type: "number",
+        isRequired: false,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+        defaultValue: 50,
+      },
+      {
+        apiName: "expected_value",
+        label: "Expected Value",
+        type: "formula",
+        isRequired: false,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+        formulaDefinition: "{amount} * ({probability} / 100)",
+      },
+      {
+        apiName: "close_date",
+        label: "Target Close Date",
+        type: "date",
+        isRequired: false,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+      },
+      {
+        apiName: "commission_rate",
+        label: "Commission Rate %",
+        type: "number",
+        isRequired: false,
+        isUnique: false,
+        isFilterable: false,
+        isSortable: false,
+      },
+      {
+        apiName: "cost_basis",
+        label: "Internal Cost Basis",
+        type: "currency",
+        isRequired: false,
+        isUnique: false,
+        isFilterable: false,
+        isSortable: false,
+      },
     ];
 
     for (const attr of dealsAttrs) {
       const attrId = generateUuidV7();
-      this.attributes.set(attrId, { ...attr, id: attrId, workspaceId, objectId: dealsObjId, createdAt: now, updatedAt: now });
+      this.attributes.set(attrId, {
+        ...attr,
+        id: attrId,
+        workspaceId,
+        objectId: dealsObjId,
+        createdAt: now,
+        updatedAt: now,
+      });
     }
 
     // 4. Activities Object
@@ -756,27 +1046,74 @@ export class DatabaseStore {
     this.objects.set(activitiesObjId, {
       id: activitiesObjId,
       workspaceId,
-      apiName: 'activities',
-      singularLabel: 'Activity',
-      pluralLabel: 'Activities',
-      icon: 'CheckSquare',
-      color: '#8B5CF6',
-      description: 'Tasks, notes, calls, meetings, and emails',
+      apiName: "activities",
+      singularLabel: "Activity",
+      pluralLabel: "Activities",
+      icon: "CheckSquare",
+      color: "#8B5CF6",
+      description: "Tasks, notes, calls, meetings, and emails",
       isSystem: true,
       createdAt: now,
       updatedAt: now,
     });
 
-    const activityAttrs: Array<Omit<AttributeRecord, 'id' | 'workspaceId' | 'objectId' | 'createdAt' | 'updatedAt'>> = [
-      { apiName: 'type', label: 'Activity Type', type: 'dropdown_single', isRequired: true, isUnique: false, isFilterable: true, isSortable: true, optionsConfig: { choices: ['task', 'note', 'call', 'meeting', 'email'] } },
-      { apiName: 'subject', label: 'Subject', type: 'text', isRequired: true, isUnique: false, isFilterable: true, isSortable: true },
-      { apiName: 'due_at', label: 'Due Date', type: 'datetime', isRequired: false, isUnique: false, isFilterable: true, isSortable: true },
-      { apiName: 'completed_at', label: 'Completed Date', type: 'datetime', isRequired: false, isUnique: false, isFilterable: true, isSortable: true },
+    const activityAttrs: Array<
+      Omit<
+        AttributeRecord,
+        "id" | "workspaceId" | "objectId" | "createdAt" | "updatedAt"
+      >
+    > = [
+      {
+        apiName: "type",
+        label: "Activity Type",
+        type: "dropdown_single",
+        isRequired: true,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+        optionsConfig: {
+          choices: ["task", "note", "call", "meeting", "email"],
+        },
+      },
+      {
+        apiName: "subject",
+        label: "Subject",
+        type: "text",
+        isRequired: true,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+      },
+      {
+        apiName: "due_at",
+        label: "Due Date",
+        type: "datetime",
+        isRequired: false,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+      },
+      {
+        apiName: "completed_at",
+        label: "Completed Date",
+        type: "datetime",
+        isRequired: false,
+        isUnique: false,
+        isFilterable: true,
+        isSortable: true,
+      },
     ];
 
     for (const attr of activityAttrs) {
       const attrId = generateUuidV7();
-      this.attributes.set(attrId, { ...attr, id: attrId, workspaceId, objectId: activitiesObjId, createdAt: now, updatedAt: now });
+      this.attributes.set(attrId, {
+        ...attr,
+        id: attrId,
+        workspaceId,
+        objectId: activitiesObjId,
+        createdAt: now,
+        updatedAt: now,
+      });
     }
 
     // Relationships:
@@ -787,9 +1124,9 @@ export class DatabaseStore {
       workspaceId,
       fromObjectId: companiesObjId,
       toObjectId: peopleObjId,
-      cardinality: '1:N',
-      fromLabel: 'Company',
-      toLabel: 'Contacts',
+      cardinality: "1:N",
+      fromLabel: "Company",
+      toLabel: "Contacts",
       createdAt: now,
     });
 
@@ -800,9 +1137,9 @@ export class DatabaseStore {
       workspaceId,
       fromObjectId: companiesObjId,
       toObjectId: dealsObjId,
-      cardinality: '1:N',
-      fromLabel: 'Company',
-      toLabel: 'Deals',
+      cardinality: "1:N",
+      fromLabel: "Company",
+      toLabel: "Deals",
       createdAt: now,
     });
 
@@ -811,7 +1148,7 @@ export class DatabaseStore {
     this.pipelines.set(pipelineId, {
       id: pipelineId,
       workspaceId,
-      name: 'Standard B2B Sales Pipeline',
+      name: "Standard B2B Sales Pipeline",
       isDefault: true,
       stages: DEFAULT_PIPELINE_STAGES,
       createdAt: now,
@@ -827,7 +1164,7 @@ export class DatabaseStore {
    */
   async initializeSystem(force = false): Promise<void> {
     if (this.users.size > 0 && !force) return;
-    if (process.env.NEXUS_CLEAN_INSTALL === 'true') {
+    if (process.env.NEXUS_CLEAN_INSTALL === "true") {
       this.isInstanceInitialized = false;
       this.generateSetupToken();
       return;
@@ -840,7 +1177,8 @@ export class DatabaseStore {
       this.mfaFactors.clear();
       this.recoveryCodes.clear();
       this.auditEvents = [];
-      this.latestAuditHash = "0000000000000000000000000000000000000000000000000000000000000000";
+      this.latestAuditHash =
+        "0000000000000000000000000000000000000000000000000000000000000000";
       this.objects.clear();
       this.attributes.clear();
       this.relationships.clear();
@@ -896,7 +1234,20 @@ export class DatabaseStore {
       slug: "nexus-sovereign",
       brandColor: "#4f46e5",
       baseCurrency: "INR",
-      enabledCurrencies: ["INR", "USD", "EUR", "GBP", "AED", "SGD", "AUD", "CAD", "JPY", "CHF", "SAR", "ZAR"],
+      enabledCurrencies: [
+        "INR",
+        "USD",
+        "EUR",
+        "GBP",
+        "AED",
+        "SGD",
+        "AUD",
+        "CAD",
+        "JPY",
+        "CHF",
+        "SAR",
+        "ZAR",
+      ],
       locale: "en-IN",
       timezone: "Asia/Kolkata",
       fiscalYearStartMonth: 4,
@@ -953,7 +1304,10 @@ export class DatabaseStore {
       workspaceId,
       actorType: "system",
       action: "system.bootstrap",
-      payload: { message: "Initialized Sovereign Nexus CRM workspace with canonical standard objects and clean state" },
+      payload: {
+        message:
+          "Initialized Sovereign Nexus CRM workspace with canonical standard objects and clean state",
+      },
     });
     await this.appendAuditEvent({
       workspaceId,
@@ -970,7 +1324,8 @@ export class DatabaseStore {
    */
   async seedDemoData(force = false): Promise<void> {
     await this.initializeSystem(force);
-    const { seedDemoRecords } = await import("../__tests__/fixtures/demo-data.js");
+    const { seedDemoRecords } =
+      await import("../__tests__/fixtures/demo-data.js");
     await seedDemoRecords(this, force);
   }
 
@@ -979,13 +1334,13 @@ export class DatabaseStore {
    */
   toDedupRecord(record: RecordEntity, objectApiName: string): DedupRecord {
     const data = record.data || {};
-    if (objectApiName === 'people') {
-      const firstName = data.first_name || '';
-      const lastName = data.last_name || '';
+    if (objectApiName === "people") {
+      const firstName = data.first_name || "";
+      const lastName = data.last_name || "";
       const name = `${firstName} ${lastName}`.trim();
       return {
         id: record.id,
-        entityName: 'people',
+        entityName: "people",
         name,
         firstName,
         lastName,
@@ -994,10 +1349,10 @@ export class DatabaseStore {
         companyName: data.company_name,
         raw: data,
       };
-    } else if (objectApiName === 'companies') {
+    } else if (objectApiName === "companies") {
       return {
         id: record.id,
-        entityName: 'companies',
+        entityName: "companies",
         name: data.name,
         domain: data.domain,
         companyName: data.name,
@@ -1007,7 +1362,7 @@ export class DatabaseStore {
       return {
         id: record.id,
         entityName: objectApiName,
-        name: data.name || '',
+        name: data.name || "",
         raw: data,
       };
     }
@@ -1019,19 +1374,23 @@ export class DatabaseStore {
   checkDuplicatePreCreation(
     workspaceId: string,
     entityName: string,
-    data: Record<string, any>
-  ): { isDuplicate: boolean; matches: Array<{ record: RecordEntity; matchResult: MatchScoreResult }> } {
+    data: Record<string, any>,
+  ): {
+    isDuplicate: boolean;
+    matches: Array<{ record: RecordEntity; matchResult: MatchScoreResult }>;
+  } {
     const obj = Array.from(this.objects.values()).find(
-      (o) => o.workspaceId === workspaceId && o.apiName === entityName
+      (o) => o.workspaceId === workspaceId && o.apiName === entityName,
     );
     if (!obj) return { isDuplicate: false, matches: [] };
 
     const activeRecords = Array.from(this.records.values()).filter(
-      (r) => r.workspaceId === workspaceId && r.objectId === obj.id && !r.deletedAt
+      (r) =>
+        r.workspaceId === workspaceId && r.objectId === obj.id && !r.deletedAt,
     );
 
     const tempRecordEntity: RecordEntity = {
-      id: 'precheck-temp',
+      id: "precheck-temp",
       workspaceId,
       objectId: obj.id,
       data,
@@ -1048,7 +1407,10 @@ export class DatabaseStore {
     }
 
     const candidateDedupRecords = blocker.getCandidates(targetDedup);
-    const matches: Array<{ record: RecordEntity; matchResult: MatchScoreResult }> = [];
+    const matches: Array<{
+      record: RecordEntity;
+      matchResult: MatchScoreResult;
+    }> = [];
 
     // Evaluate candidates with corroboration engine
     for (const cand of candidateDedupRecords) {
@@ -1061,7 +1423,9 @@ export class DatabaseStore {
       }
     }
 
-    matches.sort((x, y) => y.matchResult.overallScore - x.matchResult.overallScore);
+    matches.sort(
+      (x, y) => y.matchResult.overallScore - x.matchResult.overallScore,
+    );
 
     return {
       isDuplicate: matches.length > 0,
@@ -1076,18 +1440,23 @@ export class DatabaseStore {
     const detectedPairs: DuplicatePairRecord[] = [];
     const now = new Date().toISOString();
 
-    for (const entityName of ['people', 'companies', 'deals']) {
+    for (const entityName of ["people", "companies", "deals"]) {
       const obj = Array.from(this.objects.values()).find(
-        (o) => o.workspaceId === workspaceId && o.apiName === entityName
+        (o) => o.workspaceId === workspaceId && o.apiName === entityName,
       );
       if (!obj) continue;
 
       const activeRecords = Array.from(this.records.values()).filter(
-        (r) => r.workspaceId === workspaceId && r.objectId === obj.id && !r.deletedAt
+        (r) =>
+          r.workspaceId === workspaceId &&
+          r.objectId === obj.id &&
+          !r.deletedAt,
       );
 
       const blocker = new InvertedCandidateIndex();
-      const dedupList: DedupRecord[] = activeRecords.map((r) => this.toDedupRecord(r, entityName));
+      const dedupList: DedupRecord[] = activeRecords.map((r) =>
+        this.toDedupRecord(r, entityName),
+      );
       blocker.addRecords(dedupList);
 
       const comparedPairKeys = new Set<string>();
@@ -1095,7 +1464,7 @@ export class DatabaseStore {
       for (const recA of dedupList) {
         const candidates = blocker.getCandidates(recA);
         for (const recB of candidates) {
-          const pairKey = [recA.id, recB.id].sort().join(':');
+          const pairKey = [recA.id, recB.id].sort().join(":");
           if (comparedPairKeys.has(pairKey)) continue;
           comparedPairKeys.add(pairKey);
 
@@ -1108,8 +1477,10 @@ export class DatabaseStore {
             let existingPair = Array.from(this.duplicatePairs.values()).find(
               (p) =>
                 p.workspaceId === workspaceId &&
-                ((p.primaryRecordId === recA.id && p.duplicateRecordId === recB.id) ||
-                 (p.primaryRecordId === recB.id && p.duplicateRecordId === recA.id))
+                ((p.primaryRecordId === recA.id &&
+                  p.duplicateRecordId === recB.id) ||
+                  (p.primaryRecordId === recB.id &&
+                    p.duplicateRecordId === recA.id)),
             );
 
             if (!existingPair) {
@@ -1123,7 +1494,7 @@ export class DatabaseStore {
                 confidenceScore: matchResult.overallScore,
                 confidenceTier: matchResult.confidenceTier,
                 isAutoMergeCandidate: matchResult.isAutoMergeCandidate,
-                status: 'PENDING',
+                status: "PENDING",
                 matchFactors: matchResult.factors,
                 summary: matchResult.summary,
                 createdAt: now,
@@ -1150,7 +1521,7 @@ export class DatabaseStore {
     winnerId: string,
     loserId: string,
     mergedData: Record<string, any>,
-    userId: string
+    userId: string,
   ): Promise<MergeHistoryRecord> {
     const winner = this.records.get(winnerId);
     const loser = this.records.get(loserId);
@@ -1162,19 +1533,30 @@ export class DatabaseStore {
       throw new Error(`Loser record ${loserId} not found in workspace`);
     }
     if (winner.objectId !== loser.objectId) {
-      throw new Error('Cannot merge records of different object types');
+      throw new Error("Cannot merge records of different object types");
     }
 
     const obj = this.objects.get(winner.objectId);
-    const entityName = obj ? obj.apiName : 'records';
+    const entityName = obj ? obj.apiName : "records";
     const now = new Date().toISOString();
 
     // Snapshots before merge
-    const snapshotWinnerBefore: RecordEntity = JSON.parse(JSON.stringify(winner));
+    const snapshotWinnerBefore: RecordEntity = JSON.parse(
+      JSON.stringify(winner),
+    );
     const snapshotLoserBefore: RecordEntity = JSON.parse(JSON.stringify(loser));
 
-    const repointedLinks: Array<{ linkId: string; previousRecordId: string; role: 'from' | 'to' }> = [];
-    const repointedEntities: Array<{ type: string; id: string; field: string; previousId: string }> = [];
+    const repointedLinks: Array<{
+      linkId: string;
+      previousRecordId: string;
+      role: "from" | "to";
+    }> = [];
+    const repointedEntities: Array<{
+      type: string;
+      id: string;
+      field: string;
+      previousId: string;
+    }> = [];
 
     // 1. Re-point RecordLinks
     for (const [linkId, link] of this.recordLinks.entries()) {
@@ -1182,11 +1564,15 @@ export class DatabaseStore {
 
       if (link.fromRecordId === loserId) {
         link.fromRecordId = winnerId;
-        repointedLinks.push({ linkId, previousRecordId: loserId, role: 'from' });
+        repointedLinks.push({
+          linkId,
+          previousRecordId: loserId,
+          role: "from",
+        });
       }
       if (link.toRecordId === loserId) {
         link.toRecordId = winnerId;
-        repointedLinks.push({ linkId, previousRecordId: loserId, role: 'to' });
+        repointedLinks.push({ linkId, previousRecordId: loserId, role: "to" });
       }
     }
 
@@ -1196,15 +1582,30 @@ export class DatabaseStore {
       const qAny = quote as any;
       if (qAny.companyId === loserId) {
         qAny.companyId = winnerId;
-        repointedEntities.push({ type: 'quote', id: quoteId, field: 'companyId', previousId: loserId });
+        repointedEntities.push({
+          type: "quote",
+          id: quoteId,
+          field: "companyId",
+          previousId: loserId,
+        });
       }
       if (qAny.contactId === loserId) {
         qAny.contactId = winnerId;
-        repointedEntities.push({ type: 'quote', id: quoteId, field: 'contactId', previousId: loserId });
+        repointedEntities.push({
+          type: "quote",
+          id: quoteId,
+          field: "contactId",
+          previousId: loserId,
+        });
       }
       if (quote.dealId === loserId) {
         quote.dealId = winnerId;
-        repointedEntities.push({ type: 'quote', id: quoteId, field: 'dealId', previousId: loserId });
+        repointedEntities.push({
+          type: "quote",
+          id: quoteId,
+          field: "dealId",
+          previousId: loserId,
+        });
       }
     }
 
@@ -1213,11 +1614,21 @@ export class DatabaseStore {
       if (thread.workspaceId !== workspaceId) continue;
       if (thread.contactId === loserId) {
         thread.contactId = winnerId;
-        repointedEntities.push({ type: 'thread', id: threadId, field: 'contactId', previousId: loserId });
+        repointedEntities.push({
+          type: "thread",
+          id: threadId,
+          field: "contactId",
+          previousId: loserId,
+        });
       }
       if (thread.dealId === loserId) {
         thread.dealId = winnerId;
-        repointedEntities.push({ type: 'thread', id: threadId, field: 'dealId', previousId: loserId });
+        repointedEntities.push({
+          type: "thread",
+          id: threadId,
+          field: "dealId",
+          previousId: loserId,
+        });
       }
     }
 
@@ -1226,7 +1637,12 @@ export class DatabaseStore {
       if (enr.workspaceId !== workspaceId) continue;
       if (enr.contactId === loserId) {
         enr.contactId = winnerId;
-        repointedEntities.push({ type: 'sequenceEnrollment', id: enrId, field: 'contactId', previousId: loserId });
+        repointedEntities.push({
+          type: "sequenceEnrollment",
+          id: enrId,
+          field: "contactId",
+          previousId: loserId,
+        });
       }
     }
 
@@ -1235,18 +1651,27 @@ export class DatabaseStore {
       if (call.workspaceId !== workspaceId) continue;
       if (call.contactId === loserId) {
         call.contactId = winnerId;
-        repointedEntities.push({ type: 'telephonyCall', id: callId, field: 'contactId', previousId: loserId });
+        repointedEntities.push({
+          type: "telephonyCall",
+          id: callId,
+          field: "contactId",
+          previousId: loserId,
+        });
       }
     }
 
     // 6. Re-point Activities (polymorphic records)
     let transferredActivitiesCount = 0;
     const activitiesObj = Array.from(this.objects.values()).find(
-      (o) => o.workspaceId === workspaceId && o.apiName === 'activities'
+      (o) => o.workspaceId === workspaceId && o.apiName === "activities",
     );
     if (activitiesObj) {
       for (const [recId, rec] of this.records.entries()) {
-        if (rec.workspaceId === workspaceId && rec.objectId === activitiesObj.id && !rec.deletedAt) {
+        if (
+          rec.workspaceId === workspaceId &&
+          rec.objectId === activitiesObj.id &&
+          !rec.deletedAt
+        ) {
           let activityUpdated = false;
           if (rec.data.related_to_id === loserId) {
             rec.data.related_to_id = winnerId;
@@ -1301,14 +1726,14 @@ export class DatabaseStore {
       repointedEntities,
       mergedBy: userId,
       mergedAt: now,
-      status: 'MERGED',
+      status: "MERGED",
     };
     this.mergeHistories.set(mergeHistoryId, mergeHistory);
 
     // 10. Update Pair status if pairId provided or exists
     if (pairId && this.duplicatePairs.has(pairId)) {
       const p = this.duplicatePairs.get(pairId)!;
-      p.status = 'MERGED';
+      p.status = "MERGED";
       p.resolvedAt = now;
       p.resolvedBy = userId;
     } else {
@@ -1316,11 +1741,13 @@ export class DatabaseStore {
       const p = Array.from(this.duplicatePairs.values()).find(
         (pair) =>
           pair.workspaceId === workspaceId &&
-          ((pair.primaryRecordId === winnerId && pair.duplicateRecordId === loserId) ||
-           (pair.primaryRecordId === loserId && pair.duplicateRecordId === winnerId))
+          ((pair.primaryRecordId === winnerId &&
+            pair.duplicateRecordId === loserId) ||
+            (pair.primaryRecordId === loserId &&
+              pair.duplicateRecordId === winnerId)),
       );
       if (p) {
-        p.status = 'MERGED';
+        p.status = "MERGED";
         p.resolvedAt = now;
         p.resolvedBy = userId;
       }
@@ -1329,9 +1756,9 @@ export class DatabaseStore {
     // 11. Write tamper-evident audit ledger event
     await this.appendAuditEvent({
       workspaceId,
-      actorType: 'user',
+      actorType: "user",
       actorId: userId,
-      action: 'identity.records.merged',
+      action: "identity.records.merged",
       targetType: entityName,
       targetId: winnerId,
       payload: {
@@ -1352,13 +1779,13 @@ export class DatabaseStore {
   async unmergeRecords(
     workspaceId: string,
     mergeId: string,
-    userId: string
+    userId: string,
   ): Promise<MergeHistoryRecord> {
     const history = this.mergeHistories.get(mergeId);
     if (!history || history.workspaceId !== workspaceId) {
       throw new Error(`Merge history record ${mergeId} not found`);
     }
-    if (history.status === 'UNMERGED') {
+    if (history.status === "UNMERGED") {
       throw new Error(`Merge ${mergeId} has already been unmerged`);
     }
 
@@ -1366,13 +1793,17 @@ export class DatabaseStore {
     const mergeTime = new Date(history.mergedAt).getTime();
     const thirtyDaysMs = 30 * 24 * 3600 * 1000;
     if (Date.now() - mergeTime > thirtyDaysMs) {
-      throw new Error(`Cannot unmerge: 30-day reversible resolution window has expired`);
+      throw new Error(
+        `Cannot unmerge: 30-day reversible resolution window has expired`,
+      );
     }
 
     const winner = this.records.get(history.winnerRecordId);
     const loser = this.records.get(history.loserRecordId);
     if (!winner || !loser) {
-      throw new Error('Original records involved in merge could not be located');
+      throw new Error(
+        "Original records involved in merge could not be located",
+      );
     }
 
     const now = new Date().toISOString();
@@ -1394,7 +1825,7 @@ export class DatabaseStore {
     for (const item of history.repointedLinks) {
       const link = this.recordLinks.get(item.linkId);
       if (link) {
-        if (item.role === 'from') {
+        if (item.role === "from") {
           link.fromRecordId = item.previousRecordId;
         } else {
           link.toRecordId = item.previousRecordId;
@@ -1404,23 +1835,23 @@ export class DatabaseStore {
 
     // 4. Rollback repointed entities
     for (const item of history.repointedEntities) {
-      if (item.type === 'quote') {
+      if (item.type === "quote") {
         const q = this.quotes.get(item.id);
         if (q) (q as any)[item.field] = item.previousId;
-      } else if (item.type === 'thread') {
+      } else if (item.type === "thread") {
         const t = this.threads.get(item.id);
         if (t) (t as any)[item.field] = item.previousId;
-      } else if (item.type === 'sequenceEnrollment') {
+      } else if (item.type === "sequenceEnrollment") {
         const s = this.sequenceEnrollments.get(item.id);
         if (s) (s as any)[item.field] = item.previousId;
-      } else if (item.type === 'telephonyCall') {
+      } else if (item.type === "telephonyCall") {
         const c = this.telephonyCalls.get(item.id);
         if (c) (c as any)[item.field] = item.previousId;
       }
     }
 
     // 5. Update history status
-    history.status = 'UNMERGED';
+    history.status = "UNMERGED";
     history.unmergedAt = now;
     history.unmergedBy = userId;
 
@@ -1428,11 +1859,13 @@ export class DatabaseStore {
     const pair = Array.from(this.duplicatePairs.values()).find(
       (p) =>
         p.workspaceId === workspaceId &&
-        ((p.primaryRecordId === history.winnerRecordId && p.duplicateRecordId === history.loserRecordId) ||
-         (p.primaryRecordId === history.loserRecordId && p.duplicateRecordId === history.winnerRecordId))
+        ((p.primaryRecordId === history.winnerRecordId &&
+          p.duplicateRecordId === history.loserRecordId) ||
+          (p.primaryRecordId === history.loserRecordId &&
+            p.duplicateRecordId === history.winnerRecordId)),
     );
     if (pair) {
-      pair.status = 'PENDING';
+      pair.status = "PENDING";
       pair.resolvedAt = null;
       pair.resolvedBy = null;
     }
@@ -1440,9 +1873,9 @@ export class DatabaseStore {
     // 7. Append audit event
     await this.appendAuditEvent({
       workspaceId,
-      actorType: 'user',
+      actorType: "user",
       actorId: userId,
-      action: 'identity.records.unmerged',
+      action: "identity.records.unmerged",
       targetType: history.entityName,
       targetId: winner.id,
       payload: {
@@ -1463,7 +1896,7 @@ export class DatabaseStore {
     workflowId: string,
     triggerEvent: string,
     triggerRecord?: Record<string, any>,
-    userId?: string
+    userId?: string,
   ): Promise<WorkflowRunRecord> {
     const workflow = this.workflows.get(workflowId);
     if (!workflow || workflow.workspaceId !== workspaceId) {
@@ -1496,7 +1929,7 @@ export class DatabaseStore {
         },
         onCreateRecord: async (entityName, data) => {
           const obj = Array.from(this.objects.values()).find(
-            (o) => o.workspaceId === workspaceId && o.apiName === entityName
+            (o) => o.workspaceId === workspaceId && o.apiName === entityName,
           );
           if (!obj) return null;
           const recId = generateUuidV7();
@@ -1516,7 +1949,12 @@ export class DatabaseStore {
           return newRec;
         },
         onSendCommunication: async (channel, payload) => {
-          return { sent: true, channel, ...payload, timestamp: new Date().toISOString() };
+          return {
+            sent: true,
+            channel,
+            ...payload,
+            timestamp: new Date().toISOString(),
+          };
         },
         onDispatchWebhook: async (url, secret, payload) => {
           const delivId = generateUuidV7();
@@ -1524,22 +1962,22 @@ export class DatabaseStore {
           const delivLog: WebhookDeliveryLog = {
             id: delivId,
             workspaceId,
-            subscriptionId: 'workflow-step',
+            subscriptionId: "workflow-step",
             targetUrl: url,
             event: triggerEvent,
             payload,
             signature: sig,
             timestamp: new Date().toISOString(),
             statusCode: 200,
-            status: 'SUCCESS',
-            responseSummary: 'Workflow HTTP POST 200 OK',
+            status: "SUCCESS",
+            responseSummary: "Workflow HTTP POST 200 OK",
             durationMs: 45,
             deliveredAt: new Date().toISOString(),
           };
           this.webhookDeliveries.set(delivId, delivLog);
           return delivLog;
         },
-      }
+      },
     );
 
     const runRecord: WorkflowRunRecord = {
@@ -1561,10 +1999,10 @@ export class DatabaseStore {
 
     await this.appendAuditEvent({
       workspaceId,
-      actorType: userId ? 'user' : 'system',
+      actorType: userId ? "user" : "system",
       actorId: userId,
       action: `workflow.executed.${result.status}`,
-      targetType: 'workflow',
+      targetType: "workflow",
       targetId: workflowId,
       payload: {
         runId,
@@ -1580,7 +2018,11 @@ export class DatabaseStore {
   /**
    * Emits a domain event to the Transactional Outbox.
    */
-  emitOutboxEvent(workspaceId: string, eventType: string, payload: Record<string, any>): OutboxEvent {
+  emitOutboxEvent(
+    workspaceId: string,
+    eventType: string,
+    payload: Record<string, any>,
+  ): OutboxEvent {
     const id = generateUuidV7();
     const now = new Date().toISOString();
     const event: OutboxEvent = {
@@ -1588,7 +2030,7 @@ export class DatabaseStore {
       workspaceId,
       eventType,
       payload,
-      status: 'PENDING',
+      status: "PENDING",
       attempts: 0,
       maxAttempts: 3,
       createdAt: now,
@@ -1612,10 +2054,17 @@ export class DatabaseStore {
       chaosTimeout?: boolean;
       maxAttempts?: number;
       outboxEventId?: string;
-    }
-  ): Promise<{ deliveries: WebhookDeliveryLog[]; dlqItems: DeadLetterQueueItem[] }> {
+    },
+  ): Promise<{
+    deliveries: WebhookDeliveryLog[];
+    dlqItems: DeadLetterQueueItem[];
+  }> {
     const subscriptions = Array.from(this.outboundWebhooks.values()).filter(
-      (s) => s.workspaceId === workspaceId && s.isActive && (s.subscribedEvents.includes(event) || s.subscribedEvents.includes('*'))
+      (s) =>
+        s.workspaceId === workspaceId &&
+        s.isActive &&
+        (s.subscribedEvents.includes(event) ||
+          s.subscribedEvents.includes("*")),
     );
 
     const deliveries: WebhookDeliveryLog[] = [];
@@ -1638,8 +2087,9 @@ export class DatabaseStore {
         // Chaos simulation: failing endpoint with backoff & transition to DLQ
         const errorStatusCode = options.chaosStatusCode || 503;
         const errorMsg = options.chaosTimeout
-          ? 'Gateway Timeout: ETIMEDOUT 5000ms'
-          : options.chaosError || 'HTTP 503 Service Unavailable: Backpressure overload';
+          ? "Gateway Timeout: ETIMEDOUT 5000ms"
+          : options.chaosError ||
+            "HTTP 503 Service Unavailable: Backpressure overload";
 
         // Log failed delivery attempts
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -1654,7 +2104,7 @@ export class DatabaseStore {
             signature,
             timestamp: now,
             statusCode: errorStatusCode,
-            status: 'FAILED',
+            status: "FAILED",
             responseSummary: `Attempt ${attempt}/${maxAttempts} failed: ${errorMsg}`,
             durationMs: 45 + attempt * 12,
             deliveredAt: now,
@@ -1676,8 +2126,10 @@ export class DatabaseStore {
           attempts: maxAttempts,
           lastStatusCode: errorStatusCode,
           lastError: errorMsg,
-          responseSnippet: options.chaosTimeout ? 'Connection timed out' : '{"error": "Upstream service overloaded"}',
-          status: 'PENDING',
+          responseSnippet: options.chaosTimeout
+            ? "Connection timed out"
+            : '{"error": "Upstream service overloaded"}',
+          status: "PENDING",
           createdAt: now,
         };
         this.deadLetterQueue.set(dlqId, dlqItem);
@@ -1686,7 +2138,7 @@ export class DatabaseStore {
         if (options.outboxEventId) {
           const outbox = this.outboxEvents.get(options.outboxEventId);
           if (outbox) {
-            outbox.status = 'DLQ';
+            outbox.status = "DLQ";
             outbox.attempts = maxAttempts;
             outbox.error = errorMsg;
             outbox.lastAttemptAt = now;
@@ -1704,7 +2156,7 @@ export class DatabaseStore {
           signature,
           timestamp: now,
           statusCode: 200,
-          status: 'SUCCESS',
+          status: "SUCCESS",
           responseSummary: `Delivered to ${sub.targetUrl} - HTTP 200 OK`,
           durationMs: 32,
           deliveredAt: now,
@@ -1716,7 +2168,7 @@ export class DatabaseStore {
         if (options?.outboxEventId) {
           const outbox = this.outboxEvents.get(options.outboxEventId);
           if (outbox) {
-            outbox.status = 'DELIVERED';
+            outbox.status = "DELIVERED";
             outbox.attempts += 1;
             outbox.processedAt = now;
           }
@@ -1730,7 +2182,13 @@ export class DatabaseStore {
   /**
    * Replays a single item from the Dead-Letter Queue.
    */
-  async replayDeadLetterQueueItem(id: string): Promise<{ success: boolean; item: DeadLetterQueueItem; delivery: WebhookDeliveryLog }> {
+  async replayDeadLetterQueueItem(
+    id: string,
+  ): Promise<{
+    success: boolean;
+    item: DeadLetterQueueItem;
+    delivery: WebhookDeliveryLog;
+  }> {
     const item = this.deadLetterQueue.get(id);
     if (!item) {
       throw new Error(`Dead-Letter Queue item "${id}" not found`);
@@ -1738,46 +2196,52 @@ export class DatabaseStore {
 
     const now = new Date().toISOString();
     const replayDeliveryId = generateUuidV7();
-    const sub = item.subscriptionId ? this.outboundWebhooks.get(item.subscriptionId) : undefined;
-    const secret = sub?.secret || 'whsec_replay_secret_key';
+    const sub = item.subscriptionId
+      ? this.outboundWebhooks.get(item.subscriptionId)
+      : undefined;
+    const secret = sub?.secret || "whsec_replay_secret_key";
 
     const signature = signWebhookPayload(secret, item.payload);
 
     const deliveryLog: WebhookDeliveryLog = {
       id: replayDeliveryId,
       workspaceId: item.workspaceId,
-      subscriptionId: item.subscriptionId || 'manual-replay',
+      subscriptionId: item.subscriptionId || "manual-replay",
       targetUrl: item.targetUrl,
       event: item.event,
       payload: item.payload,
       signature,
       timestamp: now,
       statusCode: 200,
-      status: 'SUCCESS',
+      status: "SUCCESS",
       responseSummary: `Replay successful to ${item.targetUrl} - HTTP 200 OK`,
       durationMs: 28,
       deliveredAt: now,
     };
     this.webhookDeliveries.set(replayDeliveryId, deliveryLog);
 
-    item.status = 'REPLAYED';
+    item.status = "REPLAYED";
     item.replayedAt = now;
 
     if (item.outboxEventId) {
       const outbox = this.outboxEvents.get(item.outboxEventId);
       if (outbox) {
-        outbox.status = 'DELIVERED';
+        outbox.status = "DELIVERED";
         outbox.processedAt = now;
       }
     }
 
     await this.appendAuditEvent({
       workspaceId: item.workspaceId,
-      actorType: 'system',
-      action: 'webhook.dlq.replayed',
-      targetType: 'dead_letter_queue',
+      actorType: "system",
+      action: "webhook.dlq.replayed",
+      targetType: "dead_letter_queue",
       targetId: id,
-      payload: { targetUrl: item.targetUrl, event: item.event, replayDeliveryId },
+      payload: {
+        targetUrl: item.targetUrl,
+        event: item.event,
+        replayDeliveryId,
+      },
     });
 
     return { success: true, item, delivery: deliveryLog };
@@ -1786,9 +2250,11 @@ export class DatabaseStore {
   /**
    * Replays all pending items in the Dead-Letter Queue for a workspace.
    */
-  async replayAllDeadLetterQueue(workspaceId: string): Promise<{ replayedCount: number; replayedIds: string[] }> {
+  async replayAllDeadLetterQueue(
+    workspaceId: string,
+  ): Promise<{ replayedCount: number; replayedIds: string[] }> {
     const pendingItems = Array.from(this.deadLetterQueue.values()).filter(
-      (item) => item.workspaceId === workspaceId && item.status === 'PENDING'
+      (item) => item.workspaceId === workspaceId && item.status === "PENDING",
     );
 
     const replayedIds: string[] = [];
@@ -1806,15 +2272,15 @@ export class DatabaseStore {
   async connectAAC(
     workspaceId: string,
     data: {
-      provider: 'google' | 'microsoft';
+      provider: "google" | "microsoft";
       email: string;
       token?: string;
       privacySettings?: {
         excludeInternalDomains?: string[];
         excludeLabels?: string[];
-        shareLevel?: 'metadata' | 'subject' | 'full';
+        shareLevel?: "metadata" | "subject" | "full";
       };
-    }
+    },
   ): Promise<AACConnection> {
     const id = generateUuidV7();
     const now = new Date().toISOString();
@@ -1823,12 +2289,19 @@ export class DatabaseStore {
       workspaceId,
       provider: data.provider,
       email: data.email,
-      status: 'CONNECTED',
-      accessTokenEncrypted: data.token ? `enc_kms_${data.token}` : 'enc_kms_oauth_token_v1',
+      status: "CONNECTED",
+      accessTokenEncrypted: data.token
+        ? `enc_kms_${data.token}`
+        : "enc_kms_oauth_token_v1",
       privacySettings: {
-        excludeInternalDomains: data.privacySettings?.excludeInternalDomains || ['acme.corp', 'acme.inc'],
-        excludeLabels: data.privacySettings?.excludeLabels || ['Personal', 'Spam', 'Receipts'],
-        shareLevel: data.privacySettings?.shareLevel || 'full',
+        excludeInternalDomains: data.privacySettings
+          ?.excludeInternalDomains || ["acme.corp", "acme.inc"],
+        excludeLabels: data.privacySettings?.excludeLabels || [
+          "Personal",
+          "Spam",
+          "Receipts",
+        ],
+        shareLevel: data.privacySettings?.shareLevel || "full",
       },
       syncedEmailsCount: 0,
       createdAt: now,
@@ -1838,9 +2311,9 @@ export class DatabaseStore {
 
     await this.appendAuditEvent({
       workspaceId,
-      actorType: 'user',
-      action: 'integration.aac.connected',
-      targetType: 'aac_connection',
+      actorType: "user",
+      action: "integration.aac.connected",
+      targetType: "aac_connection",
       targetId: id,
       payload: { provider: data.provider, email: data.email },
     });
@@ -1862,7 +2335,7 @@ export class DatabaseStore {
       subject: string;
       body: string;
       date: string;
-    }>
+    }>,
   ): Promise<{
     syncedCount: number;
     associatedPeople: string[];
@@ -1875,7 +2348,10 @@ export class DatabaseStore {
       throw new Error(`AAC connection "${connectionId}" not found`);
     }
 
-    const excludeDomains = connection.privacySettings.excludeInternalDomains.map((d) => d.toLowerCase());
+    const excludeDomains =
+      connection.privacySettings.excludeInternalDomains.map((d) =>
+        d.toLowerCase(),
+      );
     let syncedCount = 0;
     let excludedInternalCount = 0;
     const associatedPeople = new Set<string>();
@@ -1883,12 +2359,18 @@ export class DatabaseStore {
     const associatedDeals = new Set<string>();
 
     for (const email of testEmails) {
-      const fromDomain = email.from.includes('@') ? email.from.split('@')[1]!.toLowerCase() : '';
-      const allToDomains = email.to.map((t) => (t.includes('@') ? t.split('@')[1]!.toLowerCase() : ''));
+      const fromDomain = email.from.includes("@")
+        ? email.from.split("@")[1]!.toLowerCase()
+        : "";
+      const allToDomains = email.to.map((t) =>
+        t.includes("@") ? t.split("@")[1]!.toLowerCase() : "",
+      );
 
       // Check if purely internal message (sender and all recipients belong to internal domains)
       const isInternalSender = excludeDomains.includes(fromDomain);
-      const areAllRecipientsInternal = allToDomains.length > 0 && allToDomains.every((d) => excludeDomains.includes(d));
+      const areAllRecipientsInternal =
+        allToDomains.length > 0 &&
+        allToDomains.every((d) => excludeDomains.includes(d));
 
       if (isInternalSender && areAllRecipientsInternal) {
         excludedInternalCount++;
@@ -1897,7 +2379,7 @@ export class DatabaseStore {
 
       // External participants
       const externalEmails = [email.from, ...email.to].filter((addr) => {
-        const dom = addr.includes('@') ? addr.split('@')[1]!.toLowerCase() : '';
+        const dom = addr.includes("@") ? addr.split("@")[1]!.toLowerCase() : "";
         return !excludeDomains.includes(dom);
       });
 
@@ -1905,8 +2387,11 @@ export class DatabaseStore {
       let matchedPersonId: string | null = null;
       for (const rec of this.records.values()) {
         if (rec.workspaceId === workspaceId && !rec.deletedAt) {
-          const recEmail = (rec.data.email || '').toLowerCase();
-          if (recEmail && externalEmails.some((ext) => ext.toLowerCase() === recEmail)) {
+          const recEmail = (rec.data.email || "").toLowerCase();
+          if (
+            recEmail &&
+            externalEmails.some((ext) => ext.toLowerCase() === recEmail)
+          ) {
             matchedPersonId = rec.id;
             associatedPeople.add(rec.id);
             break;
@@ -1917,13 +2402,21 @@ export class DatabaseStore {
       // Match Company records by external domain
       let matchedCompanyId: string | null = null;
       for (const ext of externalEmails) {
-        const extDomain = ext.includes('@') ? ext.split('@')[1]!.toLowerCase() : '';
-        if (extDomain && !['gmail.com', 'yahoo.com', 'outlook.com'].includes(extDomain)) {
+        const extDomain = ext.includes("@")
+          ? ext.split("@")[1]!.toLowerCase()
+          : "";
+        if (
+          extDomain &&
+          !["gmail.com", "yahoo.com", "outlook.com"].includes(extDomain)
+        ) {
           for (const rec of this.records.values()) {
             if (rec.workspaceId === workspaceId && !rec.deletedAt) {
-              const compDomain = (rec.data.domain || '').toLowerCase();
-              const compName = (rec.data.name || '').toLowerCase();
-              if (compDomain.includes(extDomain) || compName.includes(extDomain.split('.')[0]!)) {
+              const compDomain = (rec.data.domain || "").toLowerCase();
+              const compName = (rec.data.name || "").toLowerCase();
+              if (
+                compDomain.includes(extDomain) ||
+                compName.includes(extDomain.split(".")[0]!)
+              ) {
                 matchedCompanyId = rec.id;
                 associatedCompanies.add(rec.id);
                 break;
@@ -1935,7 +2428,12 @@ export class DatabaseStore {
 
       // Match active Deals
       for (const rec of this.records.values()) {
-        if (rec.workspaceId === workspaceId && !rec.deletedAt && rec.data.stage && rec.data.stage !== 'Closed Lost') {
+        if (
+          rec.workspaceId === workspaceId &&
+          !rec.deletedAt &&
+          rec.data.stage &&
+          rec.data.stage !== "Closed Lost"
+        ) {
           if (matchedPersonId || matchedCompanyId) {
             associatedDeals.add(rec.id);
             break;
@@ -1951,13 +2449,17 @@ export class DatabaseStore {
         id: msgId,
         threadId,
         workspaceId,
-        direction: 'inbound',
-        channel: 'email',
-        sender: { name: email.from.split('@')[0], email: email.from },
+        direction: "inbound",
+        channel: "email",
+        sender: { name: email.from.split("@")[0], email: email.from },
         recipients: email.to.map((t) => ({ email: t })),
-        subject: connection.privacySettings.shareLevel === 'metadata' ? '[Private Email Captured]' : email.subject,
-        bodyText: connection.privacySettings.shareLevel === 'full' ? email.body : '',
-        spfDkimStatus: 'pass',
+        subject:
+          connection.privacySettings.shareLevel === "metadata"
+            ? "[Private Email Captured]"
+            : email.subject,
+        bodyText:
+          connection.privacySettings.shareLevel === "full" ? email.body : "",
+        spfDkimStatus: "pass",
         isInternalNote: false,
         attachments: [],
         createdAt: email.date || now,
@@ -1965,7 +2467,7 @@ export class DatabaseStore {
 
       // Also create polymorphic activity record
       const activitiesObj = Array.from(this.objects.values()).find(
-        (o) => o.workspaceId === workspaceId && o.apiName === 'activities'
+        (o) => o.workspaceId === workspaceId && o.apiName === "activities",
       );
       if (activitiesObj) {
         const actRecordId = generateUuidV7();
@@ -1975,9 +2477,15 @@ export class DatabaseStore {
           objectId: activitiesObj.id,
           version: 1,
           data: {
-            type: 'email',
-            subject: connection.privacySettings.shareLevel === 'metadata' ? '[Private Email Captured]' : email.subject,
-            body: connection.privacySettings.shareLevel === 'full' ? email.body : '',
+            type: "email",
+            subject:
+              connection.privacySettings.shareLevel === "metadata"
+                ? "[Private Email Captured]"
+                : email.subject,
+            body:
+              connection.privacySettings.shareLevel === "full"
+                ? email.body
+                : "",
             related_to_id: matchedPersonId || matchedCompanyId || workspaceId,
             performed_at: email.date || now,
           },
@@ -2007,20 +2515,22 @@ export class DatabaseStore {
    */
   async pingOutboundWebhook(
     workspaceId: string,
-    subscriptionId: string
+    subscriptionId: string,
   ): Promise<WebhookDeliveryLog> {
     const sub = this.outboundWebhooks.get(subscriptionId);
     if (!sub || sub.workspaceId !== workspaceId) {
-      throw new Error(`Outbound webhook subscription ${subscriptionId} not found`);
+      throw new Error(
+        `Outbound webhook subscription ${subscriptionId} not found`,
+      );
     }
 
     const now = new Date().toISOString();
     const testPayload = {
-      event: 'webhook.ping',
+      event: "webhook.ping",
       timestamp: now,
       workspaceId,
       pingId: generateUuidV7(),
-      message: 'Nexus CRM outbound webhook test ping',
+      message: "Nexus CRM outbound webhook test ping",
     };
 
     const signature = signWebhookPayload(sub.secret, testPayload);
@@ -2031,12 +2541,12 @@ export class DatabaseStore {
       workspaceId,
       subscriptionId: sub.id,
       targetUrl: sub.targetUrl,
-      event: 'webhook.ping',
+      event: "webhook.ping",
       payload: testPayload,
       signature,
       timestamp: now,
       statusCode: 200,
-      status: 'SUCCESS',
+      status: "SUCCESS",
       responseSummary: `Test ping acknowledged by ${sub.targetUrl} (200 OK)`,
       durationMs: 24,
       deliveredAt: now,
@@ -2046,21 +2556,30 @@ export class DatabaseStore {
     return log;
   }
 
-
-
   /**
    * Evaluates any formula attributes for a record and updates the record's data payload.
    */
-  evaluateRecordFormulas(workspaceId: string, objectId: string, data: Record<string, any>): Record<string, any> {
+  evaluateRecordFormulas(
+    workspaceId: string,
+    objectId: string,
+    data: Record<string, any>,
+  ): Record<string, any> {
     const attrs = Array.from(this.attributes.values()).filter(
-      (a) => a.workspaceId === workspaceId && a.objectId === objectId && a.type === 'formula' && a.formulaDefinition
+      (a) =>
+        a.workspaceId === workspaceId &&
+        a.objectId === objectId &&
+        a.type === "formula" &&
+        a.formulaDefinition,
     );
 
     const calculatedData = { ...data };
     for (const attr of attrs) {
       if (attr.formulaDefinition) {
         try {
-          calculatedData[attr.apiName] = evaluateFormula(attr.formulaDefinition, calculatedData);
+          calculatedData[attr.apiName] = evaluateFormula(
+            attr.formulaDefinition,
+            calculatedData,
+          );
         } catch {
           calculatedData[attr.apiName] = null;
         }
@@ -2074,7 +2593,7 @@ export class DatabaseStore {
    */
   async appendAuditEvent(params: {
     workspaceId: string;
-    actorType: 'user' | 'api_key' | 'system';
+    actorType: "user" | "api_key" | "system";
     actorId?: string | null;
     action: string;
     targetType?: string | null;
@@ -2127,13 +2646,14 @@ export class DatabaseStore {
    * Verifies the cryptographic integrity of the entire audit chain.
    */
   verifyAuditChainIntegrity(): boolean {
-    let expectedPrevHash = '0000000000000000000000000000000000000000000000000000000000000000';
+    let expectedPrevHash =
+      "0000000000000000000000000000000000000000000000000000000000000000";
 
     for (let i = 0; i < this.auditEvents.length; i++) {
       const event = this.auditEvents[i]!;
       if (event.prevHash !== expectedPrevHash) {
         throw new Error(
-          `Audit chain broken at event ${event.id}: prevHash mismatch. Expected ${expectedPrevHash}, got ${event.prevHash}`
+          `Audit chain broken at event ${event.id}: prevHash mismatch. Expected ${expectedPrevHash}, got ${event.prevHash}`,
         );
       }
 
@@ -2152,7 +2672,7 @@ export class DatabaseStore {
       const calculatedHash = calculateAuditHash(event.prevHash, payloadForHash);
       if (calculatedHash !== event.currentHash) {
         throw new Error(
-          `Audit event ${event.id} hash tampering detected! Expected ${calculatedHash}, found ${event.currentHash}`
+          `Audit event ${event.id} hash tampering detected! Expected ${calculatedHash}, found ${event.currentHash}`,
         );
       }
 
@@ -2167,7 +2687,7 @@ export class DatabaseStore {
    */
   getActiveKmsKey(workspaceId: string): KmsMasterKeyRecord {
     const key = Array.from(this.kmsKeys.values()).find(
-      (k) => k.workspaceId === workspaceId && k.status === 'ACTIVE'
+      (k) => k.workspaceId === workspaceId && k.status === "ACTIVE",
     );
     if (!key) {
       const kek = generateKey();
@@ -2177,9 +2697,9 @@ export class DatabaseStore {
         id: keyId,
         workspaceId,
         version: 1,
-        status: 'ACTIVE',
-        algorithm: 'AES-256-GCM',
-        keyHex: kek.toString('hex'),
+        status: "ACTIVE",
+        algorithm: "AES-256-GCM",
+        keyHex: kek.toString("hex"),
         createdAt: now,
       };
       this.kmsKeys.set(keyId, newKey);
@@ -2193,14 +2713,14 @@ export class DatabaseStore {
    */
   async rotateTenantMasterKey(
     workspaceId: string,
-    userId: string
+    userId: string,
   ): Promise<RotationResult & { newKeyRecord: KmsMasterKeyRecord }> {
     const currentKey = this.getActiveKmsKey(workspaceId);
-    const oldKek = Buffer.from(currentKey.keyHex, 'hex');
+    const oldKek = Buffer.from(currentKey.keyHex, "hex");
     const newKek = generateKey();
     const now = new Date().toISOString();
 
-    currentKey.status = 'ROTATED';
+    currentKey.status = "ROTATED";
     currentKey.rotatedAt = now;
 
     const newVersion = currentKey.version + 1;
@@ -2209,26 +2729,36 @@ export class DatabaseStore {
       id: newKeyId,
       workspaceId,
       version: newVersion,
-      status: 'ACTIVE',
-      algorithm: 'AES-256-GCM',
-      keyHex: newKek.toString('hex'),
+      status: "ACTIVE",
+      algorithm: "AES-256-GCM",
+      keyHex: newKek.toString("hex"),
       createdAt: now,
     };
     this.kmsKeys.set(newKeyId, newKeyRecord);
 
     let existingEnvelopes = Array.from(this.encryptedDeks.values()).filter(
-      (e) => e.workspaceId === workspaceId
+      (e) => e.workspaceId === workspaceId,
     );
     if (existingEnvelopes.length === 0) {
       const initialDek = generateKey();
       const env: EncryptedDekEnvelope = {
-        ...wrapDek(oldKek, initialDek, `dek-${workspaceId}-main`, currentKey.version),
+        ...wrapDek(
+          oldKek,
+          initialDek,
+          `dek-${workspaceId}-main`,
+          currentKey.version,
+        ),
         workspaceId,
       };
       this.encryptedDeks.set(env.dekId, env);
       existingEnvelopes = [env];
     }
-    const rotationResult = rotateMasterKey(oldKek, newKek, currentKey.version, existingEnvelopes);
+    const rotationResult = rotateMasterKey(
+      oldKek,
+      newKek,
+      currentKey.version,
+      existingEnvelopes,
+    );
 
     for (const reWrapped of rotationResult.rotatedEnvelopes) {
       this.encryptedDeks.set(reWrapped.dekId, reWrapped);
@@ -2236,10 +2766,10 @@ export class DatabaseStore {
 
     await this.appendAuditEvent({
       workspaceId,
-      actorType: 'user',
+      actorType: "user",
       actorId: userId,
-      action: 'platform.kms.key_rotated',
-      targetType: 'kms_key',
+      action: "platform.kms.key_rotated",
+      targetType: "kms_key",
       targetId: newKeyId,
       payload: {
         previousVersion: currentKey.version,
@@ -2263,26 +2793,48 @@ export class DatabaseStore {
     const exportedAt = new Date().toISOString();
 
     const schemas = {
-      objects: Array.from(this.objects.values()).filter((o) => o.workspaceId === workspaceId),
-      attributes: Array.from(this.attributes.values()).filter((a) => a.workspaceId === workspaceId),
-      relationships: Array.from(this.relationships.values()).filter((r) => r.workspaceId === workspaceId),
+      objects: Array.from(this.objects.values()).filter(
+        (o) => o.workspaceId === workspaceId,
+      ),
+      attributes: Array.from(this.attributes.values()).filter(
+        (a) => a.workspaceId === workspaceId,
+      ),
+      relationships: Array.from(this.relationships.values()).filter(
+        (r) => r.workspaceId === workspaceId,
+      ),
     };
 
     const data = {
-      records: Array.from(this.records.values()).filter((r) => r.workspaceId === workspaceId),
-      recordLinks: Array.from(this.recordLinks.values()).filter((l) => l.workspaceId === workspaceId),
-      pipelines: Array.from(this.pipelines.values()).filter((p) => p.workspaceId === workspaceId),
-      products: Array.from(this.products.values()).filter((p) => p.workspaceId === workspaceId),
-      quotes: Array.from(this.quotes.values()).filter((q) => q.workspaceId === workspaceId),
-      workflows: Array.from(this.workflows.values()).filter((w) => w.workspaceId === workspaceId),
-      outboundWebhooks: Array.from(this.outboundWebhooks.values()).filter((h) => h.workspaceId === workspaceId),
+      records: Array.from(this.records.values()).filter(
+        (r) => r.workspaceId === workspaceId,
+      ),
+      recordLinks: Array.from(this.recordLinks.values()).filter(
+        (l) => l.workspaceId === workspaceId,
+      ),
+      pipelines: Array.from(this.pipelines.values()).filter(
+        (p) => p.workspaceId === workspaceId,
+      ),
+      products: Array.from(this.products.values()).filter(
+        (p) => p.workspaceId === workspaceId,
+      ),
+      quotes: Array.from(this.quotes.values()).filter(
+        (q) => q.workspaceId === workspaceId,
+      ),
+      workflows: Array.from(this.workflows.values()).filter(
+        (w) => w.workspaceId === workspaceId,
+      ),
+      outboundWebhooks: Array.from(this.outboundWebhooks.values()).filter(
+        (h) => h.workspaceId === workspaceId,
+      ),
     };
 
     const security = {
       kmsKeys: Array.from(this.kmsKeys.values())
         .filter((k) => k.workspaceId === workspaceId)
         .map(({ keyHex, ...rest }) => rest),
-      auditLedger: this.auditEvents.filter((e) => e.workspaceId === workspaceId),
+      auditLedger: this.auditEvents.filter(
+        (e) => e.workspaceId === workspaceId,
+      ),
     };
 
     const entityCounts = {
@@ -2298,9 +2850,9 @@ export class DatabaseStore {
     };
 
     const manifestData = {
-      formatVersion: '1.0.0' as const,
+      formatVersion: "1.0.0" as const,
       workspaceId,
-      workspaceName: ws?.name || 'Nexus CRM Workspace',
+      workspaceName: ws?.name || "Nexus CRM Workspace",
       exportedAt,
       entityCounts,
       latestAuditHash: this.latestAuditHash,
@@ -2308,7 +2860,9 @@ export class DatabaseStore {
     };
 
     const contentToHash = JSON.stringify({ schemas, data, manifestData });
-    const checksumSha256 = createHash('sha256').update(contentToHash).digest('hex');
+    const checksumSha256 = createHash("sha256")
+      .update(contentToHash)
+      .digest("hex");
 
     return {
       manifest: {
@@ -2326,23 +2880,35 @@ export class DatabaseStore {
    */
   async importTenantArchive(
     archive: TenantExportArchive,
-    userId: string
-  ): Promise<{ restoredCounts: Record<string, number>; validAuditChain: boolean }> {
+    userId: string,
+  ): Promise<{
+    restoredCounts: Record<string, number>;
+    validAuditChain: boolean;
+  }> {
     const { manifest, schemas, data } = archive;
 
     const { checksumSha256, ...manifestWithoutChecksum } = manifest;
-    const contentToHash = JSON.stringify({ schemas, data, manifestData: manifestWithoutChecksum });
-    const calculatedChecksum = createHash('sha256').update(contentToHash).digest('hex');
+    const contentToHash = JSON.stringify({
+      schemas,
+      data,
+      manifestData: manifestWithoutChecksum,
+    });
+    const calculatedChecksum = createHash("sha256")
+      .update(contentToHash)
+      .digest("hex");
 
     if (calculatedChecksum !== checksumSha256) {
-      throw new Error(`Archive integrity verification failed: Checksum mismatch.`);
+      throw new Error(
+        `Archive integrity verification failed: Checksum mismatch.`,
+      );
     }
 
     const workspaceId = manifest.workspaceId;
 
     for (const obj of schemas.objects) this.objects.set(obj.id, obj);
     for (const attr of schemas.attributes) this.attributes.set(attr.id, attr);
-    for (const rel of schemas.relationships) this.relationships.set(rel.id, rel);
+    for (const rel of schemas.relationships)
+      this.relationships.set(rel.id, rel);
 
     for (const rec of data.records) this.records.set(rec.id, rec);
     for (const link of data.recordLinks) this.recordLinks.set(link.id, link);
@@ -2350,13 +2916,14 @@ export class DatabaseStore {
     for (const prod of data.products) this.products.set(prod.id, prod);
     for (const q of data.quotes) this.quotes.set(q.id, q);
     for (const wf of data.workflows) this.workflows.set(wf.id, wf);
-    for (const wh of data.outboundWebhooks) this.outboundWebhooks.set(wh.id, wh);
+    for (const wh of data.outboundWebhooks)
+      this.outboundWebhooks.set(wh.id, wh);
 
     await this.appendAuditEvent({
       workspaceId,
-      actorType: 'user',
+      actorType: "user",
       actorId: userId,
-      action: 'platform.archive.imported',
+      action: "platform.archive.imported",
       payload: {
         recordsCount: data.records.length,
         schemasCount: schemas.objects.length,
@@ -2376,7 +2943,7 @@ export class DatabaseStore {
   withRlsContext<T>(
     workspaceId: string,
     userId: string,
-    fn: (scopedDb: ScopedDatabase) => T
+    fn: (scopedDb: ScopedDatabase) => T,
   ): T {
     const scoped = new ScopedDatabase(this, workspaceId, userId);
     return fn(scoped);
@@ -2390,7 +2957,7 @@ export class ScopedDatabase {
   constructor(
     private db: DatabaseStore,
     public readonly workspaceId: string,
-    public readonly userId: string
+    public readonly userId: string,
   ) {}
 
   getWorkspace(): WorkspaceRecord | undefined {
@@ -2401,29 +2968,34 @@ export class ScopedDatabase {
 
   getMemberships(): MembershipRecord[] {
     return Array.from(this.db.memberships.values()).filter(
-      (m) => m.workspaceId === this.workspaceId
+      (m) => m.workspaceId === this.workspaceId,
     );
   }
 
   getAuditEvents(): AuditEventRecord[] {
-    return this.db.auditEvents.filter((e) => e.workspaceId === this.workspaceId);
+    return this.db.auditEvents.filter(
+      (e) => e.workspaceId === this.workspaceId,
+    );
   }
 
   getObjects(): ObjectRecord[] {
     return Array.from(this.db.objects.values()).filter(
-      (o) => o.workspaceId === this.workspaceId
+      (o) => o.workspaceId === this.workspaceId,
     );
   }
 
   getAttributes(objectId: string): AttributeRecord[] {
     return Array.from(this.db.attributes.values()).filter(
-      (a) => a.workspaceId === this.workspaceId && a.objectId === objectId
+      (a) => a.workspaceId === this.workspaceId && a.objectId === objectId,
     );
   }
 
   getRecords(objectId: string): RecordEntity[] {
     return Array.from(this.db.records.values()).filter(
-      (r) => r.workspaceId === this.workspaceId && r.objectId === objectId && !r.deletedAt
+      (r) =>
+        r.workspaceId === this.workspaceId &&
+        r.objectId === objectId &&
+        !r.deletedAt,
     );
   }
 }

@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Button, Input, Kbd } from '@nexus/ui';
-import { ShieldCheck, ArrowRight, Lock, Mail, KeyRound } from 'lucide-react';
+import * as React from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button, Input, Kbd } from "@nexus/ui";
+import { ShieldCheck, ArrowRight, Lock, Mail, KeyRound } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = React.useState('founder@acme.inc');
-  const [password, setPassword] = React.useState('SuperSecretPassword123!');
-  const [mfaCode, setMfaCode] = React.useState('');
+  const [email, setEmail] = React.useState("founder@acme.inc");
+  const [password, setPassword] = React.useState("SuperSecretPassword123!");
+  const [mfaCode, setMfaCode] = React.useState("");
   const [mfaTicket, setMfaTicket] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -21,22 +21,22 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const res = await fetch('http://localhost:4000/v1/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("http://localhost:4000/v1/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to sign in');
+        throw new Error(data.error || "Failed to sign in");
       }
 
       if (data.mfaRequired) {
         setMfaTicket(data.mfaTicket);
       } else {
-        localStorage.setItem('nexus-token', data.sessionId);
-        router.push('/');
+        localStorage.setItem("nexus-token", data.sessionId);
+        router.push("/");
       }
     } catch (err: any) {
       setError(err.message);
@@ -51,19 +51,19 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const res = await fetch('http://localhost:4000/v1/auth/mfa/challenge', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("http://localhost:4000/v1/auth/mfa/challenge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mfaTicket, token: mfaCode }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Invalid 6-digit MFA code');
+        throw new Error(data.error || "Invalid 6-digit MFA code");
       }
 
-      localStorage.setItem('nexus-token', data.sessionId);
-      router.push('/');
+      localStorage.setItem("nexus-token", data.sessionId);
+      router.push("/");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -79,12 +79,12 @@ export default function LoginPage() {
             N
           </div>
           <h1 className="text-xl font-bold tracking-tight text-[var(--color-text-primary)]">
-            {mfaTicket ? 'Two-Factor Authentication' : 'Sign in to Nexus CRM'}
+            {mfaTicket ? "Two-Factor Authentication" : "Sign in to Nexus CRM"}
           </h1>
           <p className="text-xs text-[var(--color-text-muted)] mt-1">
             {mfaTicket
-              ? 'Enter the 6-digit TOTP code from your authenticator app'
-              : 'Enter your credentials to access your workspace'}
+              ? "Enter the 6-digit TOTP code from your authenticator app"
+              : "Enter your credentials to access your workspace"}
           </p>
         </div>
 
@@ -128,7 +128,7 @@ export default function LoginPage() {
               type="text"
               maxLength={6}
               value={mfaCode}
-              onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
+              onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ""))}
               prefixIcon={<KeyRound className="h-4 w-4" />}
               placeholder="123456"
               autoFocus

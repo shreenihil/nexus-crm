@@ -1,3 +1,3 @@
-export * from './roles';
-export * from './can';
-export * from './query-scope';
+export * from "./roles";
+export * from "./can";
+export * from "./query-scope";

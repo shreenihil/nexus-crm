@@ -1,6 +1,7 @@
 # Nexus CRM — Operations & Incident Response Runbook
 
 ## 1. Local Environment Operations
+
 - **Booting entire stack:**
   ```bash
   docker compose -f infra/docker-compose.yml up -d
@@ -12,6 +13,7 @@
   ```
 
 ## 2. Database Backup & Point-in-Time Recovery
+
 - **Encrypted Database Backup:**
   ```bash
   docker exec -t nexus-postgres pg_dump -U nexus_app -d nexus_crm -F c | \
@@ -24,6 +26,7 @@
   ```
 
 ## 3. Cryptographic Key Rotation Procedure
+
 1. **Session & Cookie Secrets:**
    - Update `COOKIE_SECRET` with new 256-bit key. Previous sessions will expire gracefully without server downtime.
 2. **Audit Hash Ledger Checkpoints:**
@@ -31,5 +34,6 @@
    - Run `/v1/audit/verify` to confirm ledger integrity before and after database migrations.
 
 ## 4. Disaster Recovery & Zero-Downtime Schema Migrations
+
 - Always follow the **Expand → Migrate → Contract** pattern.
 - Database DDL changes are tested against an exact replica of seed data before deployment.

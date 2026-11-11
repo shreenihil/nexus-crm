@@ -23,7 +23,7 @@ export interface QueueCacheCapabilityFlags {
 }
 
 export interface AdapterHealth {
-  status: 'healthy' | 'degraded' | 'unreachable';
+  status: "healthy" | "degraded" | "unreachable";
   latencyMs: number;
   message?: string;
   details?: Record<string, any>;

@@ -3,13 +3,18 @@
  * Ensures workflows have no cyclical loops and form deterministic execution trees.
  */
 
-export type WorkflowNodeType = 'trigger' | 'condition' | 'action' | 'delay';
+export type WorkflowNodeType = "trigger" | "condition" | "action" | "delay";
 
 export interface WorkflowNode {
   id: string;
   type: WorkflowNodeType;
   title: string;
-  actionType?: 'update_record' | 'create_task' | 'send_email' | 'send_sms' | 'outbound_webhook';
+  actionType?:
+    | "update_record"
+    | "create_task"
+    | "send_email"
+    | "send_sms"
+    | "outbound_webhook";
   config: Record<string, any>;
   nextNodes?: string[];
   elseNodes?: string[];
@@ -30,7 +35,7 @@ export interface WorkflowValidationResult {
  */
 export function validateWorkflowDAG(
   nodes: WorkflowNode[],
-  rootNodeId: string
+  rootNodeId: string,
 ): WorkflowValidationResult {
   const errors: string[] = [];
   const nodeMap = new Map<string, WorkflowNode>();
@@ -48,8 +53,10 @@ export function validateWorkflowDAG(
     return { isValid: false, errors, executionOrder: [] };
   }
 
-  if (root.type !== 'trigger') {
-    errors.push(`Root node "${rootNodeId}" must be of type 'trigger', found '${root.type}'`);
+  if (root.type !== "trigger") {
+    errors.push(
+      `Root node "${rootNodeId}" must be of type 'trigger', found '${root.type}'`,
+    );
   }
 
   // Build adjacency list & in-degree map
@@ -65,7 +72,9 @@ export function validateWorkflowDAG(
     const targets = [...(n.nextNodes || []), ...(n.elseNodes || [])];
     for (const targetId of targets) {
       if (!nodeMap.has(targetId)) {
-        errors.push(`Node "${n.id}" references non-existent target node "${targetId}"`);
+        errors.push(
+          `Node "${n.id}" references non-existent target node "${targetId}"`,
+        );
       } else {
         const cur = adj.get(n.id) ?? [];
         cur.push(targetId);
@@ -107,9 +116,11 @@ export function validateWorkflowDAG(
 
   // If sorted count does not match total nodes, there is a cycle!
   if (sorted.length !== nodes.length) {
-    const unvisited = nodes.filter((n) => !sorted.includes(n.id)).map((n) => n.id);
+    const unvisited = nodes
+      .filter((n) => !sorted.includes(n.id))
+      .map((n) => n.id);
     errors.push(
-      `Cycle detected in workflow graph! Nodes involved in loop: ${unvisited.join(', ')}`
+      `Cycle detected in workflow graph! Nodes involved in loop: ${unvisited.join(", ")}`,
     );
   }
 

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 import {
   GitBranch,
   Play,
@@ -23,15 +23,20 @@ import {
   Layers,
   Sparkles,
   ShieldAlert,
-} from 'lucide-react';
-import { Button, Input, Badge, Modal } from '@nexus/ui';
-import { apiFetch } from '@/lib/api';
+} from "lucide-react";
+import { Button, Input, Badge, Modal } from "@nexus/ui";
+import { apiFetch } from "@/lib/api";
 
 interface WorkflowNode {
   id: string;
-  type: 'trigger' | 'condition' | 'action' | 'delay';
+  type: "trigger" | "condition" | "action" | "delay";
   title: string;
-  actionType?: 'update_record' | 'create_task' | 'send_email' | 'send_sms' | 'outbound_webhook';
+  actionType?:
+    | "update_record"
+    | "create_task"
+    | "send_email"
+    | "send_sms"
+    | "outbound_webhook";
   config: Record<string, any>;
   nextNodes?: string[];
   elseNodes?: string[];
@@ -58,7 +63,7 @@ interface WorkflowRun {
   id: string;
   workspaceId: string;
   workflowId: string;
-  status: 'completed' | 'failed';
+  status: "completed" | "failed";
   triggerEvent: string;
   triggerRecordId?: string;
   context: Record<string, any>;
@@ -66,7 +71,7 @@ interface WorkflowRun {
     nodeId: string;
     nodeTitle: string;
     nodeType: string;
-    status: 'success' | 'failed' | 'skipped';
+    status: "success" | "failed" | "skipped";
     inputData: Record<string, any>;
     outputData?: Record<string, any>;
     error?: string;
@@ -101,7 +106,7 @@ interface WebhookDelivery {
   signature: string;
   timestamp: string;
   statusCode: number;
-  status: 'SUCCESS' | 'FAILED';
+  status: "SUCCESS" | "FAILED";
   responseSummary?: string;
   durationMs: number;
   deliveredAt: string;
@@ -119,16 +124,16 @@ export interface DeadLetterQueueItem {
   payload: Record<string, any>;
   createdAt: string;
   replayedAt?: string;
-  replayedStatus?: 'SUCCESS' | 'FAILED';
+  replayedStatus?: "SUCCESS" | "FAILED";
 }
 
 export interface AACConnection {
   id: string;
   workspaceId: string;
-  provider: 'google' | 'microsoft';
+  provider: "google" | "microsoft";
   mailboxEmail: string;
   kmsKeyAlias: string;
-  status: 'CONNECTED' | 'DISCONNECTED' | 'ERROR';
+  status: "CONNECTED" | "DISCONNECTED" | "ERROR";
   lastSyncedAt?: string;
   syncedEmailsCount: number;
   syncedEventsCount: number;
@@ -146,7 +151,9 @@ interface Metrics {
 }
 
 export default function AutomationsPage() {
-  const [activeTab, setActiveTab] = React.useState<'workflows' | 'webhooks' | 'dlq' | 'aac' | 'inbound'>('workflows');
+  const [activeTab, setActiveTab] = React.useState<
+    "workflows" | "webhooks" | "dlq" | "aac" | "inbound"
+  >("workflows");
   const [metrics, setMetrics] = React.useState<Metrics>({
     totalWorkflows: 2,
     activeWorkflows: 2,
@@ -155,41 +162,57 @@ export default function AutomationsPage() {
     outboundWebhooksCount: 1,
   });
   const [workflows, setWorkflows] = React.useState<Workflow[]>([]);
-  const [selectedWorkflow, setSelectedWorkflow] = React.useState<Workflow | null>(null);
+  const [selectedWorkflow, setSelectedWorkflow] =
+    React.useState<Workflow | null>(null);
   const [webhooks, setWebhooks] = React.useState<OutboundWebhook[]>([]);
   const [deliveries, setDeliveries] = React.useState<WebhookDelivery[]>([]);
   const [dlqItems, setDlqItems] = React.useState<DeadLetterQueueItem[]>([]);
-  const [aacConnection, setAacConnection] = React.useState<AACConnection | null>(null);
+  const [aacConnection, setAacConnection] =
+    React.useState<AACConnection | null>(null);
   const [refreshing, setRefreshing] = React.useState(false);
 
   // DLQ Replay & Chaos State
-  const [inspectingDlq, setInspectingDlq] = React.useState<DeadLetterQueueItem | null>(null);
-  const [replayingDlqId, setReplayingDlqId] = React.useState<string | null>(null);
+  const [inspectingDlq, setInspectingDlq] =
+    React.useState<DeadLetterQueueItem | null>(null);
+  const [replayingDlqId, setReplayingDlqId] = React.useState<string | null>(
+    null,
+  );
   const [replayingAll, setReplayingAll] = React.useState(false);
   const [chaosLoading, setChaosLoading] = React.useState(false);
   const [syncingAac, setSyncingAac] = React.useState(false);
 
   // Execution Modal & State
-  const [testingWorkflow, setTestingWorkflow] = React.useState<Workflow | null>(null);
-  const [testPayloadText, setTestPayloadText] = React.useState('');
+  const [testingWorkflow, setTestingWorkflow] = React.useState<Workflow | null>(
+    null,
+  );
+  const [testPayloadText, setTestPayloadText] = React.useState("");
   const [executing, setExecuting] = React.useState(false);
-  const [latestRunResult, setLatestRunResult] = React.useState<WorkflowRun | null>(null);
+  const [latestRunResult, setLatestRunResult] =
+    React.useState<WorkflowRun | null>(null);
 
   // Delivery Log Inspection Modal
-  const [inspectingDelivery, setInspectingDelivery] = React.useState<WebhookDelivery | null>(null);
+  const [inspectingDelivery, setInspectingDelivery] =
+    React.useState<WebhookDelivery | null>(null);
   const [pingingId, setPingingId] = React.useState<string | null>(null);
 
   // New Outbound Webhook Modal
-  const [isNewWebhookModalOpen, setIsNewWebhookModalOpen] = React.useState(false);
-  const [newTargetUrl, setNewTargetUrl] = React.useState('');
-  const [newSecret, setNewSecret] = React.useState('');
-  const [newEvents, setNewEvents] = React.useState('deal.won, record.created');
-  const [newDescription, setNewDescription] = React.useState('');
+  const [isNewWebhookModalOpen, setIsNewWebhookModalOpen] =
+    React.useState(false);
+  const [newTargetUrl, setNewTargetUrl] = React.useState("");
+  const [newSecret, setNewSecret] = React.useState("");
+  const [newEvents, setNewEvents] = React.useState("deal.won, record.created");
+  const [newDescription, setNewDescription] = React.useState("");
 
   // Notification Toast
-  const [notification, setNotification] = React.useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
+  const [notification, setNotification] = React.useState<{
+    message: string;
+    type: "success" | "info" | "error";
+  } | null>(null);
 
-  const showNotification = (message: string, type: 'success' | 'info' | 'error' = 'success') => {
+  const showNotification = (
+    message: string,
+    type: "success" | "info" | "error" = "success",
+  ) => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 4000);
   };
@@ -197,13 +220,24 @@ export default function AutomationsPage() {
   const loadAllData = React.useCallback(async () => {
     try {
       setRefreshing(true);
-      const [metricsData, workflowsData, webhooksData, deliveriesData, dlqData, aacData] = await Promise.all([
-        apiFetch<Metrics>('/v1/workflows/metrics'),
-        apiFetch<{ workflows: Workflow[] }>('/v1/workflows'),
-        apiFetch<{ subscriptions: OutboundWebhook[] }>('/v1/webhooks/outbound'),
-        apiFetch<{ deliveries: WebhookDelivery[] }>('/v1/webhooks/deliveries'),
-        apiFetch<{ items: DeadLetterQueueItem[] }>('/v1/webhooks/dlq').catch(() => ({ items: [] })),
-        apiFetch<{ ok: boolean; connection: AACConnection | null }>('/v1/integrations/aac/status').catch(() => ({ ok: true, connection: null })),
+      const [
+        metricsData,
+        workflowsData,
+        webhooksData,
+        deliveriesData,
+        dlqData,
+        aacData,
+      ] = await Promise.all([
+        apiFetch<Metrics>("/v1/workflows/metrics"),
+        apiFetch<{ workflows: Workflow[] }>("/v1/workflows"),
+        apiFetch<{ subscriptions: OutboundWebhook[] }>("/v1/webhooks/outbound"),
+        apiFetch<{ deliveries: WebhookDelivery[] }>("/v1/webhooks/deliveries"),
+        apiFetch<{ items: DeadLetterQueueItem[] }>("/v1/webhooks/dlq").catch(
+          () => ({ items: [] }),
+        ),
+        apiFetch<{ ok: boolean; connection: AACConnection | null }>(
+          "/v1/integrations/aac/status",
+        ).catch(() => ({ ok: true, connection: null })),
       ]);
 
       setMetrics(metricsData);
@@ -216,7 +250,7 @@ export default function AutomationsPage() {
       setDlqItems(dlqData.items || []);
       setAacConnection(aacData.connection || null);
     } catch (err: any) {
-      showNotification(`Failed to load automations: ${err.message}`, 'error');
+      showNotification(`Failed to load automations: ${err.message}`, "error");
     } finally {
       setRefreshing(false);
     }
@@ -230,30 +264,30 @@ export default function AutomationsPage() {
   const handleOpenTestModal = (wf: Workflow) => {
     setTestingWorkflow(wf);
     setLatestRunResult(null);
-    if (wf.triggerConfig?.objectApiName === 'people') {
+    if (wf.triggerConfig?.objectApiName === "people") {
       setTestPayloadText(
         JSON.stringify(
           {
-            first_name: 'Priya',
-            last_name: 'Sharma',
-            title: 'Chief Technology Officer',
-            email: 'priya.sharma@enterprise.local',
+            first_name: "Priya",
+            last_name: "Sharma",
+            title: "Chief Technology Officer",
+            email: "priya.sharma@enterprise.local",
           },
           null,
-          2
-        )
+          2,
+        ),
       );
     } else {
       setTestPayloadText(
         JSON.stringify(
           {
-            name: 'Cloud Infrastructure Migration Deal',
+            name: "Cloud Infrastructure Migration Deal",
             amount: 2500000,
-            stage: 'Closed Won',
+            stage: "Closed Won",
           },
           null,
-          2
-        )
+          2,
+        ),
       );
     }
   };
@@ -273,20 +307,26 @@ export default function AutomationsPage() {
       const res = await apiFetch<{ ok: boolean; run: WorkflowRun }>(
         `/v1/workflows/${testingWorkflow.id}/trigger`,
         {
-          method: 'POST',
+          method: "POST",
           body: JSON.stringify({
-            triggerEvent: `${testingWorkflow.triggerType}:${testingWorkflow.triggerConfig?.objectApiName || 'manual'}`,
+            triggerEvent: `${testingWorkflow.triggerType}:${testingWorkflow.triggerConfig?.objectApiName || "manual"}`,
             triggerRecord: parsedPayload,
           }),
-        }
+        },
       );
 
       setLatestRunResult(res.run);
-      showNotification(`Workflow executed successfully in ${res.run.durationMs}ms`);
-      apiFetch<Metrics>('/v1/workflows/metrics').then(setMetrics).catch(() => {});
-      apiFetch<{ workflows: Workflow[] }>('/v1/workflows').then((d) => setWorkflows(d.workflows)).catch(() => {});
+      showNotification(
+        `Workflow executed successfully in ${res.run.durationMs}ms`,
+      );
+      apiFetch<Metrics>("/v1/workflows/metrics")
+        .then(setMetrics)
+        .catch(() => {});
+      apiFetch<{ workflows: Workflow[] }>("/v1/workflows")
+        .then((d) => setWorkflows(d.workflows))
+        .catch(() => {});
     } catch (err: any) {
-      showNotification(`Execution failed: ${err.message}`, 'error');
+      showNotification(`Execution failed: ${err.message}`, "error");
     } finally {
       setExecuting(false);
     }
@@ -298,12 +338,14 @@ export default function AutomationsPage() {
       setPingingId(subId);
       const res = await apiFetch<{ ok: boolean; delivery: WebhookDelivery }>(
         `/v1/webhooks/outbound/${subId}/ping`,
-        { method: 'POST' }
+        { method: "POST" },
       );
-      showNotification(`Webhook ping delivered (HTTP 200 OK) in ${res.delivery.durationMs}ms`);
+      showNotification(
+        `Webhook ping delivered (HTTP 200 OK) in ${res.delivery.durationMs}ms`,
+      );
       setDeliveries((prev) => [res.delivery, ...prev]);
     } catch (err: any) {
-      showNotification(`Ping failed: ${err.message}`, 'error');
+      showNotification(`Ping failed: ${err.message}`, "error");
     } finally {
       setPingingId(null);
     }
@@ -314,25 +356,33 @@ export default function AutomationsPage() {
     e.preventDefault();
     if (!newTargetUrl) return;
     try {
-      const res = await apiFetch<{ subscription: OutboundWebhook }>('/v1/webhooks/outbound', {
-        method: 'POST',
-        body: JSON.stringify({
-          targetUrl: newTargetUrl,
-          secret: newSecret || undefined,
-          subscribedEvents: newEvents.split(',').map((s) => s.trim()).filter(Boolean),
-          description: newDescription,
-        }),
-      });
+      const res = await apiFetch<{ subscription: OutboundWebhook }>(
+        "/v1/webhooks/outbound",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            targetUrl: newTargetUrl,
+            secret: newSecret || undefined,
+            subscribedEvents: newEvents
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean),
+            description: newDescription,
+          }),
+        },
+      );
 
       setWebhooks((prev) => [res.subscription, ...prev]);
       setIsNewWebhookModalOpen(false);
-      setNewTargetUrl('');
-      setNewSecret('');
-      setNewDescription('');
-      showNotification('Outbound webhook subscription created');
-      apiFetch<Metrics>('/v1/workflows/metrics').then(setMetrics).catch(() => {});
+      setNewTargetUrl("");
+      setNewSecret("");
+      setNewDescription("");
+      showNotification("Outbound webhook subscription created");
+      apiFetch<Metrics>("/v1/workflows/metrics")
+        .then(setMetrics)
+        .catch(() => {});
     } catch (err: any) {
-      showNotification(`Failed to create webhook: ${err.message}`, 'error');
+      showNotification(`Failed to create webhook: ${err.message}`, "error");
     }
   };
 
@@ -340,15 +390,18 @@ export default function AutomationsPage() {
   const handleReplayDlq = async (id: string) => {
     try {
       setReplayingDlqId(id);
-      const res = await apiFetch<{ ok: boolean; delivery: any; item: DeadLetterQueueItem }>(
-        `/v1/webhooks/dlq/${id}/replay`,
-        { method: 'POST' }
+      const res = await apiFetch<{
+        ok: boolean;
+        delivery: any;
+        item: DeadLetterQueueItem;
+      }>(`/v1/webhooks/dlq/${id}/replay`, { method: "POST" });
+      showNotification("Dead-letter item replayed successfully (HTTP 200 OK)");
+      setDlqItems((prev) =>
+        prev.map((item) => (item.id === id ? res.item : item)),
       );
-      showNotification('Dead-letter item replayed successfully (HTTP 200 OK)');
-      setDlqItems((prev) => prev.map((item) => (item.id === id ? res.item : item)));
       loadAllData();
     } catch (err: any) {
-      showNotification(`Replay failed: ${err.message}`, 'error');
+      showNotification(`Replay failed: ${err.message}`, "error");
     } finally {
       setReplayingDlqId(null);
     }
@@ -358,14 +411,18 @@ export default function AutomationsPage() {
   const handleReplayAllDlq = async () => {
     try {
       setReplayingAll(true);
-      const res = await apiFetch<{ ok: boolean; replayed: number; successful: number; failed: number }>(
-        '/v1/webhooks/dlq/replay-all',
-        { method: 'POST' }
+      const res = await apiFetch<{
+        ok: boolean;
+        replayed: number;
+        successful: number;
+        failed: number;
+      }>("/v1/webhooks/dlq/replay-all", { method: "POST" });
+      showNotification(
+        `Replayed ${res.replayed} items: ${res.successful} succeeded, ${res.failed} failed`,
       );
-      showNotification(`Replayed ${res.replayed} items: ${res.successful} succeeded, ${res.failed} failed`);
       loadAllData();
     } catch (err: any) {
-      showNotification(`Replay all failed: ${err.message}`, 'error');
+      showNotification(`Replay all failed: ${err.message}`, "error");
     } finally {
       setReplayingAll(false);
     }
@@ -375,39 +432,51 @@ export default function AutomationsPage() {
   const handleTriggerChaos = async () => {
     try {
       setChaosLoading(true);
-      const res = await apiFetch<{ ok: boolean; message: string; failuresTriggered: number }>(
-        '/v1/webhooks/chaos/dispatch',
-        {
-          method: 'POST',
-          body: JSON.stringify({ simulateFailures: true }),
-        }
+      const res = await apiFetch<{
+        ok: boolean;
+        message: string;
+        failuresTriggered: number;
+      }>("/v1/webhooks/chaos/dispatch", {
+        method: "POST",
+        body: JSON.stringify({ simulateFailures: true }),
+      });
+      showNotification(
+        `Chaos dispatched! ${res.failuresTriggered} delivery attempts simulated with backoff and routed to DLQ.`,
+        "info",
       );
-      showNotification(`Chaos dispatched! ${res.failuresTriggered} delivery attempts simulated with backoff and routed to DLQ.`, 'info');
       loadAllData();
     } catch (err: any) {
-      showNotification(`Chaos test failed: ${err.message}`, 'error');
+      showNotification(`Chaos test failed: ${err.message}`, "error");
     } finally {
       setChaosLoading(false);
     }
   };
 
   // AAC Connect Mailbox
-  const handleConnectAac = async (provider: 'google' | 'microsoft') => {
+  const handleConnectAac = async (provider: "google" | "microsoft") => {
     try {
-      const email = provider === 'google' ? 'tony.stark@acme.corp' : 'executive.sync@acme.corp';
-      const res = await apiFetch<{ ok: boolean; connection: AACConnection }>('/v1/integrations/aac/connect', {
-        method: 'POST',
-        body: JSON.stringify({
-          provider,
-          mailboxEmail: email,
-          kmsKeyAlias: 'alias/nexus-aac-master',
-        }),
-      });
+      const email =
+        provider === "google"
+          ? "tony.stark@acme.corp"
+          : "executive.sync@acme.corp";
+      const res = await apiFetch<{ ok: boolean; connection: AACConnection }>(
+        "/v1/integrations/aac/connect",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            provider,
+            mailboxEmail: email,
+            kmsKeyAlias: "alias/nexus-aac-master",
+          }),
+        },
+      );
       setAacConnection(res.connection);
-      showNotification(`Connected to ${provider === 'google' ? 'Google Workspace' : 'Microsoft 365'} with KMS envelope encryption.`);
+      showNotification(
+        `Connected to ${provider === "google" ? "Google Workspace" : "Microsoft 365"} with KMS envelope encryption.`,
+      );
       loadAllData();
     } catch (err: any) {
-      showNotification(`AAC connection failed: ${err.message}`, 'error');
+      showNotification(`AAC connection failed: ${err.message}`, "error");
     }
   };
 
@@ -422,14 +491,14 @@ export default function AutomationsPage() {
         matchedContacts: number;
         privacyExclusions: number;
         connection: AACConnection;
-      }>('/v1/integrations/aac/sync', { method: 'POST' });
+      }>("/v1/integrations/aac/sync", { method: "POST" });
       setAacConnection(res.connection);
       showNotification(
-        `AAC Mailbox synced! ${res.syncedEmails} emails captured, ${res.matchedContacts} contacts associated, ${res.privacyExclusions} internal emails excluded.`
+        `AAC Mailbox synced! ${res.syncedEmails} emails captured, ${res.matchedContacts} contacts associated, ${res.privacyExclusions} internal emails excluded.`,
       );
       loadAllData();
     } catch (err: any) {
-      showNotification(`AAC sync failed: ${err.message}`, 'error');
+      showNotification(`AAC sync failed: ${err.message}`, "error");
     } finally {
       setSyncingAac(false);
     }
@@ -438,12 +507,12 @@ export default function AutomationsPage() {
   // AAC Disconnect
   const handleDisconnectAac = async () => {
     try {
-      await apiFetch('/v1/integrations/aac/disconnect', { method: 'POST' });
+      await apiFetch("/v1/integrations/aac/disconnect", { method: "POST" });
       setAacConnection(null);
-      showNotification('AAC Mailbox disconnected.');
+      showNotification("AAC Mailbox disconnected.");
       loadAllData();
     } catch (err: any) {
-      showNotification(`Disconnect failed: ${err.message}`, 'error');
+      showNotification(`Disconnect failed: ${err.message}`, "error");
     }
   };
 
@@ -455,14 +524,14 @@ export default function AutomationsPage() {
           role="status"
           aria-live="polite"
           className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-lg shadow-xl text-sm font-medium transition-all transform duration-200 border ${
-            notification.type === 'error'
-              ? 'bg-rose-950/95 text-rose-200 border-rose-800 shadow-rose-950/50'
-              : notification.type === 'info'
-              ? 'bg-sky-950/95 text-sky-200 border-sky-800 shadow-sky-950/50'
-              : 'bg-emerald-950/95 text-emerald-200 border-emerald-800 shadow-emerald-950/50'
+            notification.type === "error"
+              ? "bg-rose-950/95 text-rose-200 border-rose-800 shadow-rose-950/50"
+              : notification.type === "info"
+                ? "bg-sky-950/95 text-sky-200 border-sky-800 shadow-sky-950/50"
+                : "bg-emerald-950/95 text-emerald-200 border-emerald-800 shadow-emerald-950/50"
           }`}
         >
-          {notification.type === 'error' ? (
+          {notification.type === "error" ? (
             <AlertCircle className="h-4 w-4 text-rose-400 shrink-0" />
           ) : (
             <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
@@ -491,7 +560,8 @@ export default function AutomationsPage() {
             </Badge>
           </div>
           <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-            Visual deterministic DAG execution, conditional branch routing, and HMAC-SHA256 verified webhooks.
+            Visual deterministic DAG execution, conditional branch routing, and
+            HMAC-SHA256 verified webhooks.
           </p>
         </div>
 
@@ -504,11 +574,13 @@ export default function AutomationsPage() {
             className="flex items-center gap-1.5"
             data-testid="refresh-automations-btn"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`}
+            />
             Refresh
           </Button>
 
-          {activeTab === 'webhooks' ? (
+          {activeTab === "webhooks" ? (
             <Button
               variant="primary"
               size="sm"
@@ -537,7 +609,10 @@ export default function AutomationsPage() {
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4" data-testid="automation-metrics-grid">
+      <div
+        className="grid grid-cols-2 md:grid-cols-4 gap-4"
+        data-testid="automation-metrics-grid"
+      >
         <div className="p-4 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] backdrop-blur-md">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">
@@ -546,10 +621,15 @@ export default function AutomationsPage() {
             <GitBranch className="h-4 w-4 text-indigo-400" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-[var(--color-text-primary)]" data-testid="metric-active-workflows">
+            <span
+              className="text-2xl font-bold text-[var(--color-text-primary)]"
+              data-testid="metric-active-workflows"
+            >
               {metrics.activeWorkflows}
             </span>
-            <span className="text-xs text-[var(--color-text-secondary)]">of {metrics.totalWorkflows} total</span>
+            <span className="text-xs text-[var(--color-text-secondary)]">
+              of {metrics.totalWorkflows} total
+            </span>
           </div>
         </div>
 
@@ -561,10 +641,15 @@ export default function AutomationsPage() {
             <Activity className="h-4 w-4 text-emerald-400" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-[var(--color-text-primary)]" data-testid="metric-executions-count">
+            <span
+              className="text-2xl font-bold text-[var(--color-text-primary)]"
+              data-testid="metric-executions-count"
+            >
               {metrics.executionsCount}
             </span>
-            <span className="text-xs text-emerald-400 font-medium">100% DAG verified</span>
+            <span className="text-xs text-emerald-400 font-medium">
+              100% DAG verified
+            </span>
           </div>
         </div>
 
@@ -576,10 +661,15 @@ export default function AutomationsPage() {
             <CheckCircle2 className="h-4 w-4 text-teal-400" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-[var(--color-text-primary)]" data-testid="metric-success-rate">
+            <span
+              className="text-2xl font-bold text-[var(--color-text-primary)]"
+              data-testid="metric-success-rate"
+            >
               {metrics.successRate}%
             </span>
-            <span className="text-xs text-[var(--color-text-secondary)]">0 cyclical failures</span>
+            <span className="text-xs text-[var(--color-text-secondary)]">
+              0 cyclical failures
+            </span>
           </div>
         </div>
 
@@ -591,10 +681,15 @@ export default function AutomationsPage() {
             <Webhook className="h-4 w-4 text-amber-400" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-[var(--color-text-primary)]" data-testid="metric-outbound-webhooks">
+            <span
+              className="text-2xl font-bold text-[var(--color-text-primary)]"
+              data-testid="metric-outbound-webhooks"
+            >
               {metrics.outboundWebhooksCount}
             </span>
-            <span className="text-xs text-amber-400 font-medium">HMAC-SHA256 Signed</span>
+            <span className="text-xs text-amber-400 font-medium">
+              HMAC-SHA256 Signed
+            </span>
           </div>
         </div>
       </div>
@@ -602,11 +697,11 @@ export default function AutomationsPage() {
       {/* Tabs */}
       <div className="flex border-b border-[var(--color-border-subtle)] gap-2 overflow-x-auto">
         <button
-          onClick={() => setActiveTab('workflows')}
+          onClick={() => setActiveTab("workflows")}
           className={`pb-3 px-3 text-sm font-medium transition-colors flex items-center gap-2 border-b-2 -mb-px whitespace-nowrap ${
-            activeTab === 'workflows'
-              ? 'border-indigo-500 text-indigo-400'
-              : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+            activeTab === "workflows"
+              ? "border-indigo-500 text-indigo-400"
+              : "border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
           }`}
           data-testid="tab-workflows"
         >
@@ -615,11 +710,11 @@ export default function AutomationsPage() {
         </button>
 
         <button
-          onClick={() => setActiveTab('webhooks')}
+          onClick={() => setActiveTab("webhooks")}
           className={`pb-3 px-3 text-sm font-medium transition-colors flex items-center gap-2 border-b-2 -mb-px whitespace-nowrap ${
-            activeTab === 'webhooks'
-              ? 'border-indigo-500 text-indigo-400'
-              : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+            activeTab === "webhooks"
+              ? "border-indigo-500 text-indigo-400"
+              : "border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
           }`}
           data-testid="tab-webhooks"
         >
@@ -628,22 +723,22 @@ export default function AutomationsPage() {
         </button>
 
         <button
-          onClick={() => setActiveTab('dlq')}
+          onClick={() => setActiveTab("dlq")}
           className={`pb-3 px-3 text-sm font-medium transition-colors flex items-center gap-2 border-b-2 -mb-px whitespace-nowrap ${
-            activeTab === 'dlq'
-              ? 'border-indigo-500 text-indigo-400'
-              : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+            activeTab === "dlq"
+              ? "border-indigo-500 text-indigo-400"
+              : "border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
           }`}
           data-testid="tab-dlq"
         >
           <ServerCrash className="h-4 w-4" />
           Dead-Letter Queue (DLQ)
-          {dlqItems.filter((i) => i.replayedStatus !== 'SUCCESS').length > 0 ? (
+          {dlqItems.filter((i) => i.replayedStatus !== "SUCCESS").length > 0 ? (
             <span
               className="px-1.5 py-0.5 text-[10px] rounded-full bg-rose-500/20 text-rose-300 font-mono border border-rose-500/30"
               data-testid="dlq-count-badge"
             >
-              {dlqItems.filter((i) => i.replayedStatus !== 'SUCCESS').length}
+              {dlqItems.filter((i) => i.replayedStatus !== "SUCCESS").length}
             </span>
           ) : (
             <span className="px-1.5 py-0.5 text-[10px] rounded-full bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/30">
@@ -653,11 +748,11 @@ export default function AutomationsPage() {
         </button>
 
         <button
-          onClick={() => setActiveTab('aac')}
+          onClick={() => setActiveTab("aac")}
           className={`pb-3 px-3 text-sm font-medium transition-colors flex items-center gap-2 border-b-2 -mb-px whitespace-nowrap ${
-            activeTab === 'aac'
-              ? 'border-indigo-500 text-indigo-400'
-              : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+            activeTab === "aac"
+              ? "border-indigo-500 text-indigo-400"
+              : "border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
           }`}
           data-testid="tab-aac"
         >
@@ -665,21 +760,21 @@ export default function AutomationsPage() {
           Activity Capture (AAC)
           <span
             className={`px-1.5 py-0.5 text-[10px] rounded-full font-mono border ${
-              aacConnection?.status === 'CONNECTED'
-                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+              aacConnection?.status === "CONNECTED"
+                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                : "bg-zinc-800 text-zinc-400 border-zinc-700"
             }`}
           >
-            {aacConnection?.status === 'CONNECTED' ? 'Active' : 'Offline'}
+            {aacConnection?.status === "CONNECTED" ? "Active" : "Offline"}
           </span>
         </button>
 
         <button
-          onClick={() => setActiveTab('inbound')}
+          onClick={() => setActiveTab("inbound")}
           className={`pb-3 px-3 text-sm font-medium transition-colors flex items-center gap-2 border-b-2 -mb-px whitespace-nowrap ${
-            activeTab === 'inbound'
-              ? 'border-indigo-500 text-indigo-400'
-              : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+            activeTab === "inbound"
+              ? "border-indigo-500 text-indigo-400"
+              : "border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
           }`}
           data-testid="tab-inbound"
         >
@@ -689,7 +784,7 @@ export default function AutomationsPage() {
       </div>
 
       {/* TAB 1: Workflows & DAG Canvas */}
-      {activeTab === 'workflows' && (
+      {activeTab === "workflows" && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Workflows Master List */}
           <div className="lg:col-span-5 space-y-3">
@@ -707,36 +802,43 @@ export default function AutomationsPage() {
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
+                      if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
                         setSelectedWorkflow(wf);
                       }
                     }}
                     className={`p-4 rounded-xl border text-left cursor-pointer transition-all ${
                       isSelected
-                        ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-950/20'
-                        : 'border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] hover:border-[var(--color-border-strong)]'
+                        ? "border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-950/20"
+                        : "border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] hover:border-[var(--color-border-strong)]"
                     }`}
                     data-testid={`workflow-card-${wf.id}`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-[var(--color-text-primary)] text-sm">{wf.name}</span>
+                          <span className="font-semibold text-[var(--color-text-primary)] text-sm">
+                            {wf.name}
+                          </span>
                           {wf.isActive ? (
                             <Badge variant="success">Active</Badge>
                           ) : (
                             <Badge variant="neutral">Inactive</Badge>
                           )}
                         </div>
-                        <p className="text-xs text-[var(--color-text-secondary)] line-clamp-2">{wf.description}</p>
+                        <p className="text-xs text-[var(--color-text-secondary)] line-clamp-2">
+                          {wf.description}
+                        </p>
                       </div>
                     </div>
 
                     <div className="mt-3 flex items-center justify-between text-[11px] text-[var(--color-text-tertiary)] pt-2 border-t border-[var(--color-border-subtle)]">
                       <span className="flex items-center gap-1">
                         <Radio className="h-3 w-3 text-indigo-400" />
-                        Trigger: <code className="text-indigo-300">{wf.triggerType}</code>
+                        Trigger:{" "}
+                        <code className="text-indigo-300">
+                          {wf.triggerType}
+                        </code>
                       </span>
                       <span>{wf.nodes.length} nodes</span>
                     </div>
@@ -757,7 +859,8 @@ export default function AutomationsPage() {
                       {selectedWorkflow.name}
                     </h3>
                     <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
-                      Visual DAG representation with acyclic validation guarantee.
+                      Visual DAG representation with acyclic validation
+                      guarantee.
                     </p>
                   </div>
 
@@ -777,7 +880,7 @@ export default function AutomationsPage() {
                 <div className="space-y-4" data-testid="workflow-dag-canvas">
                   {selectedWorkflow.nodes.map((node, idx) => {
                     const isRoot = node.id === selectedWorkflow.rootNodeId;
-                    const isCondition = node.type === 'condition';
+                    const isCondition = node.type === "condition";
 
                     return (
                       <div key={node.id} className="relative pl-6">
@@ -790,10 +893,10 @@ export default function AutomationsPage() {
                         <div
                           className={`absolute left-0 top-3 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border ${
                             isRoot
-                              ? 'bg-indigo-600 text-white border-indigo-400'
+                              ? "bg-indigo-600 text-white border-indigo-400"
                               : isCondition
-                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                              : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                                ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
+                                : "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
                           }`}
                         >
                           {idx + 1}
@@ -806,7 +909,13 @@ export default function AutomationsPage() {
                               {node.title}
                             </span>
                             <Badge
-                              variant={isRoot ? 'accent' : isCondition ? 'warning' : 'success'}
+                              variant={
+                                isRoot
+                                  ? "accent"
+                                  : isCondition
+                                    ? "warning"
+                                    : "success"
+                              }
                             >
                               {node.type}
                             </Badge>
@@ -815,24 +924,37 @@ export default function AutomationsPage() {
                           {/* Node Config details */}
                           <div className="text-xs text-[var(--color-text-secondary)] font-mono bg-zinc-900/60 p-2.5 rounded-lg border border-zinc-800/80">
                             {isRoot && (
-                              <div>Trigger Event: {selectedWorkflow.triggerType}</div>
+                              <div>
+                                Trigger Event: {selectedWorkflow.triggerType}
+                              </div>
                             )}
                             {isCondition && (
                               <div>
-                                Rule: If <span className="text-amber-300">{node.config.field}</span> {node.config.operator} &quot;{node.config.value}&quot;
+                                Rule: If{" "}
+                                <span className="text-amber-300">
+                                  {node.config.field}
+                                </span>{" "}
+                                {node.config.operator} &quot;{node.config.value}
+                                &quot;
                               </div>
                             )}
-                            {node.actionType === 'update_record' && (
-                              <div>Update Record: Patch {JSON.stringify(node.config.patch)}</div>
+                            {node.actionType === "update_record" && (
+                              <div>
+                                Update Record: Patch{" "}
+                                {JSON.stringify(node.config.patch)}
+                              </div>
                             )}
-                            {node.actionType === 'create_task' && (
+                            {node.actionType === "create_task" && (
                               <div>Create Task: {node.config.title}</div>
                             )}
-                            {node.actionType === 'send_email' && (
+                            {node.actionType === "send_email" && (
                               <div>Send Email: {node.config.subject}</div>
                             )}
-                            {node.actionType === 'outbound_webhook' && (
-                              <div>Dispatch HMAC Outbound Webhook to {node.config.url}</div>
+                            {node.actionType === "outbound_webhook" && (
+                              <div>
+                                Dispatch HMAC Outbound Webhook to{" "}
+                                {node.config.url}
+                              </div>
                             )}
                           </div>
 
@@ -840,10 +962,12 @@ export default function AutomationsPage() {
                           {isCondition && (
                             <div className="flex items-center gap-4 text-[11px] pt-1">
                               <span className="flex items-center gap-1 text-emerald-400">
-                                <Check className="h-3 w-3" /> True: {node.nextNodes?.join(', ') || 'End'}
+                                <Check className="h-3 w-3" /> True:{" "}
+                                {node.nextNodes?.join(", ") || "End"}
                               </span>
                               <span className="flex items-center gap-1 text-rose-400">
-                                <X className="h-3 w-3" /> False: {node.elseNodes?.join(', ') || 'End'}
+                                <X className="h-3 w-3" /> False:{" "}
+                                {node.elseNodes?.join(", ") || "End"}
                               </span>
                             </div>
                           )}
@@ -863,7 +987,7 @@ export default function AutomationsPage() {
       )}
 
       {/* TAB 2: Outbound Subscriptions */}
-      {activeTab === 'webhooks' && (
+      {activeTab === "webhooks" && (
         <div className="space-y-6">
           <div className="p-4 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -871,7 +995,8 @@ export default function AutomationsPage() {
                 Active Outbound Webhook Subscriptions
               </h2>
               <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
-                Every event payload is signed with HMAC-SHA256 hex digest transmitted via <code>x-nexus-signature</code>.
+                Every event payload is signed with HMAC-SHA256 hex digest
+                transmitted via <code>x-nexus-signature</code>.
               </p>
             </div>
             <Button
@@ -905,7 +1030,9 @@ export default function AutomationsPage() {
                       )}
                     </div>
                     {hook.description && (
-                      <p className="text-xs text-[var(--color-text-secondary)]">{hook.description}</p>
+                      <p className="text-xs text-[var(--color-text-secondary)]">
+                        {hook.description}
+                      </p>
                     )}
                   </div>
 
@@ -918,20 +1045,30 @@ export default function AutomationsPage() {
                       className="flex items-center gap-1.5"
                       data-testid={`ping-webhook-${hook.id}`}
                     >
-                      <Send className={`h-3.5 w-3.5 ${pingingId === hook.id ? 'animate-pulse text-amber-400' : ''}`} />
-                      {pingingId === hook.id ? 'Pinging...' : 'Send Test Ping'}
+                      <Send
+                        className={`h-3.5 w-3.5 ${pingingId === hook.id ? "animate-pulse text-amber-400" : ""}`}
+                      />
+                      {pingingId === hook.id ? "Pinging..." : "Send Test Ping"}
                     </Button>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-[var(--color-bg-canvas)] p-3 rounded-xl border border-[var(--color-border-subtle)] font-mono">
                   <div>
-                    <span className="text-[var(--color-text-tertiary)] block text-[10px] uppercase">Events:</span>
-                    <span className="text-indigo-300">{hook.subscribedEvents.join(', ')}</span>
+                    <span className="text-[var(--color-text-tertiary)] block text-[10px] uppercase">
+                      Events:
+                    </span>
+                    <span className="text-indigo-300">
+                      {hook.subscribedEvents.join(", ")}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-[var(--color-text-tertiary)] block text-[10px] uppercase">HMAC Secret:</span>
-                    <span className="text-zinc-400">whsec_••••••••••••••••</span>
+                    <span className="text-[var(--color-text-tertiary)] block text-[10px] uppercase">
+                      HMAC Secret:
+                    </span>
+                    <span className="text-zinc-400">
+                      whsec_••••••••••••••••
+                    </span>
                   </div>
                 </div>
               </div>
@@ -959,17 +1096,26 @@ export default function AutomationsPage() {
                 </thead>
                 <tbody className="divide-y divide-[var(--color-border-subtle)]">
                   {deliveries.slice(0, 10).map((d) => (
-                    <tr key={d.id} className="hover:bg-zinc-800/20 transition-colors">
-                      <td className="py-3 px-4 font-mono font-medium text-indigo-300">{d.event}</td>
+                    <tr
+                      key={d.id}
+                      className="hover:bg-zinc-800/20 transition-colors"
+                    >
+                      <td className="py-3 px-4 font-mono font-medium text-indigo-300">
+                        {d.event}
+                      </td>
                       <td className="py-3 px-4 font-mono text-[var(--color-text-secondary)] max-w-[200px] truncate">
                         {d.targetUrl}
                       </td>
                       <td className="py-3 px-4">
-                        <Badge variant={d.statusCode === 200 ? 'success' : 'danger'}>
+                        <Badge
+                          variant={d.statusCode === 200 ? "success" : "danger"}
+                        >
                           HTTP {d.statusCode}
                         </Badge>
                       </td>
-                      <td className="py-3 px-4 font-mono text-[var(--color-text-secondary)]">{d.durationMs}ms</td>
+                      <td className="py-3 px-4 font-mono text-[var(--color-text-secondary)]">
+                        {d.durationMs}ms
+                      </td>
                       <td className="py-3 px-4 text-[var(--color-text-tertiary)]">
                         {new Date(d.deliveredAt).toLocaleTimeString()}
                       </td>
@@ -994,7 +1140,7 @@ export default function AutomationsPage() {
       )}
 
       {/* TAB 3: Inbound HMAC Verification Guide & Playground */}
-      {activeTab === 'inbound' && (
+      {activeTab === "inbound" && (
         <div className="space-y-6">
           <div className="p-6 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] backdrop-blur-md space-y-4">
             <h2 className="text-base font-bold text-[var(--color-text-primary)] flex items-center gap-2">
@@ -1002,27 +1148,37 @@ export default function AutomationsPage() {
               Cryptographic Inbound Webhook Verification
             </h2>
             <p className="text-sm text-[var(--color-text-secondary)]">
-              Nexus CRM supports cryptographically secure inbound webhook delivery with constant-time HMAC-SHA256 signature
-              validation to defend against timing attacks and forged requests.
+              Nexus CRM supports cryptographically secure inbound webhook
+              delivery with constant-time HMAC-SHA256 signature validation to
+              defend against timing attacks and forged requests.
             </p>
 
             <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 space-y-3 font-mono text-xs">
-              <div className="text-zinc-400 font-semibold">{'// Inbound Webhook Endpoint:'}</div>
-              <div className="text-indigo-400">POST http://localhost:4000/v1/webhooks/inbound/:hookId</div>
-              <div className="text-zinc-400 font-semibold pt-2">{'// Required Signature Header:'}</div>
-              <div className="text-emerald-400">x-nexus-signature: sha256=&lt;hex_encoded_hmac_digest&gt;</div>
+              <div className="text-zinc-400 font-semibold">
+                {"// Inbound Webhook Endpoint:"}
+              </div>
+              <div className="text-indigo-400">
+                POST http://localhost:4000/v1/webhooks/inbound/:hookId
+              </div>
+              <div className="text-zinc-400 font-semibold pt-2">
+                {"// Required Signature Header:"}
+              </div>
+              <div className="text-emerald-400">
+                x-nexus-signature: sha256=&lt;hex_encoded_hmac_digest&gt;
+              </div>
             </div>
 
             <div className="pt-2 text-xs text-[var(--color-text-tertiary)] flex items-center gap-1.5">
               <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-              Constant-time <code>timingSafeEqual()</code> comparison active on all incoming webhook requests.
+              Constant-time <code>timingSafeEqual()</code> comparison active on
+              all incoming webhook requests.
             </div>
           </div>
         </div>
       )}
 
       {/* TAB 4: Dead-Letter Queue (DLQ) */}
-      {activeTab === 'dlq' && (
+      {activeTab === "dlq" && (
         <div className="space-y-6" data-testid="dlq-view">
           {/* DLQ Diagnostics & Control Header */}
           <div className="p-6 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] backdrop-blur-md space-y-4">
@@ -1033,8 +1189,10 @@ export default function AutomationsPage() {
                   Dead-Letter Queue & Replay Diagnostics
                 </h2>
                 <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-                  Failed outbound webhooks that exhausted full exponential backoff & jitter attempts are safely quarantined here.
-                  Review diagnostics, inspect payloads, and execute targeted or bulk replays.
+                  Failed outbound webhooks that exhausted full exponential
+                  backoff & jitter attempts are safely quarantined here. Review
+                  diagnostics, inspect payloads, and execute targeted or bulk
+                  replays.
                 </p>
               </div>
 
@@ -1047,8 +1205,12 @@ export default function AutomationsPage() {
                   className="border-rose-800/60 text-rose-300 hover:bg-rose-950/40 flex items-center gap-1.5"
                   data-testid="trigger-chaos-btn"
                 >
-                  <AlertCircle className={`h-3.5 w-3.5 ${chaosLoading ? 'animate-spin' : 'text-rose-400'}`} />
-                  {chaosLoading ? 'Simulating Chaos...' : 'Trigger Chaos Webhook'}
+                  <AlertCircle
+                    className={`h-3.5 w-3.5 ${chaosLoading ? "animate-spin" : "text-rose-400"}`}
+                  />
+                  {chaosLoading
+                    ? "Simulating Chaos..."
+                    : "Trigger Chaos Webhook"}
                 </Button>
 
                 <Button
@@ -1059,8 +1221,10 @@ export default function AutomationsPage() {
                   className="flex items-center gap-1.5"
                   data-testid="replay-all-dlq-btn"
                 >
-                  <RotateCcw className={`h-3.5 w-3.5 ${replayingAll ? 'animate-spin' : ''}`} />
-                  {replayingAll ? 'Replaying All...' : 'Replay All Pending'}
+                  <RotateCcw
+                    className={`h-3.5 w-3.5 ${replayingAll ? "animate-spin" : ""}`}
+                  />
+                  {replayingAll ? "Replaying All..." : "Replay All Pending"}
                 </Button>
               </div>
             </div>
@@ -1073,7 +1237,8 @@ export default function AutomationsPage() {
                   Exponential Backoff + Jitter
                 </div>
                 <div className="text-[var(--color-text-secondary)]">
-                  Retries up to 5 times (100ms, 200ms, 400ms, 800ms) with randomized jitter to prevent thundering herds.
+                  Retries up to 5 times (100ms, 200ms, 400ms, 800ms) with
+                  randomized jitter to prevent thundering herds.
                 </div>
               </div>
 
@@ -1083,7 +1248,8 @@ export default function AutomationsPage() {
                   Zero Message Loss Guarantee
                 </div>
                 <div className="text-[var(--color-text-secondary)]">
-                  Transactional Outbox ensures every unacknowledged event is safely quarantined in persistent DLQ storage.
+                  Transactional Outbox ensures every unacknowledged event is
+                  safely quarantined in persistent DLQ storage.
                 </div>
               </div>
 
@@ -1093,7 +1259,8 @@ export default function AutomationsPage() {
                   Strict SSRF Enforced
                 </div>
                 <div className="text-[var(--color-text-secondary)]">
-                  Replays strictly validate destination DNS and IP ranges against loopback, private RFC1918, and metadata.
+                  Replays strictly validate destination DNS and IP ranges
+                  against loopback, private RFC1918, and metadata.
                 </div>
               </div>
             </div>
@@ -1106,12 +1273,16 @@ export default function AutomationsPage() {
                 Quarantined Delivery Items ({dlqItems.length})
               </h3>
               <span className="text-xs text-[var(--color-text-tertiary)]">
-                {dlqItems.filter((i) => i.replayedStatus === 'SUCCESS').length} recovered
+                {dlqItems.filter((i) => i.replayedStatus === "SUCCESS").length}{" "}
+                recovered
               </span>
             </div>
 
             {dlqItems.length === 0 ? (
-              <div className="p-12 text-center space-y-3" data-testid="dlq-empty-state">
+              <div
+                className="p-12 text-center space-y-3"
+                data-testid="dlq-empty-state"
+              >
                 <div className="w-12 h-12 rounded-2xl bg-emerald-950/30 border border-emerald-800/40 flex items-center justify-center mx-auto text-emerald-400">
                   <CheckCircle2 className="h-6 w-6" />
                 </div>
@@ -1119,13 +1290,18 @@ export default function AutomationsPage() {
                   Dead-Letter Queue is Empty
                 </h4>
                 <p className="text-xs text-[var(--color-text-secondary)] max-w-md mx-auto">
-                  All outbound webhook deliveries have either completed successfully or are within normal retry backoff.
-                  You can click &quot;Trigger Chaos Webhook&quot; above to simulate a live delivery outage.
+                  All outbound webhook deliveries have either completed
+                  successfully or are within normal retry backoff. You can click
+                  &quot;Trigger Chaos Webhook&quot; above to simulate a live
+                  delivery outage.
                 </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs" data-testid="dlq-table">
+                <table
+                  className="w-full text-left text-xs"
+                  data-testid="dlq-table"
+                >
                   <thead className="bg-zinc-950/40 text-[var(--color-text-tertiary)] uppercase font-semibold border-b border-[var(--color-border-subtle)]">
                     <tr>
                       <th className="py-3 px-4">Event ID / Target</th>
@@ -1138,7 +1314,11 @@ export default function AutomationsPage() {
                   </thead>
                   <tbody className="divide-y divide-[var(--color-border-subtle)]">
                     {dlqItems.map((item) => (
-                      <tr key={item.id} className="hover:bg-zinc-800/20 transition-colors" data-testid={`dlq-row-${item.id}`}>
+                      <tr
+                        key={item.id}
+                        className="hover:bg-zinc-800/20 transition-colors"
+                        data-testid={`dlq-row-${item.id}`}
+                      >
                         <td className="py-3 px-4">
                           <div className="font-mono font-medium text-indigo-300 truncate max-w-[220px]">
                             {item.targetUrl}
@@ -1155,7 +1335,9 @@ export default function AutomationsPage() {
                         <td className="py-3 px-4 max-w-[280px]">
                           <div className="flex items-center gap-1.5 font-mono text-[11px] text-rose-300 truncate">
                             <span className="px-1.5 py-0.5 rounded bg-rose-950 border border-rose-800 text-[10px]">
-                              {item.lastStatusCode ? `HTTP ${item.lastStatusCode}` : 'ERR'}
+                              {item.lastStatusCode
+                                ? `HTTP ${item.lastStatusCode}`
+                                : "ERR"}
                             </span>
                             <span className="truncate">{item.lastError}</span>
                           </div>
@@ -1164,14 +1346,12 @@ export default function AutomationsPage() {
                           {new Date(item.createdAt).toLocaleTimeString()}
                         </td>
                         <td className="py-3 px-4">
-                          {item.replayedStatus === 'SUCCESS' ? (
+                          {item.replayedStatus === "SUCCESS" ? (
                             <Badge variant="success">REPLAYED (200 OK)</Badge>
-                          ) : item.replayedStatus === 'FAILED' ? (
+                          ) : item.replayedStatus === "FAILED" ? (
                             <Badge variant="danger">REPLAY FAILED</Badge>
                           ) : (
-                            <Badge variant="warning">
-                              PENDING REPLAY
-                            </Badge>
+                            <Badge variant="warning">PENDING REPLAY</Badge>
                           )}
                         </td>
                         <td className="py-3 px-4 text-right space-x-1">
@@ -1188,12 +1368,19 @@ export default function AutomationsPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleReplayDlq(item.id)}
-                            disabled={replayingDlqId === item.id || item.replayedStatus === 'SUCCESS'}
+                            disabled={
+                              replayingDlqId === item.id ||
+                              item.replayedStatus === "SUCCESS"
+                            }
                             className="text-xs"
                             data-testid={`replay-dlq-${item.id}`}
                           >
-                            <RotateCcw className={`h-3 w-3 mr-1 ${replayingDlqId === item.id ? 'animate-spin' : ''}`} />
-                            {item.replayedStatus === 'SUCCESS' ? 'Delivered' : 'Replay'}
+                            <RotateCcw
+                              className={`h-3 w-3 mr-1 ${replayingDlqId === item.id ? "animate-spin" : ""}`}
+                            />
+                            {item.replayedStatus === "SUCCESS"
+                              ? "Delivered"
+                              : "Replay"}
                           </Button>
                         </td>
                       </tr>
@@ -1207,7 +1394,7 @@ export default function AutomationsPage() {
       )}
 
       {/* TAB 5: Automatic Activity Capture (AAC) */}
-      {activeTab === 'aac' && (
+      {activeTab === "aac" && (
         <div className="space-y-6" data-testid="aac-view">
           {/* AAC Master Integration Card */}
           <div className="p-6 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] backdrop-blur-md space-y-6">
@@ -1217,17 +1404,26 @@ export default function AutomationsPage() {
                   <h2 className="text-base font-bold text-[var(--color-text-primary)]">
                     Automatic Activity Capture (AAC)
                   </h2>
-                  <Badge variant={aacConnection?.status === 'CONNECTED' ? 'success' : 'neutral'}>
-                    {aacConnection?.status === 'CONNECTED' ? 'ACTIVE SYNC' : 'DISCONNECTED'}
+                  <Badge
+                    variant={
+                      aacConnection?.status === "CONNECTED"
+                        ? "success"
+                        : "neutral"
+                    }
+                  >
+                    {aacConnection?.status === "CONNECTED"
+                      ? "ACTIVE SYNC"
+                      : "DISCONNECTED"}
                   </Badge>
                 </div>
                 <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-                  Zero-touch bi-directional email and calendar ingestion with KMS envelope encryption and deterministic record association.
+                  Zero-touch bi-directional email and calendar ingestion with
+                  KMS envelope encryption and deterministic record association.
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
-                {aacConnection?.status === 'CONNECTED' ? (
+                {aacConnection?.status === "CONNECTED" ? (
                   <>
                     <Button
                       variant="primary"
@@ -1237,8 +1433,10 @@ export default function AutomationsPage() {
                       className="flex items-center gap-1.5"
                       data-testid="sync-aac-btn"
                     >
-                      <RefreshCw className={`h-3.5 w-3.5 ${syncingAac ? 'animate-spin' : ''}`} />
-                      {syncingAac ? 'Syncing Mailbox...' : 'Sync Mailbox Now'}
+                      <RefreshCw
+                        className={`h-3.5 w-3.5 ${syncingAac ? "animate-spin" : ""}`}
+                      />
+                      {syncingAac ? "Syncing Mailbox..." : "Sync Mailbox Now"}
                     </Button>
                     <Button
                       variant="outline"
@@ -1255,7 +1453,7 @@ export default function AutomationsPage() {
                     <Button
                       variant="primary"
                       size="sm"
-                      onClick={() => handleConnectAac('google')}
+                      onClick={() => handleConnectAac("google")}
                       className="flex items-center gap-1.5"
                       data-testid="connect-google-aac-btn"
                     >
@@ -1265,7 +1463,7 @@ export default function AutomationsPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleConnectAac('microsoft')}
+                      onClick={() => handleConnectAac("microsoft")}
                       className="flex items-center gap-1.5"
                       data-testid="connect-m365-aac-btn"
                     >
@@ -1283,8 +1481,11 @@ export default function AutomationsPage() {
                 <span className="text-xs text-[var(--color-text-tertiary)] font-medium uppercase tracking-wider">
                   Connected Mailbox
                 </span>
-                <div className="mt-2 text-sm font-mono font-semibold text-indigo-300 truncate" data-testid="aac-mailbox-email">
-                  {aacConnection?.mailboxEmail || 'None connected'}
+                <div
+                  className="mt-2 text-sm font-mono font-semibold text-indigo-300 truncate"
+                  data-testid="aac-mailbox-email"
+                >
+                  {aacConnection?.mailboxEmail || "None connected"}
                 </div>
                 <div className="text-[11px] text-[var(--color-text-secondary)] mt-1 flex items-center gap-1">
                   <Lock className="h-3 w-3 text-emerald-400" />
@@ -1296,30 +1497,45 @@ export default function AutomationsPage() {
                 <span className="text-xs text-[var(--color-text-tertiary)] font-medium uppercase tracking-wider">
                   Synced Emails
                 </span>
-                <div className="mt-2 text-2xl font-bold text-[var(--color-text-primary)]" data-testid="aac-synced-emails">
+                <div
+                  className="mt-2 text-2xl font-bold text-[var(--color-text-primary)]"
+                  data-testid="aac-synced-emails"
+                >
                   {aacConnection?.syncedEmailsCount || 0}
                 </div>
-                <div className="text-[11px] text-emerald-400 mt-1">Bi-directional captured</div>
+                <div className="text-[11px] text-emerald-400 mt-1">
+                  Bi-directional captured
+                </div>
               </div>
 
               <div className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80">
                 <span className="text-xs text-[var(--color-text-tertiary)] font-medium uppercase tracking-wider">
                   Matched Records
                 </span>
-                <div className="mt-2 text-2xl font-bold text-[var(--color-text-primary)]" data-testid="aac-matched-contacts">
+                <div
+                  className="mt-2 text-2xl font-bold text-[var(--color-text-primary)]"
+                  data-testid="aac-matched-contacts"
+                >
                   {aacConnection?.matchedContactsCount || 0}
                 </div>
-                <div className="text-[11px] text-teal-400 mt-1">Contacts & Deals associated</div>
+                <div className="text-[11px] text-teal-400 mt-1">
+                  Contacts & Deals associated
+                </div>
               </div>
 
               <div className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80">
                 <span className="text-xs text-[var(--color-text-tertiary)] font-medium uppercase tracking-wider">
                   Privacy Shield
                 </span>
-                <div className="mt-2 text-2xl font-bold text-amber-400" data-testid="aac-privacy-exclusions">
+                <div
+                  className="mt-2 text-2xl font-bold text-amber-400"
+                  data-testid="aac-privacy-exclusions"
+                >
                   {aacConnection?.privacyExclusionsCount || 0}
                 </div>
-                <div className="text-[11px] text-zinc-400 mt-1">Internal emails excluded</div>
+                <div className="text-[11px] text-zinc-400 mt-1">
+                  Internal emails excluded
+                </div>
               </div>
             </div>
 
@@ -1330,11 +1546,14 @@ export default function AutomationsPage() {
                   <Lock className="h-3.5 w-3.5 text-emerald-400" />
                   KMS Envelope Encryption Key Alias:
                 </span>
-                <span className="text-emerald-400">{aacConnection?.kmsKeyAlias || 'alias/nexus-aac-master'}</span>
+                <span className="text-emerald-400">
+                  {aacConnection?.kmsKeyAlias || "alias/nexus-aac-master"}
+                </span>
               </div>
               <p className="text-xs text-[var(--color-text-secondary)]">
-                OAuth access tokens and refresh secrets are encrypted at rest using AES-256-GCM envelope encryption.
-                Data decryption keys (DEKs) never touch non-volatile storage in plaintext.
+                OAuth access tokens and refresh secrets are encrypted at rest
+                using AES-256-GCM envelope encryption. Data decryption keys
+                (DEKs) never touch non-volatile storage in plaintext.
               </p>
             </div>
           </div>
@@ -1346,39 +1565,64 @@ export default function AutomationsPage() {
               Deterministic Association Pipeline Architecture
             </h3>
             <p className="text-sm text-[var(--color-text-secondary)]">
-              When an inbound or outbound communication event occurs, AAC evaluates records using a rigorous 4-tier match strategy:
+              When an inbound or outbound communication event occurs, AAC
+              evaluates records using a rigorous 4-tier match strategy:
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
               <div className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80 space-y-2">
-                <div className="text-xs font-mono font-bold text-indigo-400">01 / Contact Lookup</div>
-                <h4 className="text-sm font-semibold text-[var(--color-text-primary)]">Exact Email Match</h4>
+                <div className="text-xs font-mono font-bold text-indigo-400">
+                  01 / Contact Lookup
+                </div>
+                <h4 className="text-sm font-semibold text-[var(--color-text-primary)]">
+                  Exact Email Match
+                </h4>
                 <p className="text-xs text-[var(--color-text-secondary)]">
-                  Resolves external participant address against <code className="text-indigo-300">people.email</code> with case-insensitive normalization.
+                  Resolves external participant address against{" "}
+                  <code className="text-indigo-300">people.email</code> with
+                  case-insensitive normalization.
                 </p>
               </div>
 
               <div className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80 space-y-2">
-                <div className="text-xs font-mono font-bold text-indigo-400">02 / Company Linking</div>
-                <h4 className="text-sm font-semibold text-[var(--color-text-primary)]">Domain Resolution</h4>
+                <div className="text-xs font-mono font-bold text-indigo-400">
+                  02 / Company Linking
+                </div>
+                <h4 className="text-sm font-semibold text-[var(--color-text-primary)]">
+                  Domain Resolution
+                </h4>
                 <p className="text-xs text-[var(--color-text-secondary)]">
-                  Extracts email domain (e.g. <code className="text-indigo-300">starkindustries.com</code>) to automatically associate primary company record.
+                  Extracts email domain (e.g.{" "}
+                  <code className="text-indigo-300">starkindustries.com</code>)
+                  to automatically associate primary company record.
                 </p>
               </div>
 
               <div className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80 space-y-2">
-                <div className="text-xs font-mono font-bold text-indigo-400">03 / Pipeline Context</div>
-                <h4 className="text-sm font-semibold text-[var(--color-text-primary)]">Active Deal Association</h4>
+                <div className="text-xs font-mono font-bold text-indigo-400">
+                  03 / Pipeline Context
+                </div>
+                <h4 className="text-sm font-semibold text-[var(--color-text-primary)]">
+                  Active Deal Association
+                </h4>
                 <p className="text-xs text-[var(--color-text-secondary)]">
-                  Attaches correspondence to active open deals belonging to matched company or contact, recording in polymorphic activity stream.
+                  Attaches correspondence to active open deals belonging to
+                  matched company or contact, recording in polymorphic activity
+                  stream.
                 </p>
               </div>
 
               <div className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80 space-y-2">
-                <div className="text-xs font-mono font-bold text-amber-400">04 / Privacy Defense</div>
-                <h4 className="text-sm font-semibold text-[var(--color-text-primary)]">Internal Exclusions</h4>
+                <div className="text-xs font-mono font-bold text-amber-400">
+                  04 / Privacy Defense
+                </div>
+                <h4 className="text-sm font-semibold text-[var(--color-text-primary)]">
+                  Internal Exclusions
+                </h4>
                 <p className="text-xs text-[var(--color-text-secondary)]">
-                  Strict domain filtering rejects internal staff chatter (<code className="text-amber-300">@acme.corp</code>), guaranteeing confidential communications stay private.
+                  Strict domain filtering rejects internal staff chatter (
+                  <code className="text-amber-300">@acme.corp</code>),
+                  guaranteeing confidential communications stay private.
                 </p>
               </div>
             </div>
@@ -1399,14 +1643,21 @@ export default function AutomationsPage() {
           size="2xl"
           title={`Test Run: ${testingWorkflow.name}`}
         >
-          <div className="space-y-4 text-sm max-h-[75vh] overflow-y-auto pr-1" data-testid="workflow-test-modal">
+          <div
+            className="space-y-4 text-sm max-h-[75vh] overflow-y-auto pr-1"
+            data-testid="workflow-test-modal"
+          >
             <p className="text-xs text-[var(--color-text-secondary)]">
-              Provide input record data to execute through the complete DAG tree. Step outputs and branching decisions
-              will be captured in real-time.
+              Provide input record data to execute through the complete DAG
+              tree. Step outputs and branching decisions will be captured in
+              real-time.
             </p>
 
             <div className="space-y-2">
-              <label htmlFor="test-record-payload" className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase">
+              <label
+                htmlFor="test-record-payload"
+                className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase"
+              >
                 Simulated Trigger Record (JSON)
               </label>
               <textarea
@@ -1438,14 +1689,19 @@ export default function AutomationsPage() {
                 className="flex items-center gap-1.5"
                 data-testid="execute-workflow-run-btn"
               >
-                <Play className={`h-3.5 w-3.5 ${executing ? 'animate-spin' : ''}`} />
-                {executing ? 'Executing DAG...' : 'Run Workflow Now'}
+                <Play
+                  className={`h-3.5 w-3.5 ${executing ? "animate-spin" : ""}`}
+                />
+                {executing ? "Executing DAG..." : "Run Workflow Now"}
               </Button>
             </div>
 
             {/* Run Results and Step Logs */}
             {latestRunResult && (
-              <div className="pt-4 border-t border-[var(--color-border-subtle)] space-y-3" data-testid="workflow-run-results">
+              <div
+                className="pt-4 border-t border-[var(--color-border-subtle)] space-y-3"
+                data-testid="workflow-run-results"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-400" />
@@ -1460,7 +1716,8 @@ export default function AutomationsPage() {
 
                 <div className="space-y-2.5">
                   <span className="text-xs font-semibold text-[var(--color-text-tertiary)] uppercase">
-                    Step-by-Step Execution Logs ({latestRunResult.stepLogs.length} steps)
+                    Step-by-Step Execution Logs (
+                    {latestRunResult.stepLogs.length} steps)
                   </span>
 
                   {latestRunResult.stepLogs.map((log, idx) => (
@@ -1474,7 +1731,9 @@ export default function AutomationsPage() {
                           <Check className="h-3 w-3 text-emerald-400" />
                           {log.nodeTitle}
                         </span>
-                        <span className="text-zinc-500">{log.durationMs}ms</span>
+                        <span className="text-zinc-500">
+                          {log.durationMs}ms
+                        </span>
                       </div>
 
                       {log.outputData && (
@@ -1501,41 +1760,62 @@ export default function AutomationsPage() {
           size="xl"
           title={`Delivery Log: ${inspectingDelivery.event}`}
         >
-          <div className="space-y-4 text-xs font-mono max-h-[75vh] overflow-y-auto pr-1" data-testid="delivery-inspection-modal">
+          <div
+            className="space-y-4 text-xs font-mono max-h-[75vh] overflow-y-auto pr-1"
+            data-testid="delivery-inspection-modal"
+          >
             <div className="grid grid-cols-2 gap-3 bg-zinc-950 p-3 rounded-xl border border-zinc-800">
               <div>
-                <span className="text-[10px] text-zinc-500 uppercase block">Status:</span>
-                <span className="text-emerald-400 font-bold">HTTP {inspectingDelivery.statusCode} OK</span>
+                <span className="text-[10px] text-zinc-500 uppercase block">
+                  Status:
+                </span>
+                <span className="text-emerald-400 font-bold">
+                  HTTP {inspectingDelivery.statusCode} OK
+                </span>
               </div>
               <div>
-                <span className="text-[10px] text-zinc-500 uppercase block">Duration:</span>
-                <span className="text-zinc-200">{inspectingDelivery.durationMs}ms</span>
+                <span className="text-[10px] text-zinc-500 uppercase block">
+                  Duration:
+                </span>
+                <span className="text-zinc-200">
+                  {inspectingDelivery.durationMs}ms
+                </span>
               </div>
             </div>
 
             <div className="space-y-1">
-              <span className="text-[10px] text-zinc-500 uppercase block">Target Endpoint:</span>
+              <span className="text-[10px] text-zinc-500 uppercase block">
+                Target Endpoint:
+              </span>
               <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 break-all">
                 {inspectingDelivery.targetUrl}
               </div>
             </div>
 
             <div className="space-y-1">
-              <span className="text-[10px] text-zinc-500 uppercase block">HMAC-SHA256 Signature (x-nexus-signature):</span>
+              <span className="text-[10px] text-zinc-500 uppercase block">
+                HMAC-SHA256 Signature (x-nexus-signature):
+              </span>
               <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-amber-300 break-all select-all font-bold">
                 {inspectingDelivery.signature}
               </div>
             </div>
 
             <div className="space-y-1">
-              <span className="text-[10px] text-zinc-500 uppercase block">Payload:</span>
+              <span className="text-[10px] text-zinc-500 uppercase block">
+                Payload:
+              </span>
               <pre className="p-3 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 overflow-x-auto text-[11px]">
                 {JSON.stringify(inspectingDelivery.payload, null, 2)}
               </pre>
             </div>
 
             <div className="flex justify-end pt-2">
-              <Button variant="outline" size="sm" onClick={() => setInspectingDelivery(null)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setInspectingDelivery(null)}
+              >
                 Close
               </Button>
             </div>
@@ -1551,9 +1831,16 @@ export default function AutomationsPage() {
           size="md"
           title="Create Outbound Webhook Subscription"
         >
-          <form onSubmit={handleCreateWebhook} className="space-y-4 text-sm" data-testid="create-webhook-modal">
+          <form
+            onSubmit={handleCreateWebhook}
+            className="space-y-4 text-sm"
+            data-testid="create-webhook-modal"
+          >
             <div className="space-y-1.5">
-              <label htmlFor="new-webhook-url" className="text-xs font-semibold text-[var(--color-text-secondary)]">
+              <label
+                htmlFor="new-webhook-url"
+                className="text-xs font-semibold text-[var(--color-text-secondary)]"
+              >
                 Target Endpoint URL *
               </label>
               <Input
@@ -1567,7 +1854,10 @@ export default function AutomationsPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="new-webhook-events" className="text-xs font-semibold text-[var(--color-text-secondary)]">
+              <label
+                htmlFor="new-webhook-events"
+                className="text-xs font-semibold text-[var(--color-text-secondary)]"
+              >
                 Subscribed Events (comma separated)
               </label>
               <Input
@@ -1580,7 +1870,10 @@ export default function AutomationsPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="new-webhook-secret" className="text-xs font-semibold text-[var(--color-text-secondary)]">
+              <label
+                htmlFor="new-webhook-secret"
+                className="text-xs font-semibold text-[var(--color-text-secondary)]"
+              >
                 HMAC Secret (leave blank to auto-generate)
               </label>
               <Input
@@ -1593,7 +1886,10 @@ export default function AutomationsPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="new-webhook-desc" className="text-xs font-semibold text-[var(--color-text-secondary)]">
+              <label
+                htmlFor="new-webhook-desc"
+                className="text-xs font-semibold text-[var(--color-text-secondary)]"
+              >
                 Description
               </label>
               <Input
@@ -1606,10 +1902,20 @@ export default function AutomationsPage() {
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" size="sm" type="button" onClick={() => setIsNewWebhookModalOpen(false)}>
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                onClick={() => setIsNewWebhookModalOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button variant="primary" size="sm" type="submit" data-testid="submit-new-webhook-btn">
+              <Button
+                variant="primary"
+                size="sm"
+                type="submit"
+                data-testid="submit-new-webhook-btn"
+              >
                 Create Subscription
               </Button>
             </div>
@@ -1630,18 +1936,30 @@ export default function AutomationsPage() {
           <div className="space-y-4 text-sm" data-testid="inspect-dlq-modal">
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1">
-                <span className="text-[var(--color-text-tertiary)] uppercase font-semibold">Target Endpoint</span>
-                <div className="font-mono text-indigo-300 truncate">{inspectingDlq.targetUrl}</div>
+                <span className="text-[var(--color-text-tertiary)] uppercase font-semibold">
+                  Target Endpoint
+                </span>
+                <div className="font-mono text-indigo-300 truncate">
+                  {inspectingDlq.targetUrl}
+                </div>
               </div>
               <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1">
-                <span className="text-[var(--color-text-tertiary)] uppercase font-semibold">Delivery Retries</span>
-                <div className="font-mono text-rose-300">{inspectingDlq.attempts} of 5 exhausted</div>
+                <span className="text-[var(--color-text-tertiary)] uppercase font-semibold">
+                  Delivery Retries
+                </span>
+                <div className="font-mono text-rose-300">
+                  {inspectingDlq.attempts} of 5 exhausted
+                </div>
               </div>
             </div>
 
             <div className="p-3 rounded-xl bg-rose-950/30 border border-rose-800/50 space-y-1">
-              <span className="text-xs font-semibold text-rose-300 uppercase">Fatal Failure Diagnostic</span>
-              <div className="font-mono text-xs text-rose-200">{inspectingDlq.lastError}</div>
+              <span className="text-xs font-semibold text-rose-300 uppercase">
+                Fatal Failure Diagnostic
+              </span>
+              <div className="font-mono text-xs text-rose-200">
+                {inspectingDlq.lastError}
+              </div>
             </div>
 
             <div className="space-y-1.5">
@@ -1655,10 +1973,15 @@ export default function AutomationsPage() {
 
             <div className="flex justify-between items-center pt-2">
               <span className="text-xs text-[var(--color-text-tertiary)]">
-                Quarantined: {new Date(inspectingDlq.createdAt).toLocaleString()}
+                Quarantined:{" "}
+                {new Date(inspectingDlq.createdAt).toLocaleString()}
               </span>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => setInspectingDlq(null)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setInspectingDlq(null)}
+                >
                   Close
                 </Button>
                 <Button
@@ -1668,7 +1991,7 @@ export default function AutomationsPage() {
                     handleReplayDlq(inspectingDlq.id);
                     setInspectingDlq(null);
                   }}
-                  disabled={inspectingDlq.replayedStatus === 'SUCCESS'}
+                  disabled={inspectingDlq.replayedStatus === "SUCCESS"}
                 >
                   <RotateCcw className="h-3.5 w-3.5 mr-1" />
                   Replay Now

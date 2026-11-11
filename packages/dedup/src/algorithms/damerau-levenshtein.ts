@@ -4,8 +4,8 @@
  */
 
 export function damerauLevenshteinDistance(a: string, b: string): number {
-  const s1 = a || '';
-  const s2 = b || '';
+  const s1 = a || "";
+  const s2 = b || "";
 
   if (s1 === s2) return 0;
   if (s1.length === 0) return s2.length;
@@ -16,7 +16,9 @@ export function damerauLevenshteinDistance(a: string, b: string): number {
 
   // Matrix: (len1 + 2) x (len2 + 2)
   const maxDist = len1 + len2;
-  const H: number[][] = Array.from({ length: len1 + 2 }, () => new Array(len2 + 2).fill(0));
+  const H: number[][] = Array.from({ length: len1 + 2 }, () =>
+    new Array(len2 + 2).fill(0),
+  );
 
   const setH = (i: number, j: number, val: number) => {
     const row = H[i];
@@ -70,8 +72,8 @@ export function damerauLevenshteinDistance(a: string, b: string): number {
 }
 
 export function damerauLevenshteinSimilarity(a: string, b: string): number {
-  const s1 = (a || '').trim().toLowerCase();
-  const s2 = (b || '').trim().toLowerCase();
+  const s1 = (a || "").trim().toLowerCase();
+  const s2 = (b || "").trim().toLowerCase();
 
   if (s1 === s2) return 1.0;
   const maxLen = Math.max(s1.length, s2.length);

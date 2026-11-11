@@ -1,0 +1,15 @@
+node_modules
+dist
+.next
+out
+build
+coverage
+*.log
+.env
+.env.*
+.turbo
+.DS_Store
+*.tsbuildinfo
+pnpm-lock.yaml
+docs/audit/scans
+apps/web/test-results

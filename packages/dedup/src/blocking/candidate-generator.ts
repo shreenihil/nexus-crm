@@ -3,8 +3,8 @@
  * Avoids O(N^2) pairwise comparison by clustering records into high-probability candidate buckets.
  */
 
-import { soundex, doubleMetaphone } from '../algorithms/phonetic.js';
-import { stripLegalSuffixes } from '../algorithms/token-sort.js';
+import { soundex, doubleMetaphone } from "../algorithms/phonetic.js";
+import { stripLegalSuffixes } from "../algorithms/token-sort.js";
 
 export interface DedupRecord {
   id: string;
@@ -24,7 +24,7 @@ export interface DedupRecord {
  */
 export function normalizePhoneKey(phone?: string): string | null {
   if (!phone) return null;
-  const digits = phone.replace(/\D/g, '');
+  const digits = phone.replace(/\D/g, "");
   if (digits.length < 7) return null;
   return digits.slice(-10); // match on national/subscriber 10 digits
 }
@@ -32,12 +32,14 @@ export function normalizePhoneKey(phone?: string): string | null {
 /**
  * Normalizes email to extract root domain and username prefix.
  */
-export function extractEmailParts(email?: string): { user: string; domain: string } | null {
-  if (!email || !email.includes('@')) return null;
-  const parts = email.trim().toLowerCase().split('@');
+export function extractEmailParts(
+  email?: string,
+): { user: string; domain: string } | null {
+  if (!email || !email.includes("@")) return null;
+  const parts = email.trim().toLowerCase().split("@");
   const user = parts[0];
   const domain = parts[1];
-  if (!user || !domain || !domain.includes('.')) return null;
+  if (!user || !domain || !domain.includes(".")) return null;
   return { user, domain };
 }
 
@@ -49,9 +51,9 @@ export function normalizeDomain(domain?: string): string | null {
   const cleaned = domain
     .trim()
     .toLowerCase()
-    .replace(/^https?:\/\//, '')
-    .replace(/^www\./, '');
-  const firstPart = cleaned.split('/')[0];
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "");
+  const firstPart = cleaned.split("/")[0];
   return firstPart || null;
 }
 
@@ -72,20 +74,25 @@ export function generateBlockingKeys(record: DedupRecord): string[] {
   if (emailParts) {
     keys.push(`email_exact:${emailParts.user}@${emailParts.domain}`);
     if (emailParts.user.length > 0) {
-      keys.push(`email_domain_initial:${emailParts.domain}:${emailParts.user.charAt(0)}`);
+      keys.push(
+        `email_domain_initial:${emailParts.domain}:${emailParts.user.charAt(0)}`,
+      );
     }
   }
 
   // 3. Last name phonetic + first initial (for contacts)
-  const lastName = record.lastName || (record.name ? record.name.split(' ').slice(1).join(' ') : '');
-  const firstName = record.firstName || (record.name ? (record.name.split(' ')[0] ?? '') : '');
+  const lastName =
+    record.lastName ||
+    (record.name ? record.name.split(" ").slice(1).join(" ") : "");
+  const firstName =
+    record.firstName || (record.name ? (record.name.split(" ")[0] ?? "") : "");
 
   if (lastName) {
     const sx = soundex(lastName);
     const dm = doubleMetaphone(lastName).primary;
-    const initial = (firstName.charAt(0) || '').toLowerCase();
+    const initial = (firstName.charAt(0) || "").toLowerCase();
 
-    if (sx !== '0000') {
+    if (sx !== "0000") {
       keys.push(`name_sx:${sx}:${initial}`);
     }
     if (dm) {
@@ -94,7 +101,9 @@ export function generateBlockingKeys(record: DedupRecord): string[] {
   }
 
   // 4. Company token prefix + domain (for companies)
-  const companyName = record.companyName || (record.entityName === 'companies' ? record.name : '');
+  const companyName =
+    record.companyName ||
+    (record.entityName === "companies" ? record.name : "");
   if (companyName) {
     const stripped = stripLegalSuffixes(companyName);
     const prefix = stripped.slice(0, 4).toLowerCase();
@@ -104,8 +113,19 @@ export function generateBlockingKeys(record: DedupRecord): string[] {
   }
 
   // 5. Website domain
-  const domainKey = normalizeDomain(record.domain || (emailParts ? emailParts.domain : undefined));
-  if (domainKey && !['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com'].includes(domainKey)) {
+  const domainKey = normalizeDomain(
+    record.domain || (emailParts ? emailParts.domain : undefined),
+  );
+  if (
+    domainKey &&
+    ![
+      "gmail.com",
+      "yahoo.com",
+      "outlook.com",
+      "hotmail.com",
+      "icloud.com",
+    ].includes(domainKey)
+  ) {
     keys.push(`domain:${domainKey}`);
   }
 

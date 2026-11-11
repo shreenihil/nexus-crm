@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2026-10-18
 
 ### Added
+
 - **Pluggable Storage SPI (`packages/storage-spi`)**:
   - `DatabaseAdapter` interface supporting Tier 1 (PostgreSQL with pgvector) and Tier 2 (SQLite / in-memory).
   - `ObjectStorageAdapter` interface supporting Tier 1 (AWS S3 / MinIO) and Tier 2 (Local filesystem / in-memory).
@@ -32,5 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Zero sample data in shipped app — clean start with standard canonical objects.
 
 ### Changed
+
 - Sanitized `.env.example` with descriptive generator placeholders.
 - Resolved all 70 TypeScript compile errors across monorepo packages.

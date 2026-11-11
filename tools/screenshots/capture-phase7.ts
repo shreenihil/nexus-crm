@@ -1,21 +1,21 @@
-import { chromium } from '@playwright/test';
-import * as fs from 'fs';
-import * as path from 'path';
+import { chromium } from "@playwright/test";
+import * as fs from "fs";
+import * as path from "path";
 
 const TARGET_DIRS = [
-  '/Users/shreenihilvijayan/Downloads/Projects /CRM/project photos',
-  '/Users/shreenihilvijayan/Projects/CRM/project photos',
+  "/Users/shreenihilvijayan/Downloads/Projects /CRM/project photos",
+  "/Users/shreenihilvijayan/Projects/CRM/project photos",
 ];
 
 async function main() {
-  console.log('Starting Step 4 Onboarding & LinkedIn Asset Generation...');
+  console.log("Starting Step 4 Onboarding & LinkedIn Asset Generation...");
   for (const dir of TARGET_DIRS) {
-    fs.mkdirSync(path.join(dir, '02-linkedin-images'), { recursive: true });
-    fs.mkdirSync(path.join(dir, '03-carousel'), { recursive: true });
-    fs.mkdirSync(path.join(dir, '04-onboarding'), { recursive: true });
-    fs.mkdirSync(path.join(dir, '05-video'), { recursive: true });
-    fs.mkdirSync(path.join(dir, '06-slideshow-html'), { recursive: true });
-    fs.mkdirSync(path.join(dir, '07-post-copy'), { recursive: true });
+    fs.mkdirSync(path.join(dir, "02-linkedin-images"), { recursive: true });
+    fs.mkdirSync(path.join(dir, "03-carousel"), { recursive: true });
+    fs.mkdirSync(path.join(dir, "04-onboarding"), { recursive: true });
+    fs.mkdirSync(path.join(dir, "05-video"), { recursive: true });
+    fs.mkdirSync(path.join(dir, "06-slideshow-html"), { recursive: true });
+    fs.mkdirSync(path.join(dir, "07-post-copy"), { recursive: true });
   }
 
   const browser = await chromium.launch({ headless: true });
@@ -27,29 +27,35 @@ async function main() {
   const page = await context.newPage();
 
   // 1. Capture Welcome Screen (English)
-  console.log('Capturing: Welcome Screen (English)...');
-  await page.goto('http://localhost:3000', { waitUntil: 'networkidle' });
+  console.log("Capturing: Welcome Screen (English)...");
+  await page.goto("http://localhost:3000", { waitUntil: "networkidle" });
   await page.evaluate(() => {
-    localStorage.removeItem('nexus_onboarding_state');
+    localStorage.removeItem("nexus_onboarding_state");
     window.location.reload();
   });
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState("networkidle");
   await page.waitForTimeout(1000);
 
   const welcomeShotEn = await page.screenshot();
   for (const dir of TARGET_DIRS) {
-    fs.writeFileSync(path.join(dir, '04-onboarding/01-welcome-screen-english.png'), welcomeShotEn);
+    fs.writeFileSync(
+      path.join(dir, "04-onboarding/01-welcome-screen-english.png"),
+      welcomeShotEn,
+    );
   }
 
   // 2. Capture Welcome Screen (Hindi)
-  console.log('Capturing: Welcome Screen (Hindi)...');
+  console.log("Capturing: Welcome Screen (Hindi)...");
   const hiBtn = page.locator('button:has-text("हिंदी")');
   if (await hiBtn.isVisible()) {
     await hiBtn.click();
     await page.waitForTimeout(500);
     const welcomeShotHi = await page.screenshot();
     for (const dir of TARGET_DIRS) {
-      fs.writeFileSync(path.join(dir, '04-onboarding/01-welcome-screen-hindi.png'), welcomeShotHi);
+      fs.writeFileSync(
+        path.join(dir, "04-onboarding/01-welcome-screen-hindi.png"),
+        welcomeShotHi,
+      );
     }
     // Switch back to English
     await page.locator('button:has-text("English")').click();
@@ -57,22 +63,25 @@ async function main() {
   }
 
   // 3. Continue to Carousel and capture all 6 slides
-  console.log('Capturing: Carousel Slides 1 to 6...');
+  console.log("Capturing: Carousel Slides 1 to 6...");
   await page.locator('button:has-text("Continue to Product Tour")').click();
   await page.waitForTimeout(600);
 
   for (let s = 1; s <= 6; s++) {
     const slideShot = await page.screenshot();
     const slideNames = [
-      '02-carousel-slide-1-custom-objects.png',
-      '02-carousel-slide-2-kanban-pipeline.png',
-      '02-carousel-slide-3-auto-capture.png',
-      '02-carousel-slide-4-deduplication.png',
-      '02-carousel-slide-5-sovereignty-audit.png',
-      '02-carousel-slide-6-quote-to-cash.png',
+      "02-carousel-slide-1-custom-objects.png",
+      "02-carousel-slide-2-kanban-pipeline.png",
+      "02-carousel-slide-3-auto-capture.png",
+      "02-carousel-slide-4-deduplication.png",
+      "02-carousel-slide-5-sovereignty-audit.png",
+      "02-carousel-slide-6-quote-to-cash.png",
     ];
     for (const dir of TARGET_DIRS) {
-      fs.writeFileSync(path.join(dir, '04-onboarding', slideNames[s - 1]), slideShot);
+      fs.writeFileSync(
+        path.join(dir, "04-onboarding", slideNames[s - 1]),
+        slideShot,
+      );
     }
     if (s < 6) {
       await page.locator('button:has-text("Next")').click();
@@ -81,14 +90,17 @@ async function main() {
   }
 
   // 4. Launch Product Tour and capture coach marks
-  console.log('Capturing: Product Tour CoachMarks...');
+  console.log("Capturing: Product Tour CoachMarks...");
   await page.locator('button:has-text("Launch Product Tour")').click();
   await page.waitForTimeout(800);
 
   // Coach mark 1: Deals
   const tourShot1 = await page.screenshot();
   for (const dir of TARGET_DIRS) {
-    fs.writeFileSync(path.join(dir, '04-onboarding/03-product-tour-kanban-coachmark.png'), tourShot1);
+    fs.writeFileSync(
+      path.join(dir, "04-onboarding/03-product-tour-kanban-coachmark.png"),
+      tourShot1,
+    );
   }
 
   // Coach mark 2: Command Palette
@@ -96,7 +108,13 @@ async function main() {
   await page.waitForTimeout(500);
   const tourShot2 = await page.screenshot();
   for (const dir of TARGET_DIRS) {
-    fs.writeFileSync(path.join(dir, '04-onboarding/03-product-tour-command-palette-coachmark.png'), tourShot2);
+    fs.writeFileSync(
+      path.join(
+        dir,
+        "04-onboarding/03-product-tour-command-palette-coachmark.png",
+      ),
+      tourShot2,
+    );
   }
 
   // Coach mark 3: New Deal
@@ -104,7 +122,10 @@ async function main() {
   await page.waitForTimeout(500);
   const tourShot3 = await page.screenshot();
   for (const dir of TARGET_DIRS) {
-    fs.writeFileSync(path.join(dir, '04-onboarding/03-product-tour-new-deal-coachmark.png'), tourShot3);
+    fs.writeFileSync(
+      path.join(dir, "04-onboarding/03-product-tour-new-deal-coachmark.png"),
+      tourShot3,
+    );
   }
 
   // Skip remaining tour to land on Dashboard with Checklist
@@ -112,16 +133,22 @@ async function main() {
   await page.waitForTimeout(600);
 
   // 5. Capture Clean Dashboard with Onboarding Checklist
-  console.log('Capturing: Clean Dashboard & Onboarding Checklist...');
+  console.log("Capturing: Clean Dashboard & Onboarding Checklist...");
   const dashChecklistShot = await page.screenshot();
   for (const dir of TARGET_DIRS) {
-    fs.writeFileSync(path.join(dir, '04-onboarding/04-checklist-active.png'), dashChecklistShot);
-    fs.writeFileSync(path.join(dir, '04-onboarding/05-clean-dashboard-empty-state.png'), dashChecklistShot);
+    fs.writeFileSync(
+      path.join(dir, "04-onboarding/04-checklist-active.png"),
+      dashChecklistShot,
+    );
+    fs.writeFileSync(
+      path.join(dir, "04-onboarding/05-clean-dashboard-empty-state.png"),
+      dashChecklistShot,
+    );
   }
 
   // 6. Generate 10-slide LinkedIn Document Carousel HTML and export to PNG & PDF
-  console.log('Generating: 10-Slide LinkedIn Document Carousel...');
-  const carouselHtmlPath = path.join(__dirname, 'carousel-template.html');
+  console.log("Generating: 10-Slide LinkedIn Document Carousel...");
+  const carouselHtmlPath = path.join(__dirname, "carousel-template.html");
   const carouselHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -481,26 +508,32 @@ async function main() {
   for (let i = 1; i <= 10; i++) {
     const slideHandle = carouselPage.locator(`#slide-${i}`);
     const slideBuffer = await slideHandle.screenshot();
-    const filename = `slide-${String(i).padStart(2, '0')}.png`;
+    const filename = `slide-${String(i).padStart(2, "0")}.png`;
     for (const dir of TARGET_DIRS) {
-      fs.writeFileSync(path.join(dir, '03-carousel', filename), slideBuffer);
+      fs.writeFileSync(path.join(dir, "03-carousel", filename), slideBuffer);
     }
   }
 
   // Export combined PDF
-  console.log('Exporting: crm-linkedin-carousel.pdf...');
+  console.log("Exporting: crm-linkedin-carousel.pdf...");
   const pdfBuffer = await carouselPage.pdf({
-    width: '1080px',
-    height: '1350px',
+    width: "1080px",
+    height: "1350px",
     printBackground: true,
   });
   for (const dir of TARGET_DIRS) {
-    fs.writeFileSync(path.join(dir, '03-carousel/crm-linkedin-carousel.pdf'), pdfBuffer);
+    fs.writeFileSync(
+      path.join(dir, "03-carousel/crm-linkedin-carousel.pdf"),
+      pdfBuffer,
+    );
   }
 
   // 7. Render LinkedIn Single-Image Cards (1200x627, 1080x1080, 1080x1350)
-  console.log('Rendering: LinkedIn Single-Image Post Cards...');
-  const cardTemplateHtmlPath = path.join(__dirname, 'linkedin-card-template.html');
+  console.log("Rendering: LinkedIn Single-Image Post Cards...");
+  const cardTemplateHtmlPath = path.join(
+    __dirname,
+    "linkedin-card-template.html",
+  );
   const cardTemplateHtml = `<!DOCTYPE html>
 <html>
 <head>
@@ -609,8 +642,14 @@ async function main() {
   await cardPage.waitForTimeout(300);
   const cardLandscape = await cardPage.screenshot();
   for (const dir of TARGET_DIRS) {
-    fs.writeFileSync(path.join(dir, '02-linkedin-images/01-linkedin-hero-1200x627-dark.png'), cardLandscape);
-    fs.writeFileSync(path.join(dir, '02-linkedin-images/01-linkedin-hero-1200x627-light.png'), cardLandscape);
+    fs.writeFileSync(
+      path.join(dir, "02-linkedin-images/01-linkedin-hero-1200x627-dark.png"),
+      cardLandscape,
+    );
+    fs.writeFileSync(
+      path.join(dir, "02-linkedin-images/01-linkedin-hero-1200x627-light.png"),
+      cardLandscape,
+    );
   }
 
   // Square: 1080x1080
@@ -618,8 +657,20 @@ async function main() {
   await cardPage.waitForTimeout(300);
   const cardSquare = await cardPage.screenshot();
   for (const dir of TARGET_DIRS) {
-    fs.writeFileSync(path.join(dir, '02-linkedin-images/02-linkedin-square-1080x1080-dark.png'), cardSquare);
-    fs.writeFileSync(path.join(dir, '02-linkedin-images/02-linkedin-square-1080x1080-light.png'), cardSquare);
+    fs.writeFileSync(
+      path.join(
+        dir,
+        "02-linkedin-images/02-linkedin-square-1080x1080-dark.png",
+      ),
+      cardSquare,
+    );
+    fs.writeFileSync(
+      path.join(
+        dir,
+        "02-linkedin-images/02-linkedin-square-1080x1080-light.png",
+      ),
+      cardSquare,
+    );
   }
 
   // Portrait: 1080x1350
@@ -627,13 +678,31 @@ async function main() {
   await cardPage.waitForTimeout(300);
   const cardPortrait = await cardPage.screenshot();
   for (const dir of TARGET_DIRS) {
-    fs.writeFileSync(path.join(dir, '02-linkedin-images/03-linkedin-portrait-1080x1350-dark.png'), cardPortrait);
-    fs.writeFileSync(path.join(dir, '02-linkedin-images/03-linkedin-portrait-1080x1350-light.png'), cardPortrait);
-    fs.writeFileSync(path.join(dir, '02-linkedin-images/04-linkedin-composite-side-by-side.png'), cardPortrait);
+    fs.writeFileSync(
+      path.join(
+        dir,
+        "02-linkedin-images/03-linkedin-portrait-1080x1350-dark.png",
+      ),
+      cardPortrait,
+    );
+    fs.writeFileSync(
+      path.join(
+        dir,
+        "02-linkedin-images/03-linkedin-portrait-1080x1350-light.png",
+      ),
+      cardPortrait,
+    );
+    fs.writeFileSync(
+      path.join(
+        dir,
+        "02-linkedin-images/04-linkedin-composite-side-by-side.png",
+      ),
+      cardPortrait,
+    );
   }
 
   // 8. Generate 06-slideshow-html/index.html
-  console.log('Generating: Standalone HTML Slideshow...');
+  console.log("Generating: Standalone HTML Slideshow...");
   const slideshowHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -681,11 +750,14 @@ async function main() {
 </html>`;
 
   for (const dir of TARGET_DIRS) {
-    fs.writeFileSync(path.join(dir, '06-slideshow-html/index.html'), slideshowHtml);
+    fs.writeFileSync(
+      path.join(dir, "06-slideshow-html/index.html"),
+      slideshowHtml,
+    );
   }
 
   // 9. Write Post Copy Package in 07-post-copy/
-  console.log('Writing: Post Copy, Hashtags, Alt Text & Manifest...');
+  console.log("Writing: Post Copy, Hashtags, Alt Text & Manifest...");
   const postCopyContent = `# LinkedIn Post Copy Variants — Nexus CRM Product Launch
 
 ---
@@ -797,44 +869,63 @@ Nexus CRM is a sovereign, keyboard-first B2B sales platform featuring sub-millis
 `;
 
   for (const dir of TARGET_DIRS) {
-    fs.writeFileSync(path.join(dir, '07-post-copy/linkedin-post.md'), postCopyContent);
-    fs.writeFileSync(path.join(dir, '07-post-copy/hashtags.md'), hashtagsContent);
-    fs.writeFileSync(path.join(dir, '07-post-copy/alt-text.md'), altTextContent);
-    fs.writeFileSync(path.join(dir, '07-post-copy/project-summary.md'), projectSummaryContent);
+    fs.writeFileSync(
+      path.join(dir, "07-post-copy/linkedin-post.md"),
+      postCopyContent,
+    );
+    fs.writeFileSync(
+      path.join(dir, "07-post-copy/hashtags.md"),
+      hashtagsContent,
+    );
+    fs.writeFileSync(
+      path.join(dir, "07-post-copy/alt-text.md"),
+      altTextContent,
+    );
+    fs.writeFileSync(
+      path.join(dir, "07-post-copy/project-summary.md"),
+      projectSummaryContent,
+    );
   }
 
   // 10. Update manifest.json with all assets
-  console.log('Writing: manifest.json...');
+  console.log("Writing: manifest.json...");
   const manifest = {
-    projectName: 'Nexus CRM — Sovereign Multi-Tenant CRM',
-    version: '1.0.0',
+    projectName: "Nexus CRM — Sovereign Multi-Tenant CRM",
+    version: "1.0.0",
     exportTimestamp: new Date().toISOString(),
-    author: 'Shree Nihil Vijayan',
-    currencyDefault: 'INR (₹ Lakhs & Crores)',
+    author: "Shree Nihil Vijayan",
+    currencyDefault: "INR (₹ Lakhs & Crores)",
     directories: {
-      rawScreenshots: '01-raw-screenshots/ (15 core views in light, dark, mobile)',
-      linkedinImages: '02-linkedin-images/ (1200x627, 1080x1080, 1080x1350)',
-      documentCarousel: '03-carousel/ (10 slide PNGs + crm-linkedin-carousel.pdf)',
-      onboardingFlow: '04-onboarding/ (Welcome, Carousel, CoachMarks, Checklist)',
-      videoAssets: '05-video/ (Tour recording placeholders & script)',
-      slideshowHtml: '06-slideshow-html/ (Standalone interactive presentation)',
-      postCopy: '07-post-copy/ (Captions, hashtags, alt-text, summaries)',
-      privateSnapshots: '_private/ (Database snapshots for capture repeatability)',
+      rawScreenshots:
+        "01-raw-screenshots/ (15 core views in light, dark, mobile)",
+      linkedinImages: "02-linkedin-images/ (1200x627, 1080x1080, 1080x1350)",
+      documentCarousel:
+        "03-carousel/ (10 slide PNGs + crm-linkedin-carousel.pdf)",
+      onboardingFlow:
+        "04-onboarding/ (Welcome, Carousel, CoachMarks, Checklist)",
+      videoAssets: "05-video/ (Tour recording placeholders & script)",
+      slideshowHtml: "06-slideshow-html/ (Standalone interactive presentation)",
+      postCopy: "07-post-copy/ (Captions, hashtags, alt-text, summaries)",
+      privateSnapshots:
+        "_private/ (Database snapshots for capture repeatability)",
     },
     totalGeneratedAssets: 48,
     compliance: {
-      wcag: '2.2 AA',
-      piiLeakScan: 'PASSED (0 markers)',
-      forbiddenSampleDataScan: 'PASSED (0 markers)',
+      wcag: "2.2 AA",
+      piiLeakScan: "PASSED (0 markers)",
+      forbiddenSampleDataScan: "PASSED (0 markers)",
     },
   };
 
   for (const dir of TARGET_DIRS) {
-    fs.writeFileSync(path.join(dir, '07-post-copy/manifest.json'), JSON.stringify(manifest, null, 2));
+    fs.writeFileSync(
+      path.join(dir, "07-post-copy/manifest.json"),
+      JSON.stringify(manifest, null, 2),
+    );
   }
 
   await browser.close();
-  console.log('Step 4 Onboarding & Marketing Generation Complete!');
+  console.log("Step 4 Onboarding & Marketing Generation Complete!");
 }
 
 main().catch(console.error);

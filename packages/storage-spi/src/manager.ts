@@ -1,28 +1,28 @@
-import type { DatabaseAdapter } from './database.js';
-import type { ObjectStorageAdapter } from './object-storage.js';
-import type { QueueCacheAdapter } from './queue-cache.js';
-import type { AdapterHealth } from './capabilities.js';
-import { MemoryDatabaseAdapter } from './adapters/memory-database.js';
-import { MemoryObjectStorageAdapter } from './adapters/object-storage-adapters.js';
-import { MemoryQueueCacheAdapter } from './adapters/queue-cache-adapters.js';
+import type { DatabaseAdapter } from "./database.js";
+import type { ObjectStorageAdapter } from "./object-storage.js";
+import type { QueueCacheAdapter } from "./queue-cache.js";
+import type { AdapterHealth } from "./capabilities.js";
+import { MemoryDatabaseAdapter } from "./adapters/memory-database.js";
+import { MemoryObjectStorageAdapter } from "./adapters/object-storage-adapters.js";
+import { MemoryQueueCacheAdapter } from "./adapters/queue-cache-adapters.js";
 
 export interface BackendOverview {
   database: {
     name: string;
     tier: 1 | 2;
-    capabilities: ReturnType<DatabaseAdapter['getCapabilities']>;
+    capabilities: ReturnType<DatabaseAdapter["getCapabilities"]>;
     health: AdapterHealth;
   };
   objectStorage: {
     name: string;
     tier: 1 | 2;
-    capabilities: ReturnType<ObjectStorageAdapter['getCapabilities']>;
+    capabilities: ReturnType<ObjectStorageAdapter["getCapabilities"]>;
     health: AdapterHealth;
   };
   queueCache: {
     name: string;
     tier: 1 | 2;
-    capabilities: ReturnType<QueueCacheAdapter['getCapabilities']>;
+    capabilities: ReturnType<QueueCacheAdapter["getCapabilities"]>;
     health: AdapterHealth;
   };
 }
@@ -35,7 +35,7 @@ export class StorageManager {
   constructor(
     dbAdapter?: DatabaseAdapter,
     objAdapter?: ObjectStorageAdapter,
-    queueAdapter?: QueueCacheAdapter
+    queueAdapter?: QueueCacheAdapter,
   ) {
     this.dbAdapter = dbAdapter || new MemoryDatabaseAdapter();
     this.objAdapter = objAdapter || new MemoryObjectStorageAdapter();
@@ -87,13 +87,15 @@ export class StorageManager {
    * Safe read-only test connection probe.
    * Probes connectivity without writing data or altering state.
    */
-  async probeConnection(type: 'database' | 'objectStorage' | 'queueCache'): Promise<AdapterHealth> {
+  async probeConnection(
+    type: "database" | "objectStorage" | "queueCache",
+  ): Promise<AdapterHealth> {
     switch (type) {
-      case 'database':
+      case "database":
         return this.dbAdapter.healthCheck();
-      case 'objectStorage':
+      case "objectStorage":
         return this.objAdapter.healthCheck();
-      case 'queueCache':
+      case "queueCache":
         return this.queueAdapter.healthCheck();
     }
   }
@@ -106,8 +108,16 @@ export class StorageManager {
     source: DatabaseAdapter,
     target: DatabaseAdapter,
     tables: string[],
-    options: { dryRun?: boolean; batchSize?: number; onProgress?: (table: string, count: number) => void } = {}
-  ): Promise<{ totalRows: number; tablesMigrated: string[]; verified: boolean }> {
+    options: {
+      dryRun?: boolean;
+      batchSize?: number;
+      onProgress?: (table: string, count: number) => void;
+    } = {},
+  ): Promise<{
+    totalRows: number;
+    tablesMigrated: string[];
+    verified: boolean;
+  }> {
     const batchSize = options.batchSize || 200;
     let totalRows = 0;
     const tablesMigrated: string[] = [];

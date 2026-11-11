@@ -1,12 +1,12 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const pipelineStageSchema = z.object({
   id: z.string(),
-  name: z.string().min(1, 'Stage name is required'),
+  name: z.string().min(1, "Stage name is required"),
   stageOrder: z.number().int().nonnegative(),
   winProbability: z.number().min(0).max(100),
   rottingDaysThreshold: z.number().int().positive().default(14),
-  color: z.string().default('#6366f1'),
+  color: z.string().default("#6366f1"),
 });
 
 export type PipelineStage = z.infer<typeof pipelineStageSchema>;
@@ -14,7 +14,7 @@ export type PipelineStage = z.infer<typeof pipelineStageSchema>;
 export const pipelineSchema = z.object({
   id: z.string(),
   workspaceId: z.string(),
-  name: z.string().min(1, 'Pipeline name is required'),
+  name: z.string().min(1, "Pipeline name is required"),
   isDefault: z.boolean().default(true),
   stages: z.array(pipelineStageSchema),
   createdAt: z.string(),
@@ -34,12 +34,54 @@ export const stageTransitionSchema = z.object({
 export type StageTransition = z.infer<typeof stageTransitionSchema>;
 
 export const DEFAULT_PIPELINE_STAGES: PipelineStage[] = [
-  { id: 'discovery', name: 'Discovery', stageOrder: 0, winProbability: 20, rottingDaysThreshold: 14, color: '#3b82f6' },
-  { id: 'qualification', name: 'Qualification', stageOrder: 1, winProbability: 40, rottingDaysThreshold: 14, color: '#8b5cf6' },
-  { id: 'proposal', name: 'Proposal Sent', stageOrder: 2, winProbability: 60, rottingDaysThreshold: 10, color: '#06b6d4' },
-  { id: 'negotiation', name: 'Negotiation', stageOrder: 3, winProbability: 80, rottingDaysThreshold: 7, color: '#f59e0b' },
-  { id: 'closed_won', name: 'Closed Won', stageOrder: 4, winProbability: 100, rottingDaysThreshold: 999, color: '#10b981' },
-  { id: 'closed_lost', name: 'Closed Lost', stageOrder: 5, winProbability: 0, rottingDaysThreshold: 999, color: '#ef4444' },
+  {
+    id: "discovery",
+    name: "Discovery",
+    stageOrder: 0,
+    winProbability: 20,
+    rottingDaysThreshold: 14,
+    color: "#3b82f6",
+  },
+  {
+    id: "qualification",
+    name: "Qualification",
+    stageOrder: 1,
+    winProbability: 40,
+    rottingDaysThreshold: 14,
+    color: "#8b5cf6",
+  },
+  {
+    id: "proposal",
+    name: "Proposal Sent",
+    stageOrder: 2,
+    winProbability: 60,
+    rottingDaysThreshold: 10,
+    color: "#06b6d4",
+  },
+  {
+    id: "negotiation",
+    name: "Negotiation",
+    stageOrder: 3,
+    winProbability: 80,
+    rottingDaysThreshold: 7,
+    color: "#f59e0b",
+  },
+  {
+    id: "closed_won",
+    name: "Closed Won",
+    stageOrder: 4,
+    winProbability: 100,
+    rottingDaysThreshold: 999,
+    color: "#10b981",
+  },
+  {
+    id: "closed_lost",
+    name: "Closed Lost",
+    stageOrder: 5,
+    winProbability: 0,
+    rottingDaysThreshold: 999,
+    color: "#ef4444",
+  },
 ];
 
 /**
@@ -55,16 +97,22 @@ export function isDealRotting(daysInStage: number, threshold: number): boolean {
  */
 export function calculatePipelineMetrics(
   deals: Array<{ amount: number; stage: string }>,
-  stages: PipelineStage[] = DEFAULT_PIPELINE_STAGES
+  stages: PipelineStage[] = DEFAULT_PIPELINE_STAGES,
 ): {
   totalAmount: number;
   weightedAmount: number;
   dealCount: number;
-  stageBreakdown: Record<string, { count: number; amount: number; weightedAmount: number }>;
+  stageBreakdown: Record<
+    string,
+    { count: number; amount: number; weightedAmount: number }
+  >;
 } {
   let totalAmount = 0;
   let weightedAmount = 0;
-  const stageBreakdown: Record<string, { count: number; amount: number; weightedAmount: number }> = {};
+  const stageBreakdown: Record<
+    string,
+    { count: number; amount: number; weightedAmount: number }
+  > = {};
 
   for (const s of stages) {
     stageBreakdown[s.name] = { count: 0, amount: 0, weightedAmount: 0 };
@@ -75,7 +123,7 @@ export function calculatePipelineMetrics(
     totalAmount += amt;
 
     const matchedStage = stages.find(
-      (s) => s.name.toLowerCase() === (deal.stage || '').toLowerCase()
+      (s) => s.name.toLowerCase() === (deal.stage || "").toLowerCase(),
     );
     const prob = matchedStage ? matchedStage.winProbability : 50;
     const weighted = amt * (prob / 100);

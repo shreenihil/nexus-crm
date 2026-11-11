@@ -1,4 +1,7 @@
-import type { QueueCacheCapabilityFlags, AdapterHealth } from './capabilities.js';
+import type {
+  QueueCacheCapabilityFlags,
+  AdapterHealth,
+} from "./capabilities.js";
 
 export interface LockHandle {
   release(): Promise<void>;
@@ -22,7 +25,10 @@ export interface QueueCacheAdapter {
 
   // Pub/Sub
   publish(channel: string, message: string): Promise<number>;
-  subscribe(channel: string, handler: (message: string) => void): Promise<() => void>;
+  subscribe(
+    channel: string,
+    handler: (message: string) => void,
+  ): Promise<() => void>;
 
   // Distributed Locks
   acquireLock(lockKey: string, ttlMs: number): Promise<LockHandle | null>;

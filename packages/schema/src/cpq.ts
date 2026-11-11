@@ -1,16 +1,20 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-export const productBillingPeriodSchema = z.enum(['one_time', 'monthly', 'annual']);
+export const productBillingPeriodSchema = z.enum([
+  "one_time",
+  "monthly",
+  "annual",
+]);
 export type ProductBillingPeriod = z.infer<typeof productBillingPeriodSchema>;
 
 export const productSchema = z.object({
   id: z.string(),
   workspaceId: z.string(),
-  sku: z.string().min(1, 'SKU is required'),
-  name: z.string().min(1, 'Product name is required'),
+  sku: z.string().min(1, "SKU is required"),
+  name: z.string().min(1, "Product name is required"),
   description: z.string().optional(),
-  unitPrice: z.number().nonnegative('Unit price must be non-negative'),
-  billingPeriod: productBillingPeriodSchema.default('one_time'),
+  unitPrice: z.number().nonnegative("Unit price must be non-negative"),
+  billingPeriod: productBillingPeriodSchema.default("one_time"),
   isActive: z.boolean().default(true),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -24,7 +28,7 @@ export const quoteLineItemSchema = z.object({
   productName: z.string(),
   sku: z.string(),
   billingPeriod: productBillingPeriodSchema,
-  quantity: z.number().int().positive('Quantity must be at least 1'),
+  quantity: z.number().int().positive("Quantity must be at least 1"),
   unitPrice: z.number().nonnegative(),
   discountPercent: z.number().min(0).max(100).default(0),
   totalPrice: z.number().nonnegative(),
@@ -33,12 +37,12 @@ export const quoteLineItemSchema = z.object({
 export type QuoteLineItem = z.infer<typeof quoteLineItemSchema>;
 
 export const quoteStatusSchema = z.enum([
-  'draft',
-  'pending_approval',
-  'approved',
-  'sent',
-  'accepted',
-  'declined',
+  "draft",
+  "pending_approval",
+  "approved",
+  "sent",
+  "accepted",
+  "declined",
 ]);
 export type QuoteStatus = z.infer<typeof quoteStatusSchema>;
 
@@ -56,7 +60,7 @@ export const quoteSchema = z.object({
   total: z.number().nonnegative(),
   arr: z.number().nonnegative().default(0),
   tcv: z.number().nonnegative().default(0),
-  status: quoteStatusSchema.default('draft'),
+  status: quoteStatusSchema.default("draft"),
   requiresApproval: z.boolean().default(false),
   approvalNotes: z.string().optional(),
   createdAt: z.string(),
@@ -81,7 +85,7 @@ export function calculateQuoteTotals(
     discountPercent?: number;
   }>,
   volumeDiscountPercent: number = 0,
-  taxRatePercent: number = 0
+  taxRatePercent: number = 0,
 ): {
   lineItems: QuoteLineItem[];
   subtotal: number;
@@ -113,10 +117,10 @@ export function calculateQuoteTotals(
     subtotal += finalLineTotal;
 
     // Calculate ARR & TCV contributions
-    if (item.billingPeriod === 'monthly') {
+    if (item.billingPeriod === "monthly") {
       arr += finalLineTotal * 12;
       tcv += finalLineTotal * 12; // 1-year baseline for contract value
-    } else if (item.billingPeriod === 'annual') {
+    } else if (item.billingPeriod === "annual") {
       arr += finalLineTotal;
       tcv += finalLineTotal;
     } else {
@@ -144,7 +148,8 @@ export function calculateQuoteTotals(
   const total = Math.round((taxableAmount + taxAmount) * 100) / 100;
 
   // If either volume discount or any line discount exceeds threshold, trigger approval workflow
-  const requiresApproval = volDiscount > DISCOUNT_APPROVAL_THRESHOLD_PERCENT || hasHeavyLineDiscount;
+  const requiresApproval =
+    volDiscount > DISCOUNT_APPROVAL_THRESHOLD_PERCENT || hasHeavyLineDiscount;
 
   return {
     lineItems: processedItems,

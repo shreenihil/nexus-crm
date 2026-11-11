@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeAll } from 'vitest';
-import { createServer } from '../server.js';
-import { db } from '../db/index.js';
-import { computeTotpCode } from '../lib/crypto.js';
-import type { FastifyInstance } from 'fastify';
+import { describe, it, expect, beforeAll } from "vitest";
+import { createServer } from "../server.js";
+import { db } from "../db/index.js";
+import { computeTotpCode } from "../lib/crypto.js";
+import type { FastifyInstance } from "fastify";
 
-describe('Nexus CRM API & RLS Integration Tests', () => {
+describe("Nexus CRM API & RLS Integration Tests", () => {
   let app: FastifyInstance;
 
   beforeAll(async () => {
@@ -12,51 +12,51 @@ describe('Nexus CRM API & RLS Integration Tests', () => {
     await app.ready();
   });
 
-  it('Health endpoint returns healthy status', async () => {
+  it("Health endpoint returns healthy status", async () => {
     const res = await app.inject({
-      method: 'GET',
-      url: '/v1/health',
+      method: "GET",
+      url: "/v1/health",
     });
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.body);
-    expect(body.status).toBe('healthy');
+    expect(body.status).toBe("healthy");
   });
 
-  it('Flow: Register user + workspace -> creates owner membership & session', async () => {
+  it("Flow: Register user + workspace -> creates owner membership & session", async () => {
     const res = await app.inject({
-      method: 'POST',
-      url: '/v1/auth/register',
+      method: "POST",
+      url: "/v1/auth/register",
       payload: {
-        email: 'founder@acme.inc',
-        password: 'SuperSecretPassword123!',
-        firstName: 'Arthur',
-        lastName: 'Dent',
-        workspaceName: 'Acme Corporation',
+        email: "founder@acme.inc",
+        password: "SuperSecretPassword123!",
+        firstName: "Arthur",
+        lastName: "Dent",
+        workspaceName: "Acme Corporation",
       },
     });
 
     expect(res.statusCode).toBe(201);
     const body = JSON.parse(res.body);
-    expect(body.user.email).toBe('founder@acme.inc');
-    expect(body.workspace.name).toBe('Acme Corporation');
+    expect(body.user.email).toBe("founder@acme.inc");
+    expect(body.workspace.name).toBe("Acme Corporation");
     expect(body.sessionId).toBeDefined();
 
     // Check cookie
-    const cookies = res.headers['set-cookie'];
+    const cookies = res.headers["set-cookie"];
     expect(cookies).toBeDefined();
   });
 
-  it('Flow: MFA enrollment and two-factor challenge during login', async () => {
+  it("Flow: MFA enrollment and two-factor challenge during login", async () => {
     // 1. Register a dedicated MFA user
     const regRes = await app.inject({
-      method: 'POST',
-      url: '/v1/auth/register',
+      method: "POST",
+      url: "/v1/auth/register",
       payload: {
-        email: 'security.officer@acme.inc',
-        password: 'PasswordEnterprise99!',
-        firstName: 'Jane',
-        lastName: 'Doe',
-        workspaceName: 'Acme Security',
+        email: "security.officer@acme.inc",
+        password: "PasswordEnterprise99!",
+        firstName: "Jane",
+        lastName: "Doe",
+        workspaceName: "Acme Security",
       },
     });
     const regBody = JSON.parse(regRes.body);
@@ -64,8 +64,8 @@ describe('Nexus CRM API & RLS Integration Tests', () => {
 
     // 2. Setup MFA
     const setupRes = await app.inject({
-      method: 'POST',
-      url: '/v1/auth/mfa/setup',
+      method: "POST",
+      url: "/v1/auth/mfa/setup",
       headers: {
         authorization: `Bearer ${sessionId}`,
       },
@@ -73,13 +73,13 @@ describe('Nexus CRM API & RLS Integration Tests', () => {
     expect(setupRes.statusCode).toBe(200);
     const { secret, otpauthUri } = JSON.parse(setupRes.body);
     expect(secret).toBeDefined();
-    expect(otpauthUri).toContain('otpauth://totp/Nexus%20CRM:');
+    expect(otpauthUri).toContain("otpauth://totp/Nexus%20CRM:");
 
     // 3. Compute code and verify MFA
     const validCode = computeTotpCode(secret);
     const verifyRes = await app.inject({
-      method: 'POST',
-      url: '/v1/auth/mfa/verify',
+      method: "POST",
+      url: "/v1/auth/mfa/verify",
       headers: {
         authorization: `Bearer ${sessionId}`,
       },
@@ -92,11 +92,11 @@ describe('Nexus CRM API & RLS Integration Tests', () => {
 
     // 4. Login now requires MFA
     const loginRes = await app.inject({
-      method: 'POST',
-      url: '/v1/auth/login',
+      method: "POST",
+      url: "/v1/auth/login",
       payload: {
-        email: 'security.officer@acme.inc',
-        password: 'PasswordEnterprise99!',
+        email: "security.officer@acme.inc",
+        password: "PasswordEnterprise99!",
       },
     });
     expect(loginRes.statusCode).toBe(200);
@@ -107,8 +107,8 @@ describe('Nexus CRM API & RLS Integration Tests', () => {
     // 5. Complete MFA challenge
     const challengeCode = computeTotpCode(secret);
     const challengeRes = await app.inject({
-      method: 'POST',
-      url: '/v1/auth/mfa/challenge',
+      method: "POST",
+      url: "/v1/auth/mfa/challenge",
       payload: {
         mfaTicket: loginBody.mfaTicket,
         token: challengeCode,
@@ -120,17 +120,17 @@ describe('Nexus CRM API & RLS Integration Tests', () => {
     expect(challengeBody.sessionId).toBeDefined();
   });
 
-  it('RLS Isolation Proof: Tenant A cannot read Tenant B data', async () => {
+  it("RLS Isolation Proof: Tenant A cannot read Tenant B data", async () => {
     // 1. Create Tenant A
     const resA = await app.inject({
-      method: 'POST',
-      url: '/v1/auth/register',
+      method: "POST",
+      url: "/v1/auth/register",
       payload: {
-        email: 'alice@tenant-a.com',
-        password: 'PasswordTenantA123!',
-        firstName: 'Alice',
-        lastName: 'Alpha',
-        workspaceName: 'Tenant Alpha',
+        email: "alice@tenant-a.com",
+        password: "PasswordTenantA123!",
+        firstName: "Alice",
+        lastName: "Alpha",
+        workspaceName: "Tenant Alpha",
       },
     });
     const sessionA = JSON.parse(resA.body).sessionId;
@@ -138,14 +138,14 @@ describe('Nexus CRM API & RLS Integration Tests', () => {
 
     // 2. Create Tenant B
     const resB = await app.inject({
-      method: 'POST',
-      url: '/v1/auth/register',
+      method: "POST",
+      url: "/v1/auth/register",
       payload: {
-        email: 'bob@tenant-b.com',
-        password: 'PasswordTenantB123!',
-        firstName: 'Bob',
-        lastName: 'Beta',
-        workspaceName: 'Tenant Beta',
+        email: "bob@tenant-b.com",
+        password: "PasswordTenantB123!",
+        firstName: "Bob",
+        lastName: "Beta",
+        workspaceName: "Tenant Beta",
       },
     });
     const sessionB = JSON.parse(resB.body).sessionId;
@@ -153,8 +153,8 @@ describe('Nexus CRM API & RLS Integration Tests', () => {
 
     // 3. Query audit events as Tenant A
     const eventsARes = await app.inject({
-      method: 'GET',
-      url: '/v1/audit/events',
+      method: "GET",
+      url: "/v1/audit/events",
       headers: { authorization: `Bearer ${sessionA}` },
     });
     expect(eventsARes.statusCode).toBe(200);
@@ -168,19 +168,23 @@ describe('Nexus CRM API & RLS Integration Tests', () => {
     }
 
     // 4. Test RLS context directly
-    db.withRlsContext(workspaceIdA, 'user-a', (scopedDb) => {
+    db.withRlsContext(workspaceIdA, "user-a", (scopedDb) => {
       expect(scopedDb.workspaceId).toBe(workspaceIdA);
       const ws = scopedDb.getWorkspace();
       expect(ws?.id).toBe(workspaceIdA);
-      expect(ws?.name).toBe('Tenant Alpha');
+      expect(ws?.name).toBe("Tenant Alpha");
 
       const auditRecords = scopedDb.getAuditEvents();
-      expect(auditRecords.every((r) => r.workspaceId === workspaceIdA)).toBe(true);
-      expect(auditRecords.some((r) => r.workspaceId === workspaceIdB)).toBe(false);
+      expect(auditRecords.every((r) => r.workspaceId === workspaceIdA)).toBe(
+        true,
+      );
+      expect(auditRecords.some((r) => r.workspaceId === workspaceIdB)).toBe(
+        false,
+      );
     });
   });
 
-  it('Audit Log Hash Chain: Detects tampering if row is modified', async () => {
+  it("Audit Log Hash Chain: Detects tampering if row is modified", async () => {
     // Check integrity before tampering
     expect(db.verifyAuditChainIntegrity()).toBe(true);
 
@@ -190,10 +194,12 @@ describe('Nexus CRM API & RLS Integration Tests', () => {
 
     try {
       // Tamper with payload
-      originalEvent.payload = { ...originalPayload, forgedField: 'malicious' };
+      originalEvent.payload = { ...originalPayload, forgedField: "malicious" };
 
       // Verification MUST throw
-      expect(() => db.verifyAuditChainIntegrity()).toThrow(/hash tampering detected/);
+      expect(() => db.verifyAuditChainIntegrity()).toThrow(
+        /hash tampering detected/,
+      );
     } finally {
       // Restore original
       originalEvent.payload = originalPayload;

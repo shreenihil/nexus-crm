@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import * as React from "react";
+import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Save,
@@ -34,10 +34,10 @@ import {
   Trophy,
   TrendingUp,
   Zap,
-} from 'lucide-react';
-import { Button, Input, Badge, Modal, MoneyDisplay } from '@nexus/ui';
-import { Money, formatMoney } from '@nexus/schema';
-import { apiFetch } from '@/lib/api';
+} from "lucide-react";
+import { Button, Input, Badge, Modal, MoneyDisplay } from "@nexus/ui";
+import { Money, formatMoney } from "@nexus/schema";
+import { apiFetch } from "@/lib/api";
 
 interface ObjectMeta {
   id: string;
@@ -60,7 +60,7 @@ interface AttributeMeta {
 
 interface RelatedLink {
   linkId: string;
-  direction: 'forward' | 'backward';
+  direction: "forward" | "backward";
   relationLabel: string;
   record: {
     id: string;
@@ -84,7 +84,14 @@ interface RecordDetail {
 
 interface TimelineItem {
   id: string;
-  type: 'stage_transition' | 'note' | 'call' | 'meeting' | 'task' | 'audit' | string;
+  type:
+    | "stage_transition"
+    | "note"
+    | "call"
+    | "meeting"
+    | "task"
+    | "audit"
+    | string;
   title: string;
   body: string | null;
   timestamp: string;
@@ -97,7 +104,7 @@ interface ProductItem {
   sku: string;
   name: string;
   description: string;
-  pricingType: 'one_time' | 'recurring_monthly' | 'recurring_annual';
+  pricingType: "one_time" | "recurring_monthly" | "recurring_annual";
   unitPrice: number;
   currency: string;
 }
@@ -124,19 +131,32 @@ interface QuoteItem {
   total: number;
   arr: number;
   tcv: number;
-  status: 'draft' | 'pending_approval' | 'approved' | 'presented' | 'accepted' | 'rejected';
+  status:
+    | "draft"
+    | "pending_approval"
+    | "approved"
+    | "presented"
+    | "accepted"
+    | "rejected";
   requiresApproval: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-const STAGES = ['Discovery', 'Qualification', 'Proposal Sent', 'Negotiation', 'Closed Won', 'Closed Lost'];
+const STAGES = [
+  "Discovery",
+  "Qualification",
+  "Proposal Sent",
+  "Negotiation",
+  "Closed Won",
+  "Closed Lost",
+];
 
 export default function RecordDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const objectApiName = (params.object as string) || '';
-  const recordId = (params.id as string) || '';
+  const objectApiName = (params.object as string) || "";
+  const recordId = (params.id as string) || "";
 
   const [objectMeta, setObjectMeta] = React.useState<ObjectMeta | null>(null);
   const [allObjects, setAllObjects] = React.useState<ObjectMeta[]>([]);
@@ -149,20 +169,26 @@ export default function RecordDetailPage() {
   const [toastMessage, setToastMessage] = React.useState<string | null>(null);
 
   // Active Right-Pane Tab
-  const [activeTab, setActiveTab] = React.useState<'timeline' | 'quotes' | 'relations' | 'audit'>('timeline');
+  const [activeTab, setActiveTab] = React.useState<
+    "timeline" | "quotes" | "relations" | "audit"
+  >("timeline");
 
   // Link Record Dialog
   const [isLinkDialogOpen, setIsLinkDialogOpen] = React.useState(false);
   const [relationships, setRelationships] = React.useState<any[]>([]);
-  const [selectedRelId, setSelectedRelId] = React.useState('');
-  const [targetRecordId, setTargetRecordId] = React.useState('');
+  const [selectedRelId, setSelectedRelId] = React.useState("");
+  const [targetRecordId, setTargetRecordId] = React.useState("");
   const [linking, setLinking] = React.useState(false);
 
   // Timeline & Activities state
-  const [timelineEvents, setTimelineEvents] = React.useState<TimelineItem[]>([]);
-  const [activityType, setActivityType] = React.useState<'note' | 'call' | 'meeting' | 'task'>('note');
-  const [activitySubject, setActivitySubject] = React.useState('');
-  const [activityBody, setActivityBody] = React.useState('');
+  const [timelineEvents, setTimelineEvents] = React.useState<TimelineItem[]>(
+    [],
+  );
+  const [activityType, setActivityType] = React.useState<
+    "note" | "call" | "meeting" | "task"
+  >("note");
+  const [activitySubject, setActivitySubject] = React.useState("");
+  const [activityBody, setActivityBody] = React.useState("");
   const [submittingActivity, setSubmittingActivity] = React.useState(false);
 
   // CPQ & Quotes state (for deals)
@@ -170,19 +196,27 @@ export default function RecordDetailPage() {
   const [products, setProducts] = React.useState<ProductItem[]>([]);
   const [isNewQuoteOpen, setIsNewQuoteOpen] = React.useState(false);
   const [quoteItems, setQuoteItems] = React.useState<
-    Array<{ productId: string; name: string; quantity: number; unitPrice: number; discountPercent: number }>
+    Array<{
+      productId: string;
+      name: string;
+      quantity: number;
+      unitPrice: number;
+      discountPercent: number;
+    }>
   >([]);
-  const [selectedProductId, setSelectedProductId] = React.useState('');
+  const [selectedProductId, setSelectedProductId] = React.useState("");
   const [volumeDiscountPercent, setVolumeDiscountPercent] = React.useState(0);
   const [taxRatePercent, setTaxRatePercent] = React.useState(8.25);
   const [submittingQuote, setSubmittingQuote] = React.useState(false);
-  const [approvingQuoteId, setApprovingQuoteId] = React.useState<string | null>(null);
+  const [approvingQuoteId, setApprovingQuoteId] = React.useState<string | null>(
+    null,
+  );
 
   // Lead Conversion state
   const [isConvertLeadOpen, setIsConvertLeadOpen] = React.useState(false);
-  const [convertDealName, setConvertDealName] = React.useState('');
-  const [convertDealAmount, setConvertDealAmount] = React.useState('250000');
-  const [convertDealStage, setConvertDealStage] = React.useState('Discovery');
+  const [convertDealName, setConvertDealName] = React.useState("");
+  const [convertDealAmount, setConvertDealAmount] = React.useState("250000");
+  const [convertDealStage, setConvertDealStage] = React.useState("Discovery");
   const [convertingLead, setConvertingLead] = React.useState(false);
 
   // Stage transition loading
@@ -195,7 +229,7 @@ export default function RecordDetailPage() {
       setError(null);
 
       // 1. Fetch Objects
-      const objects = await apiFetch<ObjectMeta[]>('/v1/metadata/objects');
+      const objects = await apiFetch<ObjectMeta[]>("/v1/metadata/objects");
       setAllObjects(objects);
       const found = objects.find((o) => o.apiName === objectApiName);
       if (!found) {
@@ -204,39 +238,47 @@ export default function RecordDetailPage() {
       setObjectMeta(found);
 
       // 2. Fetch Attributes
-      const attrs = await apiFetch<AttributeMeta[]>(`/v1/metadata/objects/${found.id}/attributes`);
+      const attrs = await apiFetch<AttributeMeta[]>(
+        `/v1/metadata/objects/${found.id}/attributes`,
+      );
       setAttributes(attrs);
 
       // 3. Fetch Record Detail
-      const rec = await apiFetch<RecordDetail>(`/v1/records/${objectApiName}/${recordId}`);
+      const rec = await apiFetch<RecordDetail>(
+        `/v1/records/${objectApiName}/${recordId}`,
+      );
       setRecord(rec);
       setFormData(rec.data || {});
 
       // 4. Fetch Relationships for linking dialog
-      const rels = await apiFetch<any[]>('/v1/metadata/relationships');
+      const rels = await apiFetch<any[]>("/v1/metadata/relationships");
       setRelationships(rels);
 
       // 5. Fetch Universal Timeline
       try {
-        const timelineRes = await apiFetch<{ events: TimelineItem[] }>(`/v1/activities/timeline/${recordId}`);
+        const timelineRes = await apiFetch<{ events: TimelineItem[] }>(
+          `/v1/activities/timeline/${recordId}`,
+        );
         setTimelineEvents(timelineRes.events || []);
       } catch (tErr) {
-        console.warn('Timeline fetch non-fatal:', tErr);
+        console.warn("Timeline fetch non-fatal:", tErr);
       }
 
       // 6. If deals, fetch Quotes and Products
-      if (objectApiName === 'deals') {
+      if (objectApiName === "deals") {
         try {
-          const quotesRes = await apiFetch<QuoteItem[]>(`/v1/cpq/quotes?dealId=${recordId}`);
+          const quotesRes = await apiFetch<QuoteItem[]>(
+            `/v1/cpq/quotes?dealId=${recordId}`,
+          );
           setQuotes(quotesRes || []);
-          const productsRes = await apiFetch<ProductItem[]>('/v1/cpq/products');
+          const productsRes = await apiFetch<ProductItem[]>("/v1/cpq/products");
           setProducts(productsRes || []);
         } catch (qErr) {
-          console.warn('Quotes fetch non-fatal:', qErr);
+          console.warn("Quotes fetch non-fatal:", qErr);
         }
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to load record');
+      setError(err.message || "Failed to load record");
     } finally {
       setLoading(false);
     }
@@ -253,24 +295,31 @@ export default function RecordDetailPage() {
     setSaving(true);
     setError(null);
     try {
-      const updated = await apiFetch<RecordDetail>(`/v1/records/${objectApiName}/${recordId}`, {
-        method: 'PATCH',
-        body: JSON.stringify({
-          data: formData,
-          version: record.version, // Optimistic concurrency token
-        }),
-      });
+      const updated = await apiFetch<RecordDetail>(
+        `/v1/records/${objectApiName}/${recordId}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({
+            data: formData,
+            version: record.version, // Optimistic concurrency token
+          }),
+        },
+      );
 
       setRecord(updated);
       setFormData(updated.data);
-      setToastMessage('Record updated and formula values recomputed successfully!');
+      setToastMessage(
+        "Record updated and formula values recomputed successfully!",
+      );
       setTimeout(() => setToastMessage(null), 4000);
 
       // Refresh timeline
-      const timelineRes = await apiFetch<{ events: TimelineItem[] }>(`/v1/activities/timeline/${recordId}`);
+      const timelineRes = await apiFetch<{ events: TimelineItem[] }>(
+        `/v1/activities/timeline/${recordId}`,
+      );
       setTimelineEvents(timelineRes.events || []);
     } catch (err: any) {
-      setError(err.message || 'Failed to save changes');
+      setError(err.message || "Failed to save changes");
     } finally {
       setSaving(false);
     }
@@ -284,9 +333,9 @@ export default function RecordDetailPage() {
       const res = await apiFetch<{ deal: any; transition: any }>(
         `/v1/pipelines/deals/${recordId}/stage`,
         {
-          method: 'POST',
+          method: "POST",
           body: JSON.stringify({ targetStageName }),
-        }
+        },
       );
 
       if (res.deal) {
@@ -307,11 +356,13 @@ export default function RecordDetailPage() {
       setTimeout(() => setToastMessage(null), 4000);
 
       // Refresh timeline in background
-      apiFetch<{ events: TimelineItem[] }>(`/v1/activities/timeline/${recordId}`)
+      apiFetch<{ events: TimelineItem[] }>(
+        `/v1/activities/timeline/${recordId}`,
+      )
         .then((t) => setTimelineEvents(t.events || []))
         .catch(() => {});
     } catch (err: any) {
-      setError(err.message || 'Stage transition failed');
+      setError(err.message || "Stage transition failed");
     } finally {
       setTransitioningStage(false);
     }
@@ -319,12 +370,17 @@ export default function RecordDetailPage() {
 
   // Handle Soft Delete
   const handleDeleteRecord = async () => {
-    if (!confirm('Are you sure you want to move this record to the 30-day recycle bin?')) return;
+    if (
+      !confirm(
+        "Are you sure you want to move this record to the 30-day recycle bin?",
+      )
+    )
+      return;
     try {
       await apiFetch(`/v1/records/${objectApiName}/${recordId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
-      alert('Record deleted.');
+      alert("Record deleted.");
       router.push(`/records/${objectApiName}`);
     } catch (err: any) {
       alert(`Delete failed: ${err.message}`);
@@ -338,7 +394,7 @@ export default function RecordDetailPage() {
     setLinking(true);
     try {
       await apiFetch(`/v1/records/${objectApiName}/${recordId}/links`, {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify({
           relationshipId: selectedRelId,
           targetRecordId,
@@ -346,10 +402,10 @@ export default function RecordDetailPage() {
       });
 
       setIsLinkDialogOpen(false);
-      setSelectedRelId('');
-      setTargetRecordId('');
+      setSelectedRelId("");
+      setTargetRecordId("");
       await loadRecordData();
-      setToastMessage('Bidirectional record link created!');
+      setToastMessage("Bidirectional record link created!");
       setTimeout(() => setToastMessage(null), 4000);
     } catch (err: any) {
       alert(`Linking error: ${err.message}`);
@@ -364,8 +420,8 @@ export default function RecordDetailPage() {
     if (!activitySubject.trim()) return;
     setSubmittingActivity(true);
     try {
-      await apiFetch('/v1/activities', {
-        method: 'POST',
+      await apiFetch("/v1/activities", {
+        method: "POST",
         body: JSON.stringify({
           type: activityType,
           subject: activitySubject.trim(),
@@ -374,11 +430,13 @@ export default function RecordDetailPage() {
         }),
       });
 
-      setActivitySubject('');
-      setActivityBody('');
-      const timelineRes = await apiFetch<{ events: TimelineItem[] }>(`/v1/activities/timeline/${recordId}`);
+      setActivitySubject("");
+      setActivityBody("");
+      const timelineRes = await apiFetch<{ events: TimelineItem[] }>(
+        `/v1/activities/timeline/${recordId}`,
+      );
       setTimelineEvents(timelineRes.events || []);
-      setToastMessage('Activity logged to universal timeline!');
+      setToastMessage("Activity logged to universal timeline!");
       setTimeout(() => setToastMessage(null), 4000);
     } catch (err: any) {
       alert(`Log activity failed: ${err.message}`);
@@ -403,31 +461,35 @@ export default function RecordDetailPage() {
         discountPercent: 0,
       },
     ]);
-    setSelectedProductId('');
+    setSelectedProductId("");
   };
 
   // Live CPQ Quote Totals
   const quoteSubtotal = quoteItems.reduce(
-    (sum, item) => sum + item.quantity * item.unitPrice * (1 - item.discountPercent / 100),
-    0
+    (sum, item) =>
+      sum + item.quantity * item.unitPrice * (1 - item.discountPercent / 100),
+    0,
   );
-  const quoteVolumeDiscountAmount = quoteSubtotal * (volumeDiscountPercent / 100);
+  const quoteVolumeDiscountAmount =
+    quoteSubtotal * (volumeDiscountPercent / 100);
   const quoteNet = quoteSubtotal - quoteVolumeDiscountAmount;
   const quoteTaxAmount = quoteNet * (taxRatePercent / 100);
   const quoteTotal = quoteNet + quoteTaxAmount;
-  const requiresApproval = volumeDiscountPercent > 20 || quoteItems.some((i) => i.discountPercent > 20);
+  const requiresApproval =
+    volumeDiscountPercent > 20 ||
+    quoteItems.some((i) => i.discountPercent > 20);
 
   // Submit Quote
   const handleCreateQuote = async (e: React.FormEvent) => {
     e.preventDefault();
     if (quoteItems.length === 0) {
-      alert('Please add at least one line item.');
+      alert("Please add at least one line item.");
       return;
     }
     setSubmittingQuote(true);
     try {
-      await apiFetch('/v1/cpq/quotes', {
-        method: 'POST',
+      await apiFetch("/v1/cpq/quotes", {
+        method: "POST",
         body: JSON.stringify({
           dealId: recordId,
           items: quoteItems,
@@ -439,11 +501,15 @@ export default function RecordDetailPage() {
       setIsNewQuoteOpen(false);
       setQuoteItems([]);
       setVolumeDiscountPercent(0);
-      const quotesRes = await apiFetch<QuoteItem[]>(`/v1/cpq/quotes?dealId=${recordId}`);
+      const quotesRes = await apiFetch<QuoteItem[]>(
+        `/v1/cpq/quotes?dealId=${recordId}`,
+      );
       setQuotes(quotesRes || []);
-      const timelineRes = await apiFetch<{ events: TimelineItem[] }>(`/v1/activities/timeline/${recordId}`);
+      const timelineRes = await apiFetch<{ events: TimelineItem[] }>(
+        `/v1/activities/timeline/${recordId}`,
+      );
       setTimelineEvents(timelineRes.events || []);
-      setToastMessage('Quote generated successfully!');
+      setToastMessage("Quote generated successfully!");
       setTimeout(() => setToastMessage(null), 4000);
     } catch (err: any) {
       alert(`Quote creation failed: ${err.message}`);
@@ -457,13 +523,17 @@ export default function RecordDetailPage() {
     setApprovingQuoteId(quoteId);
     try {
       await apiFetch(`/v1/cpq/quotes/${quoteId}/approve`, {
-        method: 'PATCH',
+        method: "PATCH",
       });
-      const quotesRes = await apiFetch<QuoteItem[]>(`/v1/cpq/quotes?dealId=${recordId}`);
+      const quotesRes = await apiFetch<QuoteItem[]>(
+        `/v1/cpq/quotes?dealId=${recordId}`,
+      );
       setQuotes(quotesRes || []);
-      const timelineRes = await apiFetch<{ events: TimelineItem[] }>(`/v1/activities/timeline/${recordId}`);
+      const timelineRes = await apiFetch<{ events: TimelineItem[] }>(
+        `/v1/activities/timeline/${recordId}`,
+      );
       setTimelineEvents(timelineRes.events || []);
-      setToastMessage('Quote discount approved by manager!');
+      setToastMessage("Quote discount approved by manager!");
       setTimeout(() => setToastMessage(null), 4000);
     } catch (err: any) {
       alert(`Approve failed: ${err.message}`);
@@ -477,16 +547,19 @@ export default function RecordDetailPage() {
     e.preventDefault();
     setConvertingLead(true);
     try {
-      const res = await apiFetch<any>(`/v1/records/people/${recordId}/convert-to-deal`, {
-        method: 'POST',
-        body: JSON.stringify({
-          dealName: convertDealName,
-          dealAmount: parseFloat(convertDealAmount) || 0,
-          pipelineStage: convertDealStage,
-        }),
-      });
+      const res = await apiFetch<any>(
+        `/v1/records/people/${recordId}/convert-to-deal`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            dealName: convertDealName,
+            dealAmount: parseFloat(convertDealAmount) || 0,
+            pipelineStage: convertDealStage,
+          }),
+        },
+      );
       setIsConvertLeadOpen(false);
-      setToastMessage('Lead successfully converted to Opportunity!');
+      setToastMessage("Lead successfully converted to Opportunity!");
       if (res?.deal?.id) {
         setTimeout(() => router.push(`/records/deals/${res.deal.id}`), 800);
       }
@@ -507,15 +580,17 @@ export default function RecordDetailPage() {
 
   const primaryTitle =
     formData.name ||
-    (formData.first_name ? `${formData.first_name} ${formData.last_name || ''}` : '') ||
+    (formData.first_name
+      ? `${formData.first_name} ${formData.last_name || ""}`
+      : "") ||
     formData.subject ||
-    `Record #${record?.id ? record.id.slice(0, 8) : (recordId ? String(recordId).slice(0, 8) : '')}`;
+    `Record #${record?.id ? record.id.slice(0, 8) : recordId ? String(recordId).slice(0, 8) : ""}`;
 
   // Rotting check for deals
   const isDealRotting =
-    objectApiName === 'deals' &&
-    ((formData.stage === 'Discovery' && Number(formData.amount) === 320000) ||
-      formData.stage === 'Discovery' ||
+    objectApiName === "deals" &&
+    ((formData.stage === "Discovery" && Number(formData.amount) === 320000) ||
+      formData.stage === "Discovery" ||
       formData.isRotting);
 
   return (
@@ -530,26 +605,36 @@ export default function RecordDetailPage() {
             onClick={() => router.push(`/records/${objectApiName}`)}
             className="shrink-0"
           >
-            <ArrowLeft className="h-4 w-4" /> Back to {objectMeta?.pluralLabel || 'Records'}
+            <ArrowLeft className="h-4 w-4" /> Back to{" "}
+            {objectMeta?.pluralLabel || "Records"}
           </Button>
           <div className="h-4 w-px bg-[var(--color-border-default)] shrink-0 hidden sm:block" />
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-xl font-bold tracking-tight text-[var(--color-text-primary)] truncate max-w-xs sm:max-w-md lg:max-w-lg">
               {primaryTitle}
             </span>
-            <Badge variant="neutral" className="shrink-0">{objectMeta?.singularLabel || 'Record'}</Badge>
-            {formData.stage && <Badge variant="accent" className="shrink-0">{formData.stage}</Badge>}
+            <Badge variant="neutral" className="shrink-0">
+              {objectMeta?.singularLabel || "Record"}
+            </Badge>
+            {formData.stage && (
+              <Badge variant="accent" className="shrink-0">
+                {formData.stage}
+              </Badge>
+            )}
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          {objectApiName === 'people' && (
+          {objectApiName === "people" && (
             <Button
               id="btn-convert-lead"
               variant="secondary"
               size="sm"
               onClick={() => {
-                setConvertDealName(`${formData.first_name || ''} ${formData.last_name || ''}`.trim() + ' Opportunity');
+                setConvertDealName(
+                  `${formData.first_name || ""} ${formData.last_name || ""}`.trim() +
+                    " Opportunity",
+                );
                 setIsConvertLeadOpen(true);
               }}
             >
@@ -557,12 +642,12 @@ export default function RecordDetailPage() {
             </Button>
           )}
 
-          {objectApiName === 'deals' && (
+          {objectApiName === "deals" && (
             <Button
               id="btn-switch-kanban"
               variant="outline"
               size="sm"
-              onClick={() => router.push('/deals/board')}
+              onClick={() => router.push("/deals/board")}
             >
               <TrendingUp className="h-4 w-4" /> Pipeline Board
             </Button>
@@ -609,7 +694,7 @@ export default function RecordDetailPage() {
       )}
 
       {/* DEAL STAGE PROGRESSION PIPELINE BANNER (If Deals) */}
-      {objectApiName === 'deals' && (
+      {objectApiName === "deals" && (
         <div className="p-4 rounded-[10px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] shadow-sm flex flex-col gap-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
@@ -628,7 +713,10 @@ export default function RecordDetailPage() {
                 className="flex items-center gap-1.5 px-3 py-1 rounded-[6px] bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-200 text-xs font-semibold animate-pulse"
               >
                 <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
-                <span>Rotting SLA Warning: Exceeded velocity threshold for {formData.stage || 'Discovery'}</span>
+                <span>
+                  Rotting SLA Warning: Exceeded velocity threshold for{" "}
+                  {formData.stage || "Discovery"}
+                </span>
               </div>
             )}
           </div>
@@ -642,16 +730,16 @@ export default function RecordDetailPage() {
               return (
                 <button
                   key={stg}
-                  id={`stage-step-${stg.toLowerCase().replace(/\s+/g, '-')}`}
+                  id={`stage-step-${stg.toLowerCase().replace(/\s+/g, "-")}`}
                   type="button"
                   disabled={transitioningStage}
                   onClick={() => handleStageChange(stg)}
                   className={`p-2.5 rounded-[8px] text-xs font-semibold text-center transition-all border flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
                     isCurrent
-                      ? 'bg-[var(--color-accent-primary)] text-white border-[var(--color-accent-primary)] shadow-sm'
+                      ? "bg-[var(--color-accent-primary)] text-white border-[var(--color-accent-primary)] shadow-sm"
                       : isPast
-                      ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100'
-                      : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-muted)] border-[var(--color-border-default)] hover:border-[var(--color-accent-primary)]/50'
+                        ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100"
+                        : "bg-[var(--color-bg-subtle)] text-[var(--color-text-muted)] border-[var(--color-border-default)] hover:border-[var(--color-accent-primary)]/50"
                   }`}
                 >
                   <div className="flex items-center gap-1">
@@ -659,7 +747,11 @@ export default function RecordDetailPage() {
                     <span>{stg}</span>
                   </div>
                   <span className="text-[10px] opacity-75 font-mono">
-                    {isCurrent ? 'Active Stage' : isPast ? 'Completed' : 'Upcoming'}
+                    {isCurrent
+                      ? "Active Stage"
+                      : isPast
+                        ? "Completed"
+                        : "Upcoming"}
                   </span>
                 </button>
               );
@@ -703,7 +795,7 @@ export default function RecordDetailPage() {
                   const val = formData[attr.apiName];
 
                   // Read-Only Formula Attribute
-                  if (attr.type === 'formula') {
+                  if (attr.type === "formula") {
                     return (
                       <div
                         key={attr.id}
@@ -720,13 +812,19 @@ export default function RecordDetailPage() {
                         <div className="text-right">
                           <div className="font-mono text-base font-bold text-[var(--color-text-primary)]">
                             {val !== undefined && val !== null ? (
-                              typeof val === 'number' ? (
-                                <MoneyDisplay amount={val} isSubunits={false} currency="INR" compact size="sm" />
+                              typeof val === "number" ? (
+                                <MoneyDisplay
+                                  amount={val}
+                                  isSubunits={false}
+                                  currency="INR"
+                                  compact
+                                  size="sm"
+                                />
                               ) : (
                                 String(val)
                               )
                             ) : (
-                              '0'
+                              "0"
                             )}
                           </div>
                           <span className="text-[10px] text-[var(--color-text-muted)] block">
@@ -738,18 +836,24 @@ export default function RecordDetailPage() {
                   }
 
                   // Dropdown Single Select
-                  if (attr.type === 'dropdown_single') {
+                  if (attr.type === "dropdown_single") {
                     return (
                       <div key={attr.id} className="flex flex-col gap-1.5">
                         <label className="text-xs font-semibold text-[var(--color-text-secondary)]">
-                          {attr.label} {attr.isRequired && <span className="text-rose-500">*</span>}
+                          {attr.label}{" "}
+                          {attr.isRequired && (
+                            <span className="text-rose-500">*</span>
+                          )}
                         </label>
                         <select
                           id={`input-attr-${attr.apiName}`}
                           className="w-full min-w-0 h-10 px-3 rounded-[6px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-primary)] truncate"
-                          value={val || ''}
+                          value={val || ""}
                           onChange={(e) =>
-                            setFormData({ ...formData, [attr.apiName]: e.target.value })
+                            setFormData({
+                              ...formData,
+                              [attr.apiName]: e.target.value,
+                            })
                           }
                           required={attr.isRequired}
                         >
@@ -768,20 +872,20 @@ export default function RecordDetailPage() {
                     <div key={attr.id} className="flex flex-col gap-1">
                       <Input
                         id={`input-attr-${attr.apiName}`}
-                        label={`${attr.label} ${attr.isRequired ? '*' : ''}`}
+                        label={`${attr.label} ${attr.isRequired ? "*" : ""}`}
                         type={
-                          attr.type === 'number' || attr.type === 'currency'
-                            ? 'number'
-                            : attr.type === 'date'
-                            ? 'date'
-                            : 'text'
+                          attr.type === "number" || attr.type === "currency"
+                            ? "number"
+                            : attr.type === "date"
+                              ? "date"
+                              : "text"
                         }
-                        value={val !== undefined && val !== null ? val : ''}
+                        value={val !== undefined && val !== null ? val : ""}
                         onChange={(e) =>
                           setFormData({
                             ...formData,
                             [attr.apiName]:
-                              attr.type === 'number' || attr.type === 'currency'
+                              attr.type === "number" || attr.type === "currency"
                                 ? parseFloat(e.target.value) || 0
                                 : e.target.value,
                           })
@@ -794,7 +898,13 @@ export default function RecordDetailPage() {
               </div>
 
               <div className="flex justify-end pt-2">
-                <Button id="btn-save-record-bottom" variant="primary" size="md" type="submit" loading={saving}>
+                <Button
+                  id="btn-save-record-bottom"
+                  variant="primary"
+                  size="md"
+                  type="submit"
+                  loading={saving}
+                >
                   <Save className="h-4 w-4" /> Save Changes
                 </Button>
               </div>
@@ -809,26 +919,26 @@ export default function RecordDetailPage() {
             <button
               type="button"
               id="tab-universal-timeline"
-              onClick={() => setActiveTab('timeline')}
+              onClick={() => setActiveTab("timeline")}
               className={`flex-1 py-1.5 px-3 rounded-[6px] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
-                activeTab === 'timeline'
-                  ? 'bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] shadow-xs'
-                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+                activeTab === "timeline"
+                  ? "bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] shadow-xs"
+                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
               }`}
             >
               <Activity className="h-3.5 w-3.5" />
               <span>Timeline ({timelineEvents.length})</span>
             </button>
 
-            {objectApiName === 'deals' && (
+            {objectApiName === "deals" && (
               <button
                 type="button"
                 id="tab-cpq-quotes"
-                onClick={() => setActiveTab('quotes')}
+                onClick={() => setActiveTab("quotes")}
                 className={`flex-1 py-1.5 px-3 rounded-[6px] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
-                  activeTab === 'quotes'
-                    ? 'bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] shadow-xs'
-                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+                  activeTab === "quotes"
+                    ? "bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] shadow-xs"
+                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
                 }`}
               >
                 <FileSpreadsheet className="h-3.5 w-3.5" />
@@ -839,11 +949,11 @@ export default function RecordDetailPage() {
             <button
               type="button"
               id="tab-related-records"
-              onClick={() => setActiveTab('relations')}
+              onClick={() => setActiveTab("relations")}
               className={`flex-1 py-1.5 px-3 rounded-[6px] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
-                activeTab === 'relations'
-                  ? 'bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] shadow-xs'
-                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+                activeTab === "relations"
+                  ? "bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] shadow-xs"
+                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
               }`}
             >
               <Link2 className="h-3.5 w-3.5" />
@@ -853,11 +963,11 @@ export default function RecordDetailPage() {
             <button
               type="button"
               id="tab-audit-timeline"
-              onClick={() => setActiveTab('audit')}
+              onClick={() => setActiveTab("audit")}
               className={`flex-1 py-1.5 px-3 rounded-[6px] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
-                activeTab === 'audit'
-                  ? 'bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] shadow-xs'
-                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+                activeTab === "audit"
+                  ? "bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] shadow-xs"
+                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
               }`}
             >
               <History className="h-3.5 w-3.5" />
@@ -866,7 +976,7 @@ export default function RecordDetailPage() {
           </div>
 
           {/* TAB: UNIVERSAL ACTIVITY TIMELINE */}
-          {activeTab === 'timeline' && (
+          {activeTab === "timeline" && (
             <div className="rounded-[10px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] p-5 shadow-sm flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -874,16 +984,22 @@ export default function RecordDetailPage() {
                     Universal Activity Timeline
                   </h3>
                   <p className="text-xs text-[var(--color-text-muted)]">
-                    Interleaved stage transitions, notes, meetings & audit trails
+                    Interleaved stage transitions, notes, meetings & audit
+                    trails
                   </p>
                 </div>
               </div>
 
               {/* Log Activity Form */}
-              <form onSubmit={handleLogActivity} className="p-3.5 rounded-[8px] bg-[var(--color-bg-subtle)] border border-[var(--color-border-default)] flex flex-col gap-3">
+              <form
+                onSubmit={handleLogActivity}
+                className="p-3.5 rounded-[8px] bg-[var(--color-bg-subtle)] border border-[var(--color-border-default)] flex flex-col gap-3"
+              >
                 <div className="flex items-center gap-1">
-                  <span className="text-xs font-semibold text-[var(--color-text-secondary)] mr-1">Type:</span>
-                  {(['note', 'call', 'meeting', 'task'] as const).map((t) => (
+                  <span className="text-xs font-semibold text-[var(--color-text-secondary)] mr-1">
+                    Type:
+                  </span>
+                  {(["note", "call", "meeting", "task"] as const).map((t) => (
                     <button
                       key={t}
                       type="button"
@@ -891,8 +1007,8 @@ export default function RecordDetailPage() {
                       onClick={() => setActivityType(t)}
                       className={`px-2.5 py-1 rounded-[6px] text-[11px] font-semibold capitalize transition-all ${
                         activityType === t
-                          ? 'bg-[var(--color-accent-primary)] text-white'
-                          : 'bg-[var(--color-bg-surface)] text-[var(--color-text-muted)] border border-[var(--color-border-default)] hover:text-[var(--color-text-primary)]'
+                          ? "bg-[var(--color-accent-primary)] text-white"
+                          : "bg-[var(--color-bg-surface)] text-[var(--color-text-muted)] border border-[var(--color-border-default)] hover:text-[var(--color-text-primary)]"
                       }`}
                     >
                       {t}
@@ -933,15 +1049,16 @@ export default function RecordDetailPage() {
               <div className="flex flex-col gap-3 mt-1">
                 {timelineEvents.length === 0 ? (
                   <div className="p-8 text-center text-xs text-[var(--color-text-muted)] border border-dashed border-[var(--color-border-default)] rounded-[8px]">
-                    No activity recorded yet. Post a note or schedule a call above.
+                    No activity recorded yet. Post a note or schedule a call
+                    above.
                   </div>
                 ) : (
                   timelineEvents.map((evt) => {
-                    const isStage = evt.type === 'stage_transition';
-                    const isAudit = evt.type === 'audit';
-                    const isCall = evt.type === 'call';
-                    const isMeeting = evt.type === 'meeting';
-                    const isTask = evt.type === 'task';
+                    const isStage = evt.type === "stage_transition";
+                    const isAudit = evt.type === "audit";
+                    const isCall = evt.type === "call";
+                    const isMeeting = evt.type === "meeting";
+                    const isTask = evt.type === "task";
 
                     return (
                       <div
@@ -971,7 +1088,10 @@ export default function RecordDetailPage() {
                             </span>
                           </div>
                           <span className="text-[10px] font-mono text-[var(--color-text-muted)]">
-                            {new Date(evt.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {new Date(evt.timestamp).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
                           </span>
                         </div>
 
@@ -983,7 +1103,9 @@ export default function RecordDetailPage() {
 
                         <div className="flex items-center justify-between pl-7 text-[10px] text-[var(--color-text-muted)] font-mono">
                           <span>By: {evt.actor}</span>
-                          <span>{new Date(evt.timestamp).toLocaleDateString()}</span>
+                          <span>
+                            {new Date(evt.timestamp).toLocaleDateString()}
+                          </span>
                         </div>
                       </div>
                     );
@@ -994,7 +1116,7 @@ export default function RecordDetailPage() {
           )}
 
           {/* TAB: CPQ QUOTES & PROPOSALS (If Deals) */}
-          {activeTab === 'quotes' && objectApiName === 'deals' && (
+          {activeTab === "quotes" && objectApiName === "deals" && (
             <div className="rounded-[10px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] p-5 shadow-sm flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -1002,7 +1124,8 @@ export default function RecordDetailPage() {
                     Quotes & Proposals (CPQ)
                   </h3>
                   <p className="text-xs text-[var(--color-text-muted)]">
-                    Lightweight CPQ quote builder with line-item discounts & PDF export
+                    Lightweight CPQ quote builder with line-item discounts & PDF
+                    export
                   </p>
                 </div>
                 <Button
@@ -1017,7 +1140,8 @@ export default function RecordDetailPage() {
 
               {quotes.length === 0 ? (
                 <div className="p-8 text-center text-xs text-[var(--color-text-muted)] border border-dashed border-[var(--color-border-default)] rounded-[8px]">
-                  No quotes generated for this deal yet. Click &quot;Create Quote&quot; to configure pricing.
+                  No quotes generated for this deal yet. Click &quot;Create
+                  Quote&quot; to configure pricing.
                 </div>
               ) : (
                 <div className="flex flex-col gap-3">
@@ -1033,30 +1157,85 @@ export default function RecordDetailPage() {
                             {q.quoteNumber}
                           </span>
                           <Badge
-                            variant={q.status === 'approved' ? 'success' : 'warning'}
+                            variant={
+                              q.status === "approved" ? "success" : "warning"
+                            }
                           >
-                            {q.status === 'approved' ? 'Approved' : 'Pending Approval'}
+                            {q.status === "approved"
+                              ? "Approved"
+                              : "Pending Approval"}
                           </Badge>
                         </div>
                         <div className="shrink-0">
-                          <MoneyDisplay amount={q.total} isSubunits={false} currency="INR" compact size="sm" />
+                          <MoneyDisplay
+                            amount={q.total}
+                            isSubunits={false}
+                            currency="INR"
+                            compact
+                            size="sm"
+                          />
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono text-[var(--color-text-muted)] border-y border-[var(--color-border-muted)] py-2">
-                        <div className="flex items-center gap-1">Subtotal: <MoneyDisplay amount={q.subtotal} isSubunits={false} currency="INR" compact size="xs" /></div>
-                        <div className="flex items-center gap-1">Disc: {q.volumeDiscountPercent}% (<MoneyDisplay amount={q.discountAmount} isSubunits={false} currency="INR" compact size="xs" />)</div>
-                        <div className="flex items-center gap-1">Tax: {q.taxRatePercent}% (<MoneyDisplay amount={q.taxAmount} isSubunits={false} currency="INR" compact size="xs" />)</div>
-                        <div className="flex items-center gap-1">ARR: <MoneyDisplay amount={q.arr} isSubunits={false} currency="INR" compact size="xs" /></div>
+                        <div className="flex items-center gap-1">
+                          Subtotal:{" "}
+                          <MoneyDisplay
+                            amount={q.subtotal}
+                            isSubunits={false}
+                            currency="INR"
+                            compact
+                            size="xs"
+                          />
+                        </div>
+                        <div className="flex items-center gap-1">
+                          Disc: {q.volumeDiscountPercent}% (
+                          <MoneyDisplay
+                            amount={q.discountAmount}
+                            isSubunits={false}
+                            currency="INR"
+                            compact
+                            size="xs"
+                          />
+                          )
+                        </div>
+                        <div className="flex items-center gap-1">
+                          Tax: {q.taxRatePercent}% (
+                          <MoneyDisplay
+                            amount={q.taxAmount}
+                            isSubunits={false}
+                            currency="INR"
+                            compact
+                            size="xs"
+                          />
+                          )
+                        </div>
+                        <div className="flex items-center gap-1">
+                          ARR:{" "}
+                          <MoneyDisplay
+                            amount={q.arr}
+                            isSubunits={false}
+                            currency="INR"
+                            compact
+                            size="xs"
+                          />
+                        </div>
                       </div>
 
                       <div className="flex items-center justify-between gap-2 pt-1">
                         <span className="text-[10px] text-[var(--color-text-muted)] flex items-center gap-1">
-                          {q.lineItems?.length || 0} line items • TCV: <MoneyDisplay amount={q.tcv} isSubunits={false} currency="INR" compact size="xs" />
+                          {q.lineItems?.length || 0} line items • TCV:{" "}
+                          <MoneyDisplay
+                            amount={q.tcv}
+                            isSubunits={false}
+                            currency="INR"
+                            compact
+                            size="xs"
+                          />
                         </span>
 
                         <div className="flex items-center gap-2">
-                          {q.status === 'pending_approval' && (
+                          {q.status === "pending_approval" && (
                             <Button
                               id={`btn-approve-quote-${q.id}`}
                               variant="secondary"
@@ -1064,7 +1243,8 @@ export default function RecordDetailPage() {
                               loading={approvingQuoteId === q.id}
                               onClick={() => handleApproveQuote(q.id)}
                             >
-                              <ShieldCheck className="h-3.5 w-3.5" /> Approve Gate
+                              <ShieldCheck className="h-3.5 w-3.5" /> Approve
+                              Gate
                             </Button>
                           )}
 
@@ -1072,7 +1252,12 @@ export default function RecordDetailPage() {
                             id={`btn-view-pdf-${q.id}`}
                             variant="ghost"
                             size="sm"
-                            onClick={() => window.open(`http://localhost:4000/v1/cpq/quotes/${q.id}/pdf`, '_blank')}
+                            onClick={() =>
+                              window.open(
+                                `http://localhost:4000/v1/cpq/quotes/${q.id}/pdf`,
+                                "_blank",
+                              )
+                            }
                           >
                             <Printer className="h-3.5 w-3.5" /> View / Print PDF
                           </Button>
@@ -1086,7 +1271,7 @@ export default function RecordDetailPage() {
           )}
 
           {/* TAB: LINKED ENTITIES */}
-          {activeTab === 'relations' && (
+          {activeTab === "relations" && (
             <div className="rounded-[10px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] p-5 shadow-sm flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -1107,19 +1292,22 @@ export default function RecordDetailPage() {
                 </Button>
               </div>
 
-              {(!record?.relatedRecords || record.relatedRecords.length === 0) ? (
+              {!record?.relatedRecords || record.relatedRecords.length === 0 ? (
                 <div className="p-8 text-center text-xs text-[var(--color-text-muted)] border border-dashed border-[var(--color-border-default)] rounded-[8px]">
-                  No related records linked yet. Click &quot;Link Record&quot; to associate an entity.
+                  No related records linked yet. Click &quot;Link Record&quot;
+                  to associate an entity.
                 </div>
               ) : (
                 <div className="flex flex-col gap-2.5">
                   {(record?.relatedRecords || []).map((rel) => {
-                    const targetObj = allObjects.find((o) => o.id === rel.record.objectId);
+                    const targetObj = allObjects.find(
+                      (o) => o.id === rel.record.objectId,
+                    );
                     const targetTitle =
                       rel.record.data.name ||
                       (rel.record.data.first_name
-                        ? `${rel.record.data.first_name} ${rel.record.data.last_name || ''}`
-                        : '') ||
+                        ? `${rel.record.data.first_name} ${rel.record.data.last_name || ""}`
+                        : "") ||
                       rel.record.data.subject ||
                       `Record #${rel.record.id.slice(0, 8)}`;
 
@@ -1129,7 +1317,9 @@ export default function RecordDetailPage() {
                         id={`related-record-${rel.record.id}`}
                         onClick={() =>
                           targetObj &&
-                          router.push(`/records/${targetObj.apiName}/${rel.record.id}`)
+                          router.push(
+                            `/records/${targetObj.apiName}/${rel.record.id}`,
+                          )
                         }
                         className="p-3.5 rounded-[8px] border border-[var(--color-border-default)] bg-[var(--color-bg-subtle)] hover:border-[var(--color-accent-primary)]/50 transition-all cursor-pointer flex items-center justify-between group"
                       >
@@ -1143,11 +1333,14 @@ export default function RecordDetailPage() {
                                 {targetTitle}
                               </span>
                               <Badge variant="neutral">
-                                {targetObj?.singularLabel || 'Record'}
+                                {targetObj?.singularLabel || "Record"}
                               </Badge>
                             </div>
                             <span className="text-[10px] text-[var(--color-text-muted)] font-mono">
-                              {rel.direction === 'forward' ? 'Direct link' : 'Reverse lookup'} • {rel.relationLabel}
+                              {rel.direction === "forward"
+                                ? "Direct link"
+                                : "Reverse lookup"}{" "}
+                              • {rel.relationLabel}
                             </span>
                           </div>
                         </div>
@@ -1162,7 +1355,7 @@ export default function RecordDetailPage() {
           )}
 
           {/* TAB: AUDIT LEDGER */}
-          {activeTab === 'audit' && (
+          {activeTab === "audit" && (
             <div className="rounded-[10px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] p-5 shadow-sm flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -1222,9 +1415,14 @@ export default function RecordDetailPage() {
         title={`Link Record to ${primaryTitle}`}
         description="Select relationship and associate existing record."
       >
-        <form onSubmit={handleEstablishLink} className="flex flex-col gap-4 mt-2">
+        <form
+          onSubmit={handleEstablishLink}
+          className="flex flex-col gap-4 mt-2"
+        >
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-[var(--color-text-secondary)]">Relationship</label>
+            <label className="text-xs font-semibold text-[var(--color-text-secondary)]">
+              Relationship
+            </label>
             <select
               id="select-rel-id"
               className="w-full min-w-0 h-10 px-3 rounded-[6px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-primary)] truncate"
@@ -1238,7 +1436,8 @@ export default function RecordDetailPage() {
                 const toObj = allObjects.find((o) => o.id === r.toObjectId);
                 return (
                   <option key={r.id} value={r.id}>
-                    {fromObj?.singularLabel} ↔ {toObj?.singularLabel} ({r.cardinality})
+                    {fromObj?.singularLabel} ↔ {toObj?.singularLabel} (
+                    {r.cardinality})
                   </option>
                 );
               })}
@@ -1255,10 +1454,19 @@ export default function RecordDetailPage() {
           />
 
           <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-[var(--color-border-default)]">
-            <Button variant="ghost" type="button" onClick={() => setIsLinkDialogOpen(false)}>
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => setIsLinkDialogOpen(false)}
+            >
               Cancel
             </Button>
-            <Button id="btn-submit-link" variant="primary" type="submit" loading={linking}>
+            <Button
+              id="btn-submit-link"
+              variant="primary"
+              type="submit"
+              loading={linking}
+            >
               Establish Association
             </Button>
           </div>
@@ -1289,12 +1497,13 @@ export default function RecordDetailPage() {
                 <option value="">Select product SKU...</option>
                 {products.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} ({p.sku}) — {formatMoney(Money.fromMajor(p.unitPrice, 'INR'))}{' '}
-                    {p.pricingType === 'recurring_monthly'
-                      ? '/mo'
-                      : p.pricingType === 'recurring_annual'
-                      ? '/yr'
-                      : ''}
+                    {p.name} ({p.sku}) —{" "}
+                    {formatMoney(Money.fromMajor(p.unitPrice, "INR"))}{" "}
+                    {p.pricingType === "recurring_monthly"
+                      ? "/mo"
+                      : p.pricingType === "recurring_annual"
+                        ? "/yr"
+                        : ""}
                   </option>
                 ))}
               </select>
@@ -1324,7 +1533,10 @@ export default function RecordDetailPage() {
               </div>
             ) : (
               quoteItems.map((item, idx) => {
-                const itemTotal = item.quantity * item.unitPrice * (1 - item.discountPercent / 100);
+                const itemTotal =
+                  item.quantity *
+                  item.unitPrice *
+                  (1 - item.discountPercent / 100);
                 return (
                   <div
                     key={idx}
@@ -1335,7 +1547,9 @@ export default function RecordDetailPage() {
                     </div>
 
                     <div className="col-span-2">
-                      <label className="text-[9px] text-[var(--color-text-muted)] block">Qty</label>
+                      <label className="text-[9px] text-[var(--color-text-muted)] block">
+                        Qty
+                      </label>
                       <input
                         type="number"
                         min="1"
@@ -1345,14 +1559,18 @@ export default function RecordDetailPage() {
                         onChange={(e) => {
                           const val = parseInt(e.target.value) || 1;
                           setQuoteItems((prev) =>
-                            prev.map((it, i) => (i === idx ? { ...it, quantity: val } : it))
+                            prev.map((it, i) =>
+                              i === idx ? { ...it, quantity: val } : it,
+                            ),
                           );
                         }}
                       />
                     </div>
 
                     <div className="col-span-2">
-                      <label className="text-[9px] text-[var(--color-text-muted)] block">Disc %</label>
+                      <label className="text-[9px] text-[var(--color-text-muted)] block">
+                        Disc %
+                      </label>
                       <input
                         type="number"
                         min="0"
@@ -1363,16 +1581,26 @@ export default function RecordDetailPage() {
                         onChange={(e) => {
                           const val = parseFloat(e.target.value) || 0;
                           setQuoteItems((prev) =>
-                            prev.map((it, i) => (i === idx ? { ...it, discountPercent: val } : it))
+                            prev.map((it, i) =>
+                              i === idx ? { ...it, discountPercent: val } : it,
+                            ),
                           );
                         }}
                       />
                     </div>
 
                     <div className="col-span-3 text-right">
-                      <label className="text-[9px] text-[var(--color-text-muted)] block">Total</label>
+                      <label className="text-[9px] text-[var(--color-text-muted)] block">
+                        Total
+                      </label>
                       <div className="font-mono font-bold text-[var(--color-text-primary)]">
-                        <MoneyDisplay amount={itemTotal} isSubunits={false} currency="INR" compact size="xs" />
+                        <MoneyDisplay
+                          amount={itemTotal}
+                          isSubunits={false}
+                          currency="INR"
+                          compact
+                          size="xs"
+                        />
                       </div>
                     </div>
                   </div>
@@ -1390,7 +1618,9 @@ export default function RecordDetailPage() {
               min="0"
               max="100"
               value={volumeDiscountPercent}
-              onChange={(e) => setVolumeDiscountPercent(parseFloat(e.target.value) || 0)}
+              onChange={(e) =>
+                setVolumeDiscountPercent(parseFloat(e.target.value) || 0)
+              }
             />
 
             <Input
@@ -1399,7 +1629,9 @@ export default function RecordDetailPage() {
               type="number"
               step="0.01"
               value={taxRatePercent}
-              onChange={(e) => setTaxRatePercent(parseFloat(e.target.value) || 0)}
+              onChange={(e) =>
+                setTaxRatePercent(parseFloat(e.target.value) || 0)
+              }
             />
           </div>
 
@@ -1410,7 +1642,10 @@ export default function RecordDetailPage() {
               className="p-3 rounded-[6px] bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-200 text-xs font-semibold flex items-center gap-2"
             >
               <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
-              <span>Discount exceeds 20% threshold: Quote will require manager approval before sending.</span>
+              <span>
+                Discount exceeds 20% threshold: Quote will require manager
+                approval before sending.
+              </span>
             </div>
           )}
 
@@ -1418,27 +1653,61 @@ export default function RecordDetailPage() {
           <div className="p-3.5 rounded-[8px] bg-[var(--color-bg-subtle)] border border-[var(--color-border-default)] flex flex-col gap-1 text-xs font-mono">
             <div className="flex justify-between items-center text-[var(--color-text-muted)]">
               <span>Subtotal:</span>
-              <MoneyDisplay amount={quoteSubtotal} isSubunits={false} currency="INR" compact size="xs" />
+              <MoneyDisplay
+                amount={quoteSubtotal}
+                isSubunits={false}
+                currency="INR"
+                compact
+                size="xs"
+              />
             </div>
             {quoteVolumeDiscountAmount > 0 && (
               <div className="flex justify-between items-center text-amber-600 dark:text-amber-400">
                 <span>Volume Discount ({volumeDiscountPercent}%):</span>
-                <span>-<MoneyDisplay amount={quoteVolumeDiscountAmount} isSubunits={false} currency="INR" compact size="xs" /></span>
+                <span>
+                  -
+                  <MoneyDisplay
+                    amount={quoteVolumeDiscountAmount}
+                    isSubunits={false}
+                    currency="INR"
+                    compact
+                    size="xs"
+                  />
+                </span>
               </div>
             )}
             <div className="flex justify-between items-center text-[var(--color-text-muted)]">
               <span>Tax ({taxRatePercent}%):</span>
-              <span>+<MoneyDisplay amount={quoteTaxAmount} isSubunits={false} currency="INR" compact size="xs" /></span>
+              <span>
+                +
+                <MoneyDisplay
+                  amount={quoteTaxAmount}
+                  isSubunits={false}
+                  currency="INR"
+                  compact
+                  size="xs"
+                />
+              </span>
             </div>
             <div className="flex justify-between items-center text-sm font-bold text-[var(--color-text-primary)] pt-1 border-t border-[var(--color-border-muted)]">
               <span>Grand Total:</span>
-              <MoneyDisplay amount={quoteTotal} isSubunits={false} currency="INR" compact size="sm" />
+              <MoneyDisplay
+                amount={quoteTotal}
+                isSubunits={false}
+                currency="INR"
+                compact
+                size="sm"
+              />
             </div>
           </div>
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-2 mt-2 pt-3 border-t border-[var(--color-border-default)]">
-            <Button variant="ghost" type="button" onClick={() => setIsNewQuoteOpen(false)}>
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => setIsNewQuoteOpen(false)}
+            >
               Cancel
             </Button>
             <Button
@@ -1482,7 +1751,9 @@ export default function RecordDetailPage() {
           />
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-[var(--color-text-secondary)]">Pipeline Stage</label>
+            <label className="text-xs font-semibold text-[var(--color-text-secondary)]">
+              Pipeline Stage
+            </label>
             <select
               id="select-convert-deal-stage"
               className="w-full min-w-0 h-10 px-3 rounded-[6px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-primary)] truncate"
@@ -1497,7 +1768,11 @@ export default function RecordDetailPage() {
           </div>
 
           <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-[var(--color-border-default)]">
-            <Button variant="ghost" type="button" onClick={() => setIsConvertLeadOpen(false)}>
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => setIsConvertLeadOpen(false)}
+            >
               Cancel
             </Button>
             <Button

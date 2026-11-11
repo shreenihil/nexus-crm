@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 import {
   Copy,
   GitMerge,
@@ -21,9 +21,9 @@ import {
   Users,
   TrendingUp,
   SlidersHorizontal,
-} from 'lucide-react';
-import { Button, Input, Badge, Modal } from '@nexus/ui';
-import { apiFetch } from '@/lib/api';
+} from "lucide-react";
+import { Button, Input, Badge, Modal } from "@nexus/ui";
+import { apiFetch } from "@/lib/api";
 
 interface DuplicatePair {
   id: string;
@@ -32,9 +32,9 @@ interface DuplicatePair {
   primaryRecordId: string;
   duplicateRecordId: string;
   confidenceScore: number;
-  confidenceTier: 'HIGH' | 'MEDIUM' | 'LOW';
+  confidenceTier: "HIGH" | "MEDIUM" | "LOW";
   isAutoMergeCandidate: boolean;
-  status: 'PENDING' | 'MERGED' | 'DISMISSED';
+  status: "PENDING" | "MERGED" | "DISMISSED";
   matchFactors: Array<{
     factor: string;
     weight: number;
@@ -72,34 +72,48 @@ interface MergeHistoryItem {
   mergedBy: string;
   mergedAt: string;
   unmergedAt?: string | null;
-  status: 'MERGED' | 'UNMERGED';
+  status: "MERGED" | "UNMERGED";
   winnerRecord?: any;
   loserRecord?: any;
 }
 
 export default function DuplicatesResolutionPage() {
-  const [activeTab, setActiveTab] = React.useState<'pairs' | 'history'>('pairs');
+  const [activeTab, setActiveTab] = React.useState<"pairs" | "history">(
+    "pairs",
+  );
   const [pairs, setPairs] = React.useState<DuplicatePair[]>([]);
   const [merges, setMerges] = React.useState<MergeHistoryItem[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [scanning, setScanning] = React.useState(false);
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const [selectedEntity, setSelectedEntity] = React.useState<string>('all');
-  const [selectedTier, setSelectedTier] = React.useState<string>('all');
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [selectedEntity, setSelectedEntity] = React.useState<string>("all");
+  const [selectedTier, setSelectedTier] = React.useState<string>("all");
 
   // Comparison & Merge Modal
-  const [comparingPair, setComparingPair] = React.useState<DuplicatePair | null>(null);
-  const [winnerChoice, setWinnerChoice] = React.useState<'primary' | 'duplicate'>('primary');
-  const [fieldSelections, setFieldSelections] = React.useState<Record<string, 'primary' | 'duplicate'>>({});
+  const [comparingPair, setComparingPair] =
+    React.useState<DuplicatePair | null>(null);
+  const [winnerChoice, setWinnerChoice] = React.useState<
+    "primary" | "duplicate"
+  >("primary");
+  const [fieldSelections, setFieldSelections] = React.useState<
+    Record<string, "primary" | "duplicate">
+  >({});
   const [merging, setMerging] = React.useState(false);
 
   // Score Explanation Popover
-  const [explanationPair, setExplanationPair] = React.useState<DuplicatePair | null>(null);
+  const [explanationPair, setExplanationPair] =
+    React.useState<DuplicatePair | null>(null);
 
   // Notification Toast
-  const [notification, setNotification] = React.useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
+  const [notification, setNotification] = React.useState<{
+    message: string;
+    type: "success" | "info" | "error";
+  } | null>(null);
 
-  const notify = (message: string, type: 'success' | 'info' | 'error' = 'success') => {
+  const notify = (
+    message: string,
+    type: "success" | "info" | "error" = "success",
+  ) => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 4000);
   };
@@ -108,13 +122,13 @@ export default function DuplicatesResolutionPage() {
     setLoading(true);
     try {
       const [pairsRes, mergesRes] = await Promise.all([
-        apiFetch<any>('/v1/duplicates?status=PENDING'),
-        apiFetch<any>('/v1/duplicates/merges'),
+        apiFetch<any>("/v1/duplicates?status=PENDING"),
+        apiFetch<any>("/v1/duplicates/merges"),
       ]);
       setPairs(pairsRes.pairs || []);
       setMerges(mergesRes.merges || []);
     } catch (err: any) {
-      notify(err.message || 'Failed to load duplicate records', 'error');
+      notify(err.message || "Failed to load duplicate records", "error");
     } finally {
       setLoading(false);
     }
@@ -127,11 +141,16 @@ export default function DuplicatesResolutionPage() {
   const handleRunScan = async () => {
     setScanning(true);
     try {
-      const res = await apiFetch<any>('/v1/duplicates/scan', { method: 'POST' });
-      notify(`Identity resolution scan complete. ${res.detectedCount} duplicate pairs analyzed.`, 'success');
+      const res = await apiFetch<any>("/v1/duplicates/scan", {
+        method: "POST",
+      });
+      notify(
+        `Identity resolution scan complete. ${res.detectedCount} duplicate pairs analyzed.`,
+        "success",
+      );
       await loadData();
     } catch (err: any) {
-      notify(err.message || 'Scan failed', 'error');
+      notify(err.message || "Scan failed", "error");
     } finally {
       setScanning(false);
     }
@@ -139,16 +158,16 @@ export default function DuplicatesResolutionPage() {
 
   const handleOpenMerge = (pair: DuplicatePair) => {
     setComparingPair(pair);
-    setWinnerChoice('primary');
+    setWinnerChoice("primary");
 
     // Default field selections to primary
     const allFields = new Set([
       ...Object.keys(pair.primaryRecord?.data || {}),
       ...Object.keys(pair.duplicateRecord?.data || {}),
     ]);
-    const initSelections: Record<string, 'primary' | 'duplicate'> = {};
+    const initSelections: Record<string, "primary" | "duplicate"> = {};
     for (const f of allFields) {
-      initSelections[f] = 'primary';
+      initSelections[f] = "primary";
     }
     setFieldSelections(initSelections);
   };
@@ -158,8 +177,14 @@ export default function DuplicatesResolutionPage() {
     setMerging(true);
 
     try {
-      const winnerId = winnerChoice === 'primary' ? comparingPair.primaryRecordId : comparingPair.duplicateRecordId;
-      const loserId = winnerChoice === 'primary' ? comparingPair.duplicateRecordId : comparingPair.primaryRecordId;
+      const winnerId =
+        winnerChoice === "primary"
+          ? comparingPair.primaryRecordId
+          : comparingPair.duplicateRecordId;
+      const loserId =
+        winnerChoice === "primary"
+          ? comparingPair.duplicateRecordId
+          : comparingPair.primaryRecordId;
 
       // Construct merged data based on fieldSelections
       const mergedData: Record<string, any> = {};
@@ -167,15 +192,17 @@ export default function DuplicatesResolutionPage() {
       const duplicateData = comparingPair.duplicateRecord?.data || {};
 
       for (const [field, choice] of Object.entries(fieldSelections)) {
-        if (choice === 'primary') {
-          if (primaryData[field] !== undefined) mergedData[field] = primaryData[field];
+        if (choice === "primary") {
+          if (primaryData[field] !== undefined)
+            mergedData[field] = primaryData[field];
         } else {
-          if (duplicateData[field] !== undefined) mergedData[field] = duplicateData[field];
+          if (duplicateData[field] !== undefined)
+            mergedData[field] = duplicateData[field];
         }
       }
 
       await apiFetch(`/v1/duplicates/${comparingPair.id}/merge`, {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify({
           winnerId,
           loserId,
@@ -183,11 +210,11 @@ export default function DuplicatesResolutionPage() {
         }),
       });
 
-      notify('Records successfully merged! Reversible for 30 days.', 'success');
+      notify("Records successfully merged! Reversible for 30 days.", "success");
       setComparingPair(null);
       await loadData();
     } catch (err: any) {
-      notify(err.message || 'Merge failed', 'error');
+      notify(err.message || "Merge failed", "error");
     } finally {
       setMerging(false);
     }
@@ -195,39 +222,59 @@ export default function DuplicatesResolutionPage() {
 
   const handleDismiss = async (pairId: string) => {
     try {
-      await apiFetch(`/v1/duplicates/${pairId}/dismiss`, { method: 'POST' });
-      notify('Pair dismissed. The engine will remember not to flag these records.', 'info');
+      await apiFetch(`/v1/duplicates/${pairId}/dismiss`, { method: "POST" });
+      notify(
+        "Pair dismissed. The engine will remember not to flag these records.",
+        "info",
+      );
       await loadData();
     } catch (err: any) {
-      notify(err.message || 'Failed to dismiss pair', 'error');
+      notify(err.message || "Failed to dismiss pair", "error");
     }
   };
 
   const handleUnmerge = async (mergeId: string) => {
     try {
-      await apiFetch(`/v1/duplicates/merges/${mergeId}/unmerge`, { method: 'POST' });
-      notify('Reversible unmerge complete! Restored archived record and reassigned relationships.', 'success');
+      await apiFetch(`/v1/duplicates/merges/${mergeId}/unmerge`, {
+        method: "POST",
+      });
+      notify(
+        "Reversible unmerge complete! Restored archived record and reassigned relationships.",
+        "success",
+      );
       await loadData();
     } catch (err: any) {
-      notify(err.message || 'Unmerge failed', 'error');
+      notify(err.message || "Unmerge failed", "error");
     }
   };
 
   // Metrics
-  const highConfidenceCount = pairs.filter((p) => p.confidenceTier === 'HIGH').length;
+  const highConfidenceCount = pairs.filter(
+    (p) => p.confidenceTier === "HIGH",
+  ).length;
   const autoMergeCount = pairs.filter((p) => p.isAutoMergeCandidate).length;
-  const mergedCount = merges.filter((m) => m.status === 'MERGED').length;
+  const mergedCount = merges.filter((m) => m.status === "MERGED").length;
 
   // Filtered pairs
   const filteredPairs = pairs.filter((pair) => {
-    if (selectedEntity !== 'all' && pair.entityName !== selectedEntity) return false;
-    if (selectedTier !== 'all' && pair.confidenceTier !== selectedTier) return false;
+    if (selectedEntity !== "all" && pair.entityName !== selectedEntity)
+      return false;
+    if (selectedTier !== "all" && pair.confidenceTier !== selectedTier)
+      return false;
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      const pData = JSON.stringify(pair.primaryRecord?.data || {}).toLowerCase();
-      const dData = JSON.stringify(pair.duplicateRecord?.data || {}).toLowerCase();
-      if (!pData.includes(q) && !dData.includes(q) && !pair.summary.toLowerCase().includes(q)) {
+      const pData = JSON.stringify(
+        pair.primaryRecord?.data || {},
+      ).toLowerCase();
+      const dData = JSON.stringify(
+        pair.duplicateRecord?.data || {},
+      ).toLowerCase();
+      if (
+        !pData.includes(q) &&
+        !dData.includes(q) &&
+        !pair.summary.toLowerCase().includes(q)
+      ) {
         return false;
       }
     }
@@ -235,22 +282,23 @@ export default function DuplicatesResolutionPage() {
   });
 
   const getRecordTitle = (record?: { data: Record<string, any> }) => {
-    if (!record?.data) return 'Untitled Record';
+    if (!record?.data) return "Untitled Record";
     const d = record.data;
     if (d.name) return d.name;
-    if (d.first_name || d.last_name) return `${d.first_name || ''} ${d.last_name || ''}`.trim();
-    return 'Record #' + (record as any).id?.slice(-6);
+    if (d.first_name || d.last_name)
+      return `${d.first_name || ""} ${d.last_name || ""}`.trim();
+    return "Record #" + (record as any).id?.slice(-6);
   };
 
   const getRecordSubtitle = (record?: { data: Record<string, any> }) => {
-    if (!record?.data) return '';
+    if (!record?.data) return "";
     const d = record.data;
     const parts: string[] = [];
     if (d.email) parts.push(d.email);
     if (d.domain) parts.push(d.domain);
     if (d.phone) parts.push(d.phone);
     if (d.title) parts.push(d.title);
-    return parts.join(' • ');
+    return parts.join(" • ");
   };
 
   return (
@@ -261,16 +309,22 @@ export default function DuplicatesResolutionPage() {
           role="status"
           aria-live="polite"
           className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg transition-all ${
-            notification.type === 'success'
-              ? 'bg-emerald-950/90 border-emerald-500/40 text-emerald-200'
-              : notification.type === 'error'
-              ? 'bg-rose-950/90 border-rose-500/40 text-rose-200'
-              : 'bg-indigo-950/90 border-indigo-500/40 text-indigo-200'
+            notification.type === "success"
+              ? "bg-emerald-950/90 border-emerald-500/40 text-emerald-200"
+              : notification.type === "error"
+                ? "bg-rose-950/90 border-rose-500/40 text-rose-200"
+                : "bg-indigo-950/90 border-indigo-500/40 text-indigo-200"
           }`}
         >
-          {notification.type === 'success' && <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />}
-          {notification.type === 'error' && <XCircle className="h-5 w-5 text-rose-400 shrink-0" />}
-          {notification.type === 'info' && <Info className="h-5 w-5 text-indigo-400 shrink-0" />}
+          {notification.type === "success" && (
+            <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+          )}
+          {notification.type === "error" && (
+            <XCircle className="h-5 w-5 text-rose-400 shrink-0" />
+          )}
+          {notification.type === "info" && (
+            <Info className="h-5 w-5 text-indigo-400 shrink-0" />
+          )}
           <span className="text-sm font-medium">{notification.message}</span>
         </div>
       )}
@@ -287,7 +341,8 @@ export default function DuplicatesResolutionPage() {
                 Resolution Center
               </h1>
               <p className="text-sm text-[var(--color-text-muted)]">
-                Data integrity & identity resolution engine with 5 matching algorithms and 30-day reversible merges.
+                Data integrity & identity resolution engine with 5 matching
+                algorithms and 30-day reversible merges.
               </p>
             </div>
           </div>
@@ -302,22 +357,32 @@ export default function DuplicatesResolutionPage() {
             disabled={scanning}
             className="flex items-center gap-2"
           >
-            <RefreshCw className={`h-4 w-4 ${scanning ? 'animate-spin' : ''}`} />
-            {scanning ? 'Scanning Workspace...' : 'Run Duplicate Scan'}
+            <RefreshCw
+              className={`h-4 w-4 ${scanning ? "animate-spin" : ""}`}
+            />
+            {scanning ? "Scanning Workspace..." : "Run Duplicate Scan"}
           </Button>
         </div>
       </div>
 
       {/* KPI Metrics Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4" data-testid="kpi-cards">
+      <div
+        className="grid grid-cols-2 md:grid-cols-4 gap-4"
+        data-testid="kpi-cards"
+      >
         <div className="p-4 rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-surface)]">
           <div className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
             Pending Pairs
           </div>
-          <div className="text-2xl font-bold text-[var(--color-text-primary)] mt-1" data-testid="kpi-pending-count">
+          <div
+            className="text-2xl font-bold text-[var(--color-text-primary)] mt-1"
+            data-testid="kpi-pending-count"
+          >
             {pairs.length}
           </div>
-          <div className="text-xs text-[var(--color-text-muted)] mt-1">Requires user review</div>
+          <div className="text-xs text-[var(--color-text-muted)] mt-1">
+            Requires user review
+          </div>
         </div>
 
         <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-950/10">
@@ -325,10 +390,15 @@ export default function DuplicatesResolutionPage() {
             <span>High Confidence</span>
             <ShieldCheck className="h-4 w-4" />
           </div>
-          <div className="text-2xl font-bold text-emerald-400 mt-1" data-testid="kpi-high-conf-count">
+          <div
+            className="text-2xl font-bold text-emerald-400 mt-1"
+            data-testid="kpi-high-conf-count"
+          >
             {highConfidenceCount}
           </div>
-          <div className="text-xs text-emerald-500/80 mt-1">&ge; 85% match score</div>
+          <div className="text-xs text-emerald-500/80 mt-1">
+            &ge; 85% match score
+          </div>
         </div>
 
         <div className="p-4 rounded-xl border border-indigo-500/20 bg-indigo-950/10">
@@ -336,10 +406,15 @@ export default function DuplicatesResolutionPage() {
             <span>Auto-Merge Candidates</span>
             <Sparkles className="h-4 w-4" />
           </div>
-          <div className="text-2xl font-bold text-indigo-400 mt-1" data-testid="kpi-auto-merge-count">
+          <div
+            className="text-2xl font-bold text-indigo-400 mt-1"
+            data-testid="kpi-auto-merge-count"
+          >
             {autoMergeCount}
           </div>
-          <div className="text-xs text-indigo-500/80 mt-1">&ge; 92% + exact identity anchor</div>
+          <div className="text-xs text-indigo-500/80 mt-1">
+            &ge; 92% + exact identity anchor
+          </div>
         </div>
 
         <div className="p-4 rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-surface)]">
@@ -347,10 +422,15 @@ export default function DuplicatesResolutionPage() {
             <span>Resolved Merges</span>
             <History className="h-4 w-4" />
           </div>
-          <div className="text-2xl font-bold text-[var(--color-text-primary)] mt-1" data-testid="kpi-merged-count">
+          <div
+            className="text-2xl font-bold text-[var(--color-text-primary)] mt-1"
+            data-testid="kpi-merged-count"
+          >
             {mergedCount}
           </div>
-          <div className="text-xs text-[var(--color-text-muted)] mt-1">Reversible in 30 days</div>
+          <div className="text-xs text-[var(--color-text-muted)] mt-1">
+            Reversible in 30 days
+          </div>
         </div>
       </div>
 
@@ -359,11 +439,11 @@ export default function DuplicatesResolutionPage() {
         <button
           id="tab-pending-pairs"
           data-testid="tab-pending-pairs"
-          onClick={() => setActiveTab('pairs')}
+          onClick={() => setActiveTab("pairs")}
           className={`pb-3 font-semibold text-sm transition-all border-b-2 flex items-center gap-2 ${
-            activeTab === 'pairs'
-              ? 'border-indigo-500 text-indigo-400'
-              : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+            activeTab === "pairs"
+              ? "border-indigo-500 text-indigo-400"
+              : "border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
           }`}
         >
           <Copy className="h-4 w-4" />
@@ -373,11 +453,11 @@ export default function DuplicatesResolutionPage() {
         <button
           id="tab-merge-history"
           data-testid="tab-merge-history"
-          onClick={() => setActiveTab('history')}
+          onClick={() => setActiveTab("history")}
           className={`pb-3 font-semibold text-sm transition-all border-b-2 flex items-center gap-2 ${
-            activeTab === 'history'
-              ? 'border-indigo-500 text-indigo-400'
-              : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+            activeTab === "history"
+              ? "border-indigo-500 text-indigo-400"
+              : "border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
           }`}
         >
           <History className="h-4 w-4" />
@@ -386,7 +466,7 @@ export default function DuplicatesResolutionPage() {
       </div>
 
       {/* TAB 1: PENDING PAIRS */}
-      {activeTab === 'pairs' && (
+      {activeTab === "pairs" && (
         <div className="space-y-4">
           {/* Filters Bar */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)]">
@@ -442,9 +522,13 @@ export default function DuplicatesResolutionPage() {
           ) : filteredPairs.length === 0 ? (
             <div className="p-12 text-center rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-surface)]">
               <ShieldCheck className="h-12 w-12 text-emerald-400 mx-auto mb-3 opacity-60" />
-              <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">Zero Duplicates Detected</h3>
+              <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
+                Zero Duplicates Detected
+              </h3>
               <p className="text-sm text-[var(--color-text-muted)] max-w-md mx-auto mt-1">
-                Your database identity index is clean and synchronized. Any incoming records will undergo real-time pre-creation corroboration.
+                Your database identity index is clean and synchronized. Any
+                incoming records will undergo real-time pre-creation
+                corroboration.
               </p>
             </div>
           ) : (
@@ -480,8 +564,8 @@ export default function DuplicatesResolutionPage() {
                         <span
                           className={`text-lg font-black px-2.5 py-1 rounded-lg border ${
                             pair.confidenceScore >= 85
-                              ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/30'
-                              : 'bg-amber-950/40 text-amber-400 border-amber-500/30'
+                              ? "bg-emerald-950/40 text-emerald-400 border-emerald-500/30"
+                              : "bg-amber-950/40 text-amber-400 border-amber-500/30"
                           }`}
                           data-testid="confidence-badge"
                         >
@@ -553,9 +637,14 @@ export default function DuplicatesResolutionPage() {
                   {/* Summary Footer */}
                   <div className="mt-3 pt-3 border-t border-[var(--color-border-default)]/60 flex items-center justify-between text-xs text-[var(--color-text-muted)]">
                     <span className="truncate">
-                      Corroboration: <span className="text-[var(--color-text-secondary)]">{pair.summary}</span>
+                      Corroboration:{" "}
+                      <span className="text-[var(--color-text-secondary)]">
+                        {pair.summary}
+                      </span>
                     </span>
-                    <span className="shrink-0 capitalize">Object: {pair.entityName}</span>
+                    <span className="shrink-0 capitalize">
+                      Object: {pair.entityName}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -565,25 +654,35 @@ export default function DuplicatesResolutionPage() {
       )}
 
       {/* TAB 2: MERGE HISTORY & ROLLBACK */}
-      {activeTab === 'history' && (
+      {activeTab === "history" && (
         <div className="space-y-4" data-testid="merge-history-view">
           <div className="p-4 rounded-xl border border-indigo-500/20 bg-indigo-950/10 flex items-start gap-3">
             <RotateCcw className="h-5 w-5 text-indigo-400 shrink-0 mt-0.5" />
             <div className="text-xs text-[var(--color-text-muted)]">
-              <span className="font-semibold text-[var(--color-text-primary)]">30-Day Safe Rollback Invariant:</span>{' '}
-              All merged records preserve full original snapshots, foreign-key relationships, timeline activities, and quote references. Clicking <strong>Unmerge</strong> instantly restores the archived record and reassigns all foreign links.
+              <span className="font-semibold text-[var(--color-text-primary)]">
+                30-Day Safe Rollback Invariant:
+              </span>{" "}
+              All merged records preserve full original snapshots, foreign-key
+              relationships, timeline activities, and quote references. Clicking{" "}
+              <strong>Unmerge</strong> instantly restores the archived record
+              and reassigns all foreign links.
             </div>
           </div>
 
           {merges.length === 0 ? (
             <div className="p-12 text-center rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-surface)]">
               <History className="h-10 w-10 text-[var(--color-text-muted)] mx-auto mb-2 opacity-50" />
-              <p className="text-sm text-[var(--color-text-muted)]">No merge transactions recorded yet.</p>
+              <p className="text-sm text-[var(--color-text-muted)]">
+                No merge transactions recorded yet.
+              </p>
             </div>
           ) : (
             <div className="rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm" data-testid="merge-history-table">
+                <table
+                  className="w-full text-left text-sm"
+                  data-testid="merge-history-table"
+                >
                   <thead className="bg-[var(--color-bg-canvas)] border-b border-[var(--color-border-default)] text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
                     <tr>
                       <th className="py-3 px-4">Merged Records</th>
@@ -596,37 +695,48 @@ export default function DuplicatesResolutionPage() {
                   </thead>
                   <tbody className="divide-y divide-[var(--color-border-default)]">
                     {merges.map((item) => (
-                      <tr key={item.id} className="hover:bg-[var(--color-bg-canvas)]/50 transition-colors">
+                      <tr
+                        key={item.id}
+                        className="hover:bg-[var(--color-bg-canvas)]/50 transition-colors"
+                      >
                         <td className="py-3.5 px-4">
                           <div className="font-medium text-[var(--color-text-primary)]">
-                            Winner: {getRecordTitle(item.winnerRecord || item.snapshotWinnerBefore)}
+                            Winner:{" "}
+                            {getRecordTitle(
+                              item.winnerRecord || item.snapshotWinnerBefore,
+                            )}
                           </div>
                           <div className="text-xs text-[var(--color-text-muted)] mt-0.5 line-through">
-                            Loser: {getRecordTitle(item.loserRecord || item.snapshotLoserBefore)}
+                            Loser:{" "}
+                            {getRecordTitle(
+                              item.loserRecord || item.snapshotLoserBefore,
+                            )}
                           </div>
                         </td>
                         <td className="py-3.5 px-4 capitalize text-[var(--color-text-secondary)]">
                           {item.entityName}
                         </td>
                         <td className="py-3.5 px-4 text-[var(--color-text-secondary)] text-xs">
-                          {item.transferredLinksCount} links • {item.transferredActivitiesCount} activities
+                          {item.transferredLinksCount} links •{" "}
+                          {item.transferredActivitiesCount} activities
                         </td>
                         <td className="py-3.5 px-4 text-xs text-[var(--color-text-muted)]">
-                          {new Date(item.mergedAt).toLocaleDateString()} {new Date(item.mergedAt).toLocaleTimeString()}
+                          {new Date(item.mergedAt).toLocaleDateString()}{" "}
+                          {new Date(item.mergedAt).toLocaleTimeString()}
                         </td>
                         <td className="py-3.5 px-4">
                           <span
                             className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                              item.status === 'MERGED'
-                                ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20'
-                                : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                              item.status === "MERGED"
+                                ? "bg-emerald-950/40 text-emerald-400 border border-emerald-500/20"
+                                : "bg-zinc-800 text-zinc-400 border border-zinc-700"
                             }`}
                           >
                             {item.status}
                           </span>
                         </td>
                         <td className="py-3.5 px-4 text-right">
-                          {item.status === 'MERGED' ? (
+                          {item.status === "MERGED" ? (
                             <Button
                               id={`unmerge-btn-${item.id}`}
                               data-testid="unmerge-btn"
@@ -638,7 +748,9 @@ export default function DuplicatesResolutionPage() {
                               Unmerge
                             </Button>
                           ) : (
-                            <span className="text-xs text-[var(--color-text-muted)]">Unmerged</span>
+                            <span className="text-xs text-[var(--color-text-muted)]">
+                              Unmerged
+                            </span>
                           )}
                         </td>
                       </tr>
@@ -663,7 +775,11 @@ export default function DuplicatesResolutionPage() {
             {/* Header info */}
             <div className="p-3 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-canvas)] flex items-center justify-between text-xs">
               <span className="text-[var(--color-text-muted)]">
-                Match Confidence: <strong className="text-emerald-400">{comparingPair.confidenceScore}%</strong> ({comparingPair.confidenceTier})
+                Match Confidence:{" "}
+                <strong className="text-emerald-400">
+                  {comparingPair.confidenceScore}%
+                </strong>{" "}
+                ({comparingPair.confidenceTier})
               </span>
               <span className="text-[var(--color-text-muted)]">
                 Signals: {comparingPair.summary}
@@ -677,23 +793,25 @@ export default function DuplicatesResolutionPage() {
                 id="pick-winner-left"
                 data-testid="pick-winner-left"
                 onClick={() => {
-                  setWinnerChoice('primary');
+                  setWinnerChoice("primary");
                   const allFields = Object.keys(fieldSelections);
-                  const sel: Record<string, 'primary' | 'duplicate'> = {};
-                  for (const f of allFields) sel[f] = 'primary';
+                  const sel: Record<string, "primary" | "duplicate"> = {};
+                  for (const f of allFields) sel[f] = "primary";
                   setFieldSelections(sel);
                 }}
                 className={`p-3.5 rounded-xl border text-left transition-all ${
-                  winnerChoice === 'primary'
-                    ? 'border-indigo-500 bg-indigo-950/20 shadow-md ring-1 ring-indigo-500'
-                    : 'border-[var(--color-border-default)] bg-[var(--color-bg-surface)] hover:border-zinc-700'
+                  winnerChoice === "primary"
+                    ? "border-indigo-500 bg-indigo-950/20 shadow-md ring-1 ring-indigo-500"
+                    : "border-[var(--color-border-default)] bg-[var(--color-bg-surface)] hover:border-zinc-700"
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
                     Record A (Primary)
                   </span>
-                  {winnerChoice === 'primary' && <CheckCircle2 className="h-4 w-4 text-indigo-400" />}
+                  {winnerChoice === "primary" && (
+                    <CheckCircle2 className="h-4 w-4 text-indigo-400" />
+                  )}
                 </div>
                 <div className="font-semibold text-[var(--color-text-primary)]">
                   {getRecordTitle(comparingPair.primaryRecord)}
@@ -708,23 +826,25 @@ export default function DuplicatesResolutionPage() {
                 id="pick-winner-right"
                 data-testid="pick-winner-right"
                 onClick={() => {
-                  setWinnerChoice('duplicate');
+                  setWinnerChoice("duplicate");
                   const allFields = Object.keys(fieldSelections);
-                  const sel: Record<string, 'primary' | 'duplicate'> = {};
-                  for (const f of allFields) sel[f] = 'duplicate';
+                  const sel: Record<string, "primary" | "duplicate"> = {};
+                  for (const f of allFields) sel[f] = "duplicate";
                   setFieldSelections(sel);
                 }}
                 className={`p-3.5 rounded-xl border text-left transition-all ${
-                  winnerChoice === 'duplicate'
-                    ? 'border-indigo-500 bg-indigo-950/20 shadow-md ring-1 ring-indigo-500'
-                    : 'border-[var(--color-border-default)] bg-[var(--color-bg-surface)] hover:border-zinc-700'
+                  winnerChoice === "duplicate"
+                    ? "border-indigo-500 bg-indigo-950/20 shadow-md ring-1 ring-indigo-500"
+                    : "border-[var(--color-border-default)] bg-[var(--color-bg-surface)] hover:border-zinc-700"
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
                     Record B (Duplicate)
                   </span>
-                  {winnerChoice === 'duplicate' && <CheckCircle2 className="h-4 w-4 text-indigo-400" />}
+                  {winnerChoice === "duplicate" && (
+                    <CheckCircle2 className="h-4 w-4 text-indigo-400" />
+                  )}
                 </div>
                 <div className="font-semibold text-[var(--color-text-primary)]">
                   {getRecordTitle(comparingPair.duplicateRecord)}
@@ -745,7 +865,10 @@ export default function DuplicatesResolutionPage() {
               </div>
 
               <div className="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] overflow-hidden max-h-72 overflow-y-auto">
-                <table className="w-full text-xs text-left" data-testid="field-compare-table">
+                <table
+                  className="w-full text-xs text-left"
+                  data-testid="field-compare-table"
+                >
                   <thead className="bg-[var(--color-bg-canvas)] border-b border-[var(--color-border-default)] sticky top-0 text-[var(--color-text-muted)] font-semibold">
                     <tr>
                       <th className="py-2.5 px-3">Field</th>
@@ -757,12 +880,13 @@ export default function DuplicatesResolutionPage() {
                     {Object.keys(fieldSelections).map((field) => {
                       const valA = comparingPair.primaryRecord?.data?.[field];
                       const valB = comparingPair.duplicateRecord?.data?.[field];
-                      const isConflict = String(valA ?? '') !== String(valB ?? '');
+                      const isConflict =
+                        String(valA ?? "") !== String(valB ?? "");
 
                       return (
                         <tr
                           key={field}
-                          className={isConflict ? 'bg-amber-950/10' : ''}
+                          className={isConflict ? "bg-amber-950/10" : ""}
                           data-testid={`field-row-${field}`}
                         >
                           <td className="py-2.5 px-3 font-medium text-[var(--color-text-secondary)]">
@@ -779,14 +903,23 @@ export default function DuplicatesResolutionPage() {
                               <input
                                 type="radio"
                                 name={`field_${field}`}
-                                checked={fieldSelections[field] === 'primary'}
+                                checked={fieldSelections[field] === "primary"}
                                 onChange={() =>
-                                  setFieldSelections((prev) => ({ ...prev, [field]: 'primary' }))
+                                  setFieldSelections((prev) => ({
+                                    ...prev,
+                                    [field]: "primary",
+                                  }))
                                 }
                                 className="text-indigo-600 focus:ring-indigo-500"
                               />
                               <span className="text-[var(--color-text-primary)]">
-                                {valA !== undefined && valA !== null ? String(valA) : <em className="text-[var(--color-text-muted)]">empty</em>}
+                                {valA !== undefined && valA !== null ? (
+                                  String(valA)
+                                ) : (
+                                  <em className="text-[var(--color-text-muted)]">
+                                    empty
+                                  </em>
+                                )}
                               </span>
                             </label>
                           </td>
@@ -796,14 +929,23 @@ export default function DuplicatesResolutionPage() {
                               <input
                                 type="radio"
                                 name={`field_${field}`}
-                                checked={fieldSelections[field] === 'duplicate'}
+                                checked={fieldSelections[field] === "duplicate"}
                                 onChange={() =>
-                                  setFieldSelections((prev) => ({ ...prev, [field]: 'duplicate' }))
+                                  setFieldSelections((prev) => ({
+                                    ...prev,
+                                    [field]: "duplicate",
+                                  }))
                                 }
                                 className="text-indigo-600 focus:ring-indigo-500"
                               />
                               <span className="text-[var(--color-text-primary)]">
-                                {valB !== undefined && valB !== null ? String(valB) : <em className="text-[var(--color-text-muted)]">empty</em>}
+                                {valB !== undefined && valB !== null ? (
+                                  String(valB)
+                                ) : (
+                                  <em className="text-[var(--color-text-muted)]">
+                                    empty
+                                  </em>
+                                )}
                               </span>
                             </label>
                           </td>
@@ -822,10 +964,12 @@ export default function DuplicatesResolutionPage() {
                 Atomic Merge & Link Transfer Guarantees
               </div>
               <p>
-                • All quotes, emails, calls, threads, and relationships linked to the loser record will be reassigned to the surviving record.
+                • All quotes, emails, calls, threads, and relationships linked
+                to the loser record will be reassigned to the surviving record.
               </p>
               <p>
-                • The loser record will be soft-deleted and an entry added to the audit ledger. You have 30 days to reversibly unmerge.
+                • The loser record will be soft-deleted and an entry added to
+                the audit ledger. You have 30 days to reversibly unmerge.
               </p>
             </div>
 
@@ -847,7 +991,7 @@ export default function DuplicatesResolutionPage() {
                 className="flex items-center gap-2"
               >
                 <GitMerge className="h-4 w-4" />
-                {merging ? 'Merging Records...' : 'Confirm & Execute Merge'}
+                {merging ? "Merging Records..." : "Confirm & Execute Merge"}
               </Button>
             </div>
           </div>
@@ -864,7 +1008,9 @@ export default function DuplicatesResolutionPage() {
         >
           <div className="space-y-4" data-testid="match-explanation-dialog">
             <p className="text-xs text-[var(--color-text-muted)]">
-              Our 5-algorithm identity corroboration engine combines phonetic indexing, token transposition, legal entity normalization, and exact identity anchors into an explainable score:
+              Our 5-algorithm identity corroboration engine combines phonetic
+              indexing, token transposition, legal entity normalization, and
+              exact identity anchors into an explainable score:
             </p>
 
             <div className="space-y-2.5">
@@ -873,25 +1019,44 @@ export default function DuplicatesResolutionPage() {
                   key={idx}
                   className={`p-3 rounded-lg border text-xs ${
                     factor.contribution > 0
-                      ? 'bg-emerald-950/20 border-emerald-500/30'
-                      : 'bg-rose-950/20 border-rose-500/30'
+                      ? "bg-emerald-950/20 border-emerald-500/30"
+                      : "bg-rose-950/20 border-rose-500/30"
                   }`}
                 >
                   <div className="flex items-center justify-between font-semibold">
-                    <span className={factor.contribution > 0 ? 'text-emerald-300' : 'text-rose-300'}>
+                    <span
+                      className={
+                        factor.contribution > 0
+                          ? "text-emerald-300"
+                          : "text-rose-300"
+                      }
+                    >
                       {factor.factor}
                     </span>
-                    <span className={factor.contribution > 0 ? 'text-emerald-400' : 'text-rose-400'}>
-                      {factor.contribution > 0 ? `+${factor.contribution}%` : `${factor.contribution}%`}
+                    <span
+                      className={
+                        factor.contribution > 0
+                          ? "text-emerald-400"
+                          : "text-rose-400"
+                      }
+                    >
+                      {factor.contribution > 0
+                        ? `+${factor.contribution}%`
+                        : `${factor.contribution}%`}
                     </span>
                   </div>
-                  <p className="text-[var(--color-text-muted)] mt-1">{factor.detail}</p>
+                  <p className="text-[var(--color-text-muted)] mt-1">
+                    {factor.detail}
+                  </p>
                 </div>
               ))}
             </div>
 
             <div className="pt-3 border-t border-[var(--color-border-default)] flex justify-end">
-              <Button variant="outline" onClick={() => setExplanationPair(null)}>
+              <Button
+                variant="outline"
+                onClick={() => setExplanationPair(null)}
+              >
                 Close
               </Button>
             </div>

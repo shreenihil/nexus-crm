@@ -45,7 +45,7 @@ This document records the architectural and design decisions for Nexus CRM using
   1. **Primitives:** Raw color hexes, base spacing units (4px scale), typography scales.
   2. **Semantics:** Meaningful tokens (`bg-surface`, `text-primary`, `border-muted`, `accent-primary`, `status-danger`).
   3. **Components:** Specific abstractions (`button-primary-bg`, `table-row-hover`).
-  Tokens are compiled into CSS custom properties (`--color-bg-surface`, etc.) mapped to Tailwind CSS utilities. A blocking inline script in `<head>` applies the user's theme preference before first DOM paint to prevent FOWT.
+     Tokens are compiled into CSS custom properties (`--color-bg-surface`, etc.) mapped to Tailwind CSS utilities. A blocking inline script in `<head>` applies the user's theme preference before first DOM paint to prevent FOWT.
 - **Consequences:**
   - **Positive:** Components never contain hardcoded hex codes. Contrast ratios can be validated mathematically at build time. Themes switch instantaneously with zero flash.
   - **Negative:** Requires strict discipline when creating components to only consume semantic tokens.
@@ -143,4 +143,3 @@ This document records the architectural and design decisions for Nexus CRM using
 - **Consequences:**
   - **Positive:** 100% precision safety, zero currency bugs, native Indian localization without sacrificing any ISO-4217 foreign currency capability.
   - **Negative:** Developers must always use `Money` and formatting utilities instead of raw string templates or numbers.
-

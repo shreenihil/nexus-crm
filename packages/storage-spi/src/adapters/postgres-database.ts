@@ -1,10 +1,13 @@
-import { createHash } from 'node:crypto';
-import type { DatabaseAdapter } from '../database.js';
-import type { DatabaseCapabilityFlags, AdapterHealth } from '../capabilities.js';
-import type { PostgresConfig } from '../config.js';
+import { createHash } from "node:crypto";
+import type { DatabaseAdapter } from "../database.js";
+import type {
+  DatabaseCapabilityFlags,
+  AdapterHealth,
+} from "../capabilities.js";
+import type { PostgresConfig } from "../config.js";
 
 export class PostgresDatabaseAdapter implements DatabaseAdapter {
-  readonly name = 'postgresql-pgvector';
+  readonly name = "postgresql-pgvector";
   readonly tier = 1 as const;
   private connected = false;
   private config: PostgresConfig;
@@ -30,7 +33,7 @@ export class PostgresDatabaseAdapter implements DatabaseAdapter {
       // In production, performs probe query `SELECT 1`
       const latencyMs = Math.round(performance.now() - start);
       return {
-        status: 'healthy',
+        status: "healthy",
         latencyMs,
         details: {
           host: this.config.host,
@@ -42,7 +45,7 @@ export class PostgresDatabaseAdapter implements DatabaseAdapter {
       };
     } catch (err: any) {
       return {
-        status: 'unreachable',
+        status: "unreachable",
         latencyMs: Math.round(performance.now() - start),
         message: err.message,
         checkedAt: new Date().toISOString(),
@@ -59,12 +62,15 @@ export class PostgresDatabaseAdapter implements DatabaseAdapter {
   }
 
   async query<T = any>(_sql: string, _params?: any[]): Promise<T[]> {
-    if (!this.connected) throw new Error('Postgres database not connected');
+    if (!this.connected) throw new Error("Postgres database not connected");
     return [];
   }
 
-  async execute(_sql: string, _params?: any[]): Promise<{ rowsAffected: number }> {
-    if (!this.connected) throw new Error('Postgres database not connected');
+  async execute(
+    _sql: string,
+    _params?: any[],
+  ): Promise<{ rowsAffected: number }> {
+    if (!this.connected) throw new Error("Postgres database not connected");
     return { rowsAffected: 0 };
   }
 
@@ -73,20 +79,31 @@ export class PostgresDatabaseAdapter implements DatabaseAdapter {
   }
 
   async migrate(): Promise<{ appliedMigrations: string[] }> {
-    return { appliedMigrations: ['001_initial_pgvector', '002_polymorphic_schema', '003_rls_policies'] };
+    return {
+      appliedMigrations: [
+        "001_initial_pgvector",
+        "002_polymorphic_schema",
+        "003_rls_policies",
+      ],
+    };
   }
 
   async exportStream(
     _table: string,
     cursor?: string,
-    batchSize = 100
+    batchSize = 100,
   ): Promise<{ rows: any[]; nextCursor?: string; checksum: string }> {
     const rows: any[] = [];
-    const checksum = createHash('sha256').update(JSON.stringify(rows)).digest('hex');
+    const checksum = createHash("sha256")
+      .update(JSON.stringify(rows))
+      .digest("hex");
     return { rows, nextCursor: undefined, checksum };
   }
 
-  async importBatch(_table: string, rows: any[]): Promise<{ inserted: number }> {
+  async importBatch(
+    _table: string,
+    rows: any[],
+  ): Promise<{ inserted: number }> {
     return { inserted: rows.length };
   }
 }

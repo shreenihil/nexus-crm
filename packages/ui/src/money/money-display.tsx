@@ -1,6 +1,11 @@
-import * as React from 'react';
-import { Money, formatMoney, formatCompactMoney, amountInWordsIndian } from '@nexus/schema';
-import { cn } from '../lib/utils';
+import * as React from "react";
+import {
+  Money,
+  formatMoney,
+  formatCompactMoney,
+  amountInWordsIndian,
+} from "@nexus/schema";
+import { cn } from "../lib/utils";
 
 export interface MoneyDisplayProps extends React.HTMLAttributes<HTMLSpanElement> {
   money?: Money;
@@ -9,23 +14,26 @@ export interface MoneyDisplayProps extends React.HTMLAttributes<HTMLSpanElement>
   isSubunits?: boolean;
   compact?: boolean;
   showWords?: boolean;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 }
 
-export const MoneyDisplay = React.forwardRef<HTMLSpanElement, MoneyDisplayProps>(
+export const MoneyDisplay = React.forwardRef<
+  HTMLSpanElement,
+  MoneyDisplayProps
+>(
   (
     {
       money,
       amount = 0,
-      currency = 'INR',
+      currency = "INR",
       isSubunits = true,
       compact = false,
       showWords = false,
-      size = 'md',
+      size = "md",
       className,
       ...props
     },
-    ref
+    ref,
   ) => {
     const moneyObj = React.useMemo(() => {
       if (money) return money;
@@ -50,25 +58,25 @@ export const MoneyDisplay = React.forwardRef<HTMLSpanElement, MoneyDisplayProps>
     }, [moneyObj, showWords]);
 
     const sizeClasses = {
-      xs: 'text-xs',
-      sm: 'text-sm',
-      md: 'text-base',
-      lg: 'text-lg font-semibold',
-      xl: 'text-xl font-bold tracking-tight',
-      '2xl': 'text-2xl font-extrabold tracking-tight',
+      xs: "text-xs",
+      sm: "text-sm",
+      md: "text-base",
+      lg: "text-lg font-semibold",
+      xl: "text-xl font-bold tracking-tight",
+      "2xl": "text-2xl font-extrabold tracking-tight",
     };
 
     return (
       <span
         ref={ref}
-        className={cn('inline-flex flex-col', className)}
+        className={cn("inline-flex flex-col", className)}
         title={wordsText || formatMoney(moneyObj)}
         {...props}
       >
         <span
           className={cn(
-            'font-mono tabular-nums tracking-tight text-[var(--color-text-primary)]',
-            sizeClasses[size]
+            "font-mono tabular-nums tracking-tight text-[var(--color-text-primary)]",
+            sizeClasses[size],
           )}
           aria-label={`${moneyObj.currency} ${moneyObj.toMajor()}`}
         >
@@ -81,7 +89,7 @@ export const MoneyDisplay = React.forwardRef<HTMLSpanElement, MoneyDisplayProps>
         )}
       </span>
     );
-  }
+  },
 );
 
-MoneyDisplay.displayName = 'MoneyDisplay';
+MoneyDisplay.displayName = "MoneyDisplay";

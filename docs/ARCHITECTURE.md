@@ -12,7 +12,7 @@ graph TD
     Fastify --> Redis
     Fastify --> Postgres[("PostgreSQL 16 (RLS Enabled)")]
     Worker --> Postgres
-    
+
     subgraph Packages
         Tokens["packages/tokens"] --> Next
         Tokens --> UI["packages/ui"]
@@ -27,6 +27,7 @@ graph TD
 ## 2. Security Boundaries & RLS Architecture
 
 Every request to `apps/api` undergoes:
+
 1. **Transport Security:** Strict TLS, HSTS, Secure `SameSite=Lax` cookies.
 2. **Authentication Middleware:** Validates JWT access token or session cookie, resolves `user_id`.
 3. **Workspace Context Resolution:** Extracts `workspace_id` from the active membership or request header `X-Workspace-ID`.

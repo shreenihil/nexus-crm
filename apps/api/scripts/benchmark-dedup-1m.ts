@@ -3,22 +3,67 @@
  * Validates exit gate requirement per §15: 1M-record scan benchmark.
  */
 
-import { InvertedCandidateIndex, evaluateDuplicateMatch, type DedupRecord } from '@nexus/dedup';
+import {
+  InvertedCandidateIndex,
+  evaluateDuplicateMatch,
+  type DedupRecord,
+} from "@nexus/dedup";
 
 async function runDedup1MBenchmark() {
-  console.log('============================================================');
-  console.log('Nexus CRM — 1,000,000 Record Deduplication Scan Benchmark');
-  console.log('Exit Gate Target: Sub-25ms real-time candidate blocking on 1M records');
-  console.log('============================================================\n');
+  console.log("============================================================");
+  console.log("Nexus CRM — 1,000,000 Record Deduplication Scan Benchmark");
+  console.log(
+    "Exit Gate Target: Sub-25ms real-time candidate blocking on 1M records",
+  );
+  console.log("============================================================\n");
 
   const TOTAL_RECORDS = 1_000_000;
   const index = new InvertedCandidateIndex();
 
-  const firstNames = ['James', 'Mary', 'John', 'Patricia', 'Robert', 'Jennifer', 'Michael', 'Linda', 'William', 'Elizabeth', 'Tony', 'Anthony', 'Bruce', 'Clark'];
-  const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Stark', 'Wayne', 'Kent'];
-  const domains = ['starkindustries.com', 'wayneenterprises.com', 'dailyplanet.com', 'cyberdyne.io', 'acme.corp', 'lexcorp.org', 'umbrella.co'];
+  const firstNames = [
+    "James",
+    "Mary",
+    "John",
+    "Patricia",
+    "Robert",
+    "Jennifer",
+    "Michael",
+    "Linda",
+    "William",
+    "Elizabeth",
+    "Tony",
+    "Anthony",
+    "Bruce",
+    "Clark",
+  ];
+  const lastNames = [
+    "Smith",
+    "Johnson",
+    "Williams",
+    "Brown",
+    "Jones",
+    "Garcia",
+    "Miller",
+    "Davis",
+    "Rodriguez",
+    "Martinez",
+    "Stark",
+    "Wayne",
+    "Kent",
+  ];
+  const domains = [
+    "starkindustries.com",
+    "wayneenterprises.com",
+    "dailyplanet.com",
+    "cyberdyne.io",
+    "acme.corp",
+    "lexcorp.org",
+    "umbrella.co",
+  ];
 
-  console.log(`[1/3] Generating & indexing ${TOTAL_RECORDS.toLocaleString()} records via candidate blocking...`);
+  console.log(
+    `[1/3] Generating & indexing ${TOTAL_RECORDS.toLocaleString()} records via candidate blocking...`,
+  );
   const genStart = performance.now();
 
   const BATCH_SIZE = 50_000;
@@ -33,11 +78,11 @@ async function runDedup1MBenchmark() {
 
       batch.push({
         id: `rec-${i}`,
-        entityName: 'people',
+        entityName: "people",
         firstName: fn,
         lastName: ln,
         name: `${fn} ${ln}`,
-        email: `${fn.toLowerCase()}.${ln.toLowerCase()}${i % 500 === 0 ? '' : i}@${dom}`,
+        email: `${fn.toLowerCase()}.${ln.toLowerCase()}${i % 500 === 0 ? "" : i}@${dom}`,
         phone: `+1-${phoneDigits.slice(0, 3)}-${phoneDigits.slice(3, 6)}-${phoneDigits.slice(6)}`,
       });
     }
@@ -45,10 +90,14 @@ async function runDedup1MBenchmark() {
   }
 
   const genDuration = performance.now() - genStart;
-  const indexRate = Math.round((TOTAL_RECORDS / (genDuration / 1000)));
-  console.log(`✓ 1,000,000 records indexed in ${(genDuration / 1000).toFixed(2)}s (${indexRate.toLocaleString()} records/sec)\n`);
+  const indexRate = Math.round(TOTAL_RECORDS / (genDuration / 1000));
+  console.log(
+    `✓ 1,000,000 records indexed in ${(genDuration / 1000).toFixed(2)}s (${indexRate.toLocaleString()} records/sec)\n`,
+  );
 
-  console.log('[2/3] Executing 500 real-time duplicate pre-creation check queries...');
+  console.log(
+    "[2/3] Executing 500 real-time duplicate pre-creation check queries...",
+  );
   const NUM_QUERIES = 500;
   const queryLatencies: number[] = [];
   let candidateMatchesTotal = 0;
@@ -62,12 +111,12 @@ async function runDedup1MBenchmark() {
 
     const probeRecord: DedupRecord = {
       id: `probe-${q}`,
-      entityName: 'people',
+      entityName: "people",
       firstName: fn,
       lastName: ln,
       name: `${fn} ${ln}`,
       email: `${fn.toLowerCase()}.${ln.toLowerCase()}@${dom}`,
-      phone: `+1-212-555-${String(1000 + q).padStart(4, '0')}`,
+      phone: `+1-212-555-${String(1000 + q).padStart(4, "0")}`,
     };
 
     const qStart = performance.now();
@@ -91,23 +140,31 @@ async function runDedup1MBenchmark() {
   const p99 = queryLatencies[Math.floor(NUM_QUERIES * 0.99)]!;
   const max = queryLatencies[queryLatencies.length - 1]!;
 
-  console.log('[3/3] Benchmark Results');
-  console.log('------------------------------------------------------------');
+  console.log("[3/3] Benchmark Results");
+  console.log("------------------------------------------------------------");
   console.log(`Total Records Indexed:     ${TOTAL_RECORDS.toLocaleString()}`);
   console.log(`Queries Executed:          ${NUM_QUERIES}`);
-  console.log(`Candidate Buckets Found:   ${candidateMatchesTotal.toLocaleString()}`);
-  console.log(`Full Corroborations Run:   ${fullCorroborationCount.toLocaleString()}`);
+  console.log(
+    `Candidate Buckets Found:   ${candidateMatchesTotal.toLocaleString()}`,
+  );
+  console.log(
+    `Full Corroborations Run:   ${fullCorroborationCount.toLocaleString()}`,
+  );
   console.log(`Min Query Latency:         ${min.toFixed(3)} ms`);
   console.log(`p50 (Median) Latency:      ${p50.toFixed(3)} ms`);
   console.log(`p95 Latency:               ${p95.toFixed(3)} ms`);
   console.log(`p99 Latency:               ${p99.toFixed(3)} ms`);
   console.log(`Max Latency:               ${max.toFixed(3)} ms`);
-  console.log('------------------------------------------------------------');
+  console.log("------------------------------------------------------------");
 
   if (p95 < 25) {
-    console.log(`✅ SUCCESS: p95 scan latency (${p95.toFixed(3)} ms) passes the <25ms budget on 1M records!`);
+    console.log(
+      `✅ SUCCESS: p95 scan latency (${p95.toFixed(3)} ms) passes the <25ms budget on 1M records!`,
+    );
   } else {
-    console.error(`❌ FAILURE: p95 latency (${p95.toFixed(3)} ms) exceeds 25ms threshold.`);
+    console.error(
+      `❌ FAILURE: p95 latency (${p95.toFixed(3)} ms) exceeds 25ms threshold.`,
+    );
     process.exit(1);
   }
 }

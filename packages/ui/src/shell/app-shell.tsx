@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from "react";
 import {
   LayoutDashboard,
   Users,
@@ -20,11 +20,11 @@ import {
   PanelLeftOpen,
   Sparkles,
   Server,
-} from 'lucide-react';
-import { Kbd } from '../kbd/kbd';
-import { Avatar } from '../avatar/avatar';
-import { Button } from '../button/button';
-import { cn } from '../lib/utils';
+} from "lucide-react";
+import { Kbd } from "../kbd/kbd";
+import { Avatar } from "../avatar/avatar";
+import { Button } from "../button/button";
+import { cn } from "../lib/utils";
 
 export interface NavItem {
   label: string;
@@ -45,10 +45,10 @@ export interface AppShellProps {
 }
 
 export function AppShell({
-  currentPath = '/',
-  workspaceName = 'Acme Corp',
-  userName = 'Alex Rivers',
-  userEmail = 'alex@acme.corp',
+  currentPath = "/",
+  workspaceName = "Acme Corp",
+  userName = "Alex Rivers",
+  userEmail = "alex@acme.corp",
   children,
   onNavigate,
   onSearchClick,
@@ -58,19 +58,64 @@ export function AppShell({
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const navItems: NavItem[] = [
-    { label: 'Home', href: '/', icon: <LayoutDashboard className="h-4 w-4" /> },
-    { label: 'Inbox & Activity', href: '/activity', icon: <Inbox className="h-4 w-4" />, badge: 3 },
-    { label: 'People', href: '/people', icon: <Users className="h-4 w-4" /> },
-    { label: 'Companies', href: '/companies', icon: <Building2 className="h-4 w-4" /> },
-    { label: 'Deals', href: '/deals', icon: <TrendingUp className="h-4 w-4" /> },
-    { label: 'Quotes & Contracts', href: '/quotes', icon: <FileText className="h-4 w-4" /> },
-    { label: 'Invoices', href: '/invoices', icon: <CreditCard className="h-4 w-4" /> },
-    { label: 'Dashboards', href: '/analytics', icon: <BarChart3 className="h-4 w-4" /> },
-    { label: 'Automations', href: '/automations', icon: <GitBranch className="h-4 w-4" /> },
-    { label: 'Duplicates', href: '/duplicates', icon: <Copy className="h-4 w-4" /> },
-    { label: 'Platform & BYOK', href: '/settings/platform', icon: <Server className="h-4 w-4" /> },
-    { label: 'Design System', href: '/design-system', icon: <Sparkles className="h-4 w-4" /> },
-    { label: 'Settings', href: '/settings', icon: <Settings className="h-4 w-4" /> },
+    { label: "Home", href: "/", icon: <LayoutDashboard className="h-4 w-4" /> },
+    {
+      label: "Inbox & Activity",
+      href: "/activity",
+      icon: <Inbox className="h-4 w-4" />,
+      badge: 3,
+    },
+    { label: "People", href: "/people", icon: <Users className="h-4 w-4" /> },
+    {
+      label: "Companies",
+      href: "/companies",
+      icon: <Building2 className="h-4 w-4" />,
+    },
+    {
+      label: "Deals",
+      href: "/deals",
+      icon: <TrendingUp className="h-4 w-4" />,
+    },
+    {
+      label: "Quotes & Contracts",
+      href: "/quotes",
+      icon: <FileText className="h-4 w-4" />,
+    },
+    {
+      label: "Invoices",
+      href: "/invoices",
+      icon: <CreditCard className="h-4 w-4" />,
+    },
+    {
+      label: "Dashboards",
+      href: "/analytics",
+      icon: <BarChart3 className="h-4 w-4" />,
+    },
+    {
+      label: "Automations",
+      href: "/automations",
+      icon: <GitBranch className="h-4 w-4" />,
+    },
+    {
+      label: "Duplicates",
+      href: "/duplicates",
+      icon: <Copy className="h-4 w-4" />,
+    },
+    {
+      label: "Platform & BYOK",
+      href: "/settings/platform",
+      icon: <Server className="h-4 w-4" />,
+    },
+    {
+      label: "Design System",
+      href: "/design-system",
+      icon: <Sparkles className="h-4 w-4" />,
+    },
+    {
+      label: "Settings",
+      href: "/settings",
+      icon: <Settings className="h-4 w-4" />,
+    },
   ];
 
   const handleNavClick = (href: string) => {
@@ -85,8 +130,8 @@ export function AppShell({
       {/* Desktop / Tablet Sidebar */}
       <aside
         className={cn(
-          'hidden md:flex flex-col border-r border-[var(--color-border-default)] bg-[var(--color-bg-surface)] transition-all duration-200 z-30',
-          collapsed ? 'w-16' : 'w-64'
+          "hidden md:flex flex-col border-r border-[var(--color-border-default)] bg-[var(--color-bg-surface)] transition-all duration-200 z-30",
+          collapsed ? "w-16" : "w-64",
         )}
       >
         {/* Workspace Brand Header */}
@@ -97,8 +142,12 @@ export function AppShell({
                 N
               </div>
               <div className="flex flex-col truncate">
-                <span className="font-semibold text-sm leading-tight truncate">{workspaceName}</span>
-                <span className="text-[10px] text-[var(--color-text-muted)] font-mono">Nexus CRM</span>
+                <span className="font-semibold text-sm leading-tight truncate">
+                  {workspaceName}
+                </span>
+                <span className="text-[10px] text-[var(--color-text-muted)] font-mono">
+                  Nexus CRM
+                </span>
               </div>
             </div>
           )}
@@ -110,10 +159,14 @@ export function AppShell({
           <button
             type="button"
             onClick={() => setCollapsed(!collapsed)}
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             className="p-1 rounded-[4px] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-subtle)] transition-colors"
           >
-            {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+            {collapsed ? (
+              <PanelLeftOpen className="h-4 w-4" />
+            ) : (
+              <PanelLeftClose className="h-4 w-4" />
+            )}
           </button>
         </div>
 
@@ -121,7 +174,16 @@ export function AppShell({
         <nav className="flex-1 overflow-y-auto p-2 flex flex-col gap-0.5">
           {navItems.map((item) => {
             const isActive = currentPath === item.href;
-            const tourId = item.href === '/deals' ? 'nav-deals' : item.href === '/duplicates' ? 'nav-duplicates' : item.href === '/automations' ? 'nav-automations' : item.href.startsWith('/settings') ? 'nav-settings' : undefined;
+            const tourId =
+              item.href === "/deals"
+                ? "nav-deals"
+                : item.href === "/duplicates"
+                  ? "nav-duplicates"
+                  : item.href === "/automations"
+                    ? "nav-automations"
+                    : item.href.startsWith("/settings")
+                      ? "nav-settings"
+                      : undefined;
             return (
               <button
                 key={item.href}
@@ -129,14 +191,21 @@ export function AppShell({
                 data-tour-id={tourId}
                 onClick={() => handleNavClick(item.href)}
                 className={cn(
-                  'flex items-center gap-3 px-2.5 py-2 rounded-[6px] text-sm font-medium transition-colors select-none w-full text-left',
+                  "flex items-center gap-3 px-2.5 py-2 rounded-[6px] text-sm font-medium transition-colors select-none w-full text-left",
                   isActive
-                    ? 'bg-[var(--color-accent-muted)] text-[var(--color-accent-primary)] font-semibold'
-                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-subtle)]'
+                    ? "bg-[var(--color-accent-muted)] text-[var(--color-accent-primary)] font-semibold"
+                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-subtle)]",
                 )}
                 title={collapsed ? item.label : undefined}
               >
-                <span className={cn('shrink-0', isActive ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)]')}>
+                <span
+                  className={cn(
+                    "shrink-0",
+                    isActive
+                      ? "text-[var(--color-accent-primary)]"
+                      : "text-[var(--color-text-muted)]",
+                  )}
+                >
                   {item.icon}
                 </span>
                 {!collapsed && (
@@ -154,12 +223,21 @@ export function AppShell({
 
         {/* User Profile Footer */}
         <div className="p-2 border-t border-[var(--color-border-default)]">
-          <div className={cn('flex items-center gap-2.5 p-1.5 rounded-[6px] hover:bg-[var(--color-bg-subtle)] transition-colors', collapsed && 'justify-center')}>
+          <div
+            className={cn(
+              "flex items-center gap-2.5 p-1.5 rounded-[6px] hover:bg-[var(--color-bg-subtle)] transition-colors",
+              collapsed && "justify-center",
+            )}
+          >
             <Avatar name={userName} size="sm" />
             {!collapsed && (
               <div className="flex flex-col flex-1 overflow-hidden text-left">
-                <span className="text-xs font-semibold truncate leading-tight">{userName}</span>
-                <span className="text-[10px] text-[var(--color-text-muted)] truncate">{userEmail}</span>
+                <span className="text-xs font-semibold truncate leading-tight">
+                  {userName}
+                </span>
+                <span className="text-[10px] text-[var(--color-text-muted)] truncate">
+                  {userEmail}
+                </span>
               </div>
             )}
           </div>
@@ -178,7 +256,11 @@ export function AppShell({
               className="md:hidden p-1.5 rounded-[6px] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
               aria-label="Toggle Navigation Menu"
             >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </button>
 
             {/* Quick Search Trigger */}
@@ -189,7 +271,9 @@ export function AppShell({
               className="flex items-center gap-2 h-9 px-3 rounded-[6px] bg-[var(--color-bg-subtle)] hover:bg-[var(--color-bg-elevated)] border border-[var(--color-border-default)] text-xs text-[var(--color-text-muted)] transition-colors sm:w-64"
             >
               <Search className="h-3.5 w-3.5 shrink-0" />
-              <span className="flex-1 text-left truncate">Search records, actions...</span>
+              <span className="flex-1 text-left truncate">
+                Search records, actions...
+              </span>
               <Kbd>⌘K</Kbd>
             </button>
           </div>
@@ -220,10 +304,10 @@ export function AppShell({
                 type="button"
                 onClick={() => handleNavClick(item.href)}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2 rounded-[6px] text-sm font-medium text-left',
+                  "flex items-center gap-3 px-3 py-2 rounded-[6px] text-sm font-medium text-left",
                   currentPath === item.href
-                    ? 'bg-[var(--color-accent-muted)] text-[var(--color-accent-primary)] font-semibold'
-                    : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]'
+                    ? "bg-[var(--color-accent-muted)] text-[var(--color-accent-primary)] font-semibold"
+                    : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]",
                 )}
               >
                 {item.icon}

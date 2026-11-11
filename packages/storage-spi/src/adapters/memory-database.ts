@@ -1,9 +1,12 @@
-import { createHash } from 'node:crypto';
-import type { DatabaseAdapter } from '../database.js';
-import type { DatabaseCapabilityFlags, AdapterHealth } from '../capabilities.js';
+import { createHash } from "node:crypto";
+import type { DatabaseAdapter } from "../database.js";
+import type {
+  DatabaseCapabilityFlags,
+  AdapterHealth,
+} from "../capabilities.js";
 
 export class MemoryDatabaseAdapter implements DatabaseAdapter {
-  readonly name = 'in-memory-sqlite';
+  readonly name = "in-memory-sqlite";
   readonly tier = 2 as const;
   private connected = false;
   private tables = new Map<string, any[]>();
@@ -22,7 +25,7 @@ export class MemoryDatabaseAdapter implements DatabaseAdapter {
   async healthCheck(): Promise<AdapterHealth> {
     const start = performance.now();
     return {
-      status: this.connected ? 'healthy' : 'degraded',
+      status: this.connected ? "healthy" : "degraded",
       latencyMs: Math.round(performance.now() - start),
       details: {
         tableCount: this.tables.size,
@@ -41,12 +44,15 @@ export class MemoryDatabaseAdapter implements DatabaseAdapter {
   }
 
   async query<T = any>(sql: string, _params?: any[]): Promise<T[]> {
-    if (!this.connected) throw new Error('Database not connected');
+    if (!this.connected) throw new Error("Database not connected");
     return [];
   }
 
-  async execute(_sql: string, _params?: any[]): Promise<{ rowsAffected: number }> {
-    if (!this.connected) throw new Error('Database not connected');
+  async execute(
+    _sql: string,
+    _params?: any[],
+  ): Promise<{ rowsAffected: number }> {
+    if (!this.connected) throw new Error("Database not connected");
     return { rowsAffected: 0 };
   }
 
@@ -55,20 +61,22 @@ export class MemoryDatabaseAdapter implements DatabaseAdapter {
   }
 
   async migrate(): Promise<{ appliedMigrations: string[] }> {
-    return { appliedMigrations: ['001_genesis_schema'] };
+    return { appliedMigrations: ["001_genesis_schema"] };
   }
 
   async exportStream(
     table: string,
     cursor?: string,
-    batchSize = 100
+    batchSize = 100,
   ): Promise<{ rows: any[]; nextCursor?: string; checksum: string }> {
     const all = this.tables.get(table) || [];
     const offset = cursor ? parseInt(cursor, 10) : 0;
     const rows = all.slice(offset, offset + batchSize);
     const nextOffset = offset + batchSize;
     const nextCursor = nextOffset < all.length ? String(nextOffset) : undefined;
-    const checksum = createHash('sha256').update(JSON.stringify(rows)).digest('hex');
+    const checksum = createHash("sha256")
+      .update(JSON.stringify(rows))
+      .digest("hex");
     return { rows, nextCursor, checksum };
   }
 

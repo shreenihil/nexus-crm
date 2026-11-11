@@ -1,5 +1,5 @@
-import type { WorkspaceRole } from '@nexus/schema';
-import { ROLE_PERMISSIONS_MATRIX, type Action } from './roles';
+import type { WorkspaceRole } from "@nexus/schema";
+import { ROLE_PERMISSIONS_MATRIX, type Action } from "./roles";
 
 export interface UserContext {
   id: string;
@@ -24,7 +24,7 @@ export function can(
   action: Action,
   objectType: string,
   record?: RecordContext | null,
-  field?: string | null
+  field?: string | null,
 ): boolean {
   // If record has a workspaceId, it MUST match the user's workspace
   if (record && record.workspaceId !== user.workspaceId) {
@@ -37,16 +37,24 @@ export function can(
   }
 
   // 1. Object-level check
-  const allowedActions = roleDef.objects['*'] ?? roleDef.objects[objectType] ?? [];
+  const allowedActions =
+    roleDef.objects["*"] ?? roleDef.objects[objectType] ?? [];
   if (!allowedActions.includes(action)) {
     return false;
   }
 
   // 2. Record-level check (for standard rep roles, non-admin)
-  if (record && user.role === 'sales_rep') {
+  if (record && user.role === "sales_rep") {
     // If updating or deleting a deal, must be the owner or creator
-    if ((action === 'update' || action === 'delete') && objectType === 'deals') {
-      if (record.ownerId && record.ownerId !== user.id && record.createdBy !== user.id) {
+    if (
+      (action === "update" || action === "delete") &&
+      objectType === "deals"
+    ) {
+      if (
+        record.ownerId &&
+        record.ownerId !== user.id &&
+        record.createdBy !== user.id
+      ) {
         return false;
       }
     }
@@ -62,7 +70,10 @@ export function can(
     }
 
     // Check if field is read-only when attempting to write/update
-    if ((action === 'create' || action === 'update') && fieldPerm?.readOnly?.includes(field)) {
+    if (
+      (action === "create" || action === "update") &&
+      fieldPerm?.readOnly?.includes(field)
+    ) {
       return false;
     }
   }

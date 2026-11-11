@@ -1,12 +1,27 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-export const channelTypeSchema = z.enum(['email', 'sms', 'whatsapp', 'call', 'internal_note']);
+export const channelTypeSchema = z.enum([
+  "email",
+  "sms",
+  "whatsapp",
+  "call",
+  "internal_note",
+]);
 export type ChannelType = z.infer<typeof channelTypeSchema>;
 
-export const threadStatusSchema = z.enum(['open', 'pending', 'resolved', 'snoozed']);
+export const threadStatusSchema = z.enum([
+  "open",
+  "pending",
+  "resolved",
+  "snoozed",
+]);
 export type ThreadStatus = z.infer<typeof threadStatusSchema>;
 
-export const messageDirectionSchema = z.enum(['inbound', 'outbound', 'internal']);
+export const messageDirectionSchema = z.enum([
+  "inbound",
+  "outbound",
+  "internal",
+]);
 export type MessageDirection = z.infer<typeof messageDirectionSchema>;
 
 export const attachmentSchema = z.object({
@@ -39,7 +54,7 @@ export const messageSchema = z.object({
   bodyHtml: z.string().optional(),
   isInternalNote: z.boolean().default(false),
   attachments: z.array(attachmentSchema).default([]),
-  spfDkimStatus: z.enum(['pass', 'fail', 'neutral']).optional(),
+  spfDkimStatus: z.enum(["pass", "fail", "neutral"]).optional(),
   inReplyTo: z.string().optional(),
   messageIdHeader: z.string().optional(),
   createdAt: z.string(),
@@ -54,7 +69,7 @@ export const messageThreadSchema = z.object({
   contactId: z.string().nullable().optional(),
   companyId: z.string().nullable().optional(),
   dealId: z.string().nullable().optional(),
-  status: threadStatusSchema.default('open'),
+  status: threadStatusSchema.default("open"),
   assignedUserId: z.string().nullable().optional(),
   assignedTeamId: z.string().nullable().optional(),
   slaDueAt: z.string().nullable().optional(),
@@ -71,7 +86,7 @@ export const sequenceStepSchema = z.object({
   id: z.string(),
   stepOrder: z.number().int().nonnegative(),
   dayOffset: z.number().int().nonnegative(),
-  type: z.enum(['email', 'task_call', 'sms']),
+  type: z.enum(["email", "task_call", "sms"]),
   subject: z.string().optional(),
   body: z.string(),
 });
@@ -80,7 +95,7 @@ export type SequenceStep = z.infer<typeof sequenceStepSchema>;
 export const sequenceSchema = z.object({
   id: z.string(),
   workspaceId: z.string(),
-  name: z.string().min(1, 'Sequence name is required'),
+  name: z.string().min(1, "Sequence name is required"),
   description: z.string().optional(),
   steps: z.array(sequenceStepSchema),
   exitOnReply: z.boolean().default(true),
@@ -101,13 +116,25 @@ export const sequenceEnrollmentSchema = z.object({
   contactEmail: z.string(),
   currentStepIndex: z.number().int().nonnegative().default(0),
   nextStepDueAt: z.string(),
-  status: z.enum(['running', 'completed', 'canceled_reply', 'canceled_won', 'paused']),
+  status: z.enum([
+    "running",
+    "completed",
+    "canceled_reply",
+    "canceled_won",
+    "paused",
+  ]),
   enrolledAt: z.string(),
   updatedAt: z.string(),
 });
 export type SequenceEnrollment = z.infer<typeof sequenceEnrollmentSchema>;
 
-export const callOutcomeSchema = z.enum(['connected', 'left_voicemail', 'busy', 'wrong_number', 'no_answer']);
+export const callOutcomeSchema = z.enum([
+  "connected",
+  "left_voicemail",
+  "busy",
+  "wrong_number",
+  "no_answer",
+]);
 export type CallOutcome = z.infer<typeof callOutcomeSchema>;
 
 export const telephonyCallSchema = z.object({
@@ -117,7 +144,7 @@ export const telephonyCallSchema = z.object({
   dealId: z.string().optional(),
   userId: z.string(),
   phoneNumber: z.string(),
-  direction: z.enum(['inbound', 'outbound']),
+  direction: z.enum(["inbound", "outbound"]),
   durationSeconds: z.number().int().nonnegative(),
   outcome: callOutcomeSchema,
   notes: z.string().optional(),
@@ -133,7 +160,9 @@ export const communicationPreferencesSchema = z.object({
   smsOptOut: z.boolean().default(false), // DNC (Do Not Call / SMS) flag
   updatedAt: z.string(),
 });
-export type CommunicationPreferences = z.infer<typeof communicationPreferencesSchema>;
+export type CommunicationPreferences = z.infer<
+  typeof communicationPreferencesSchema
+>;
 
 export const cannedSnippetSchema = z.object({
   id: z.string(),
@@ -141,7 +170,7 @@ export const cannedSnippetSchema = z.object({
   shortcut: z.string(), // e.g. "!intro"
   title: z.string(),
   body: z.string(),
-  category: z.string().default('General'),
+  category: z.string().default("General"),
 });
 export type CannedSnippet = z.infer<typeof cannedSnippetSchema>;
 
@@ -152,7 +181,14 @@ export type CannedSnippet = z.infer<typeof cannedSnippetSchema>;
 export function detectSmsOptOut(body: string): boolean {
   if (!body) return false;
   const trimmed = body.trim().toUpperCase();
-  const optOutWords = ['STOP', 'UNSUBSCRIBE', 'CANCEL', 'QUIT', 'END', 'STOPALL'];
+  const optOutWords = [
+    "STOP",
+    "UNSUBSCRIBE",
+    "CANCEL",
+    "QUIT",
+    "END",
+    "STOPALL",
+  ];
   if (optOutWords.includes(trimmed)) return true;
   const tokens = trimmed.split(/[\s,.;!]+/);
   return tokens.some((w) => optOutWords.includes(w));
@@ -164,12 +200,12 @@ export function detectSmsOptOut(body: string): boolean {
  */
 export function substituteTemplateVariables(
   template: string,
-  variables: Record<string, string | number | undefined | null>
+  variables: Record<string, string | number | undefined | null>,
 ): string {
-  if (!template) return '';
+  if (!template) return "";
   return template.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_, key) => {
     const val = variables[key];
-    return val !== undefined && val !== null ? String(val) : '';
+    return val !== undefined && val !== null ? String(val) : "";
   });
 }
 
@@ -181,11 +217,17 @@ export function stitchEmailThread(
   inReplyToHeader?: string,
   referencesHeader?: string[],
   cleanSubject?: string,
-  existingThreads: Array<{ id: string; subject: string; messageIds: string[] }> = []
+  existingThreads: Array<{
+    id: string;
+    subject: string;
+    messageIds: string[];
+  }> = [],
 ): string | null {
   // 1. Direct In-Reply-To match
   if (inReplyToHeader) {
-    const match = existingThreads.find((t) => t.messageIds.includes(inReplyToHeader));
+    const match = existingThreads.find((t) =>
+      t.messageIds.includes(inReplyToHeader),
+    );
     if (match) return match.id;
   }
 
@@ -199,9 +241,15 @@ export function stitchEmailThread(
 
   // 3. Normalized subject match
   if (cleanSubject) {
-    const normalized = cleanSubject.replace(/^(re|fwd|fw):\s*/i, '').trim().toLowerCase();
+    const normalized = cleanSubject
+      .replace(/^(re|fwd|fw):\s*/i, "")
+      .trim()
+      .toLowerCase();
     const match = existingThreads.find((t) => {
-      const targetNorm = t.subject.replace(/^(re|fwd|fw):\s*/i, '').trim().toLowerCase();
+      const targetNorm = t.subject
+        .replace(/^(re|fwd|fw):\s*/i, "")
+        .trim()
+        .toLowerCase();
       return targetNorm === normalized;
     });
     if (match) return match.id;
@@ -216,7 +264,7 @@ export function stitchEmailThread(
 export function isWithinSendWindow(
   date: Date = new Date(),
   startHour: number = 8,
-  endHour: number = 18
+  endHour: number = 18,
 ): boolean {
   const day = date.getDay(); // 0 is Sunday, 6 is Saturday
   if (day === 0 || day === 6) return false;

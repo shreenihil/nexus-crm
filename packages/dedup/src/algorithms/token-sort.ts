@@ -3,58 +3,58 @@
  * Resolves permutations like "Global Logistics LLC" vs "Logistics, Global".
  */
 
-import { damerauLevenshteinSimilarity } from './damerau-levenshtein.js';
+import { damerauLevenshteinSimilarity } from "./damerau-levenshtein.js";
 
 // Common corporate and organizational legal suffixes across US, UK, EU, and global jurisdictions
 const LEGAL_SUFFIXES = [
-  'incorporated',
-  'incorporation',
-  'inc',
-  'limited',
-  'ltd',
-  'corporation',
-  'corp',
-  'company',
-  'co',
-  'llc',
-  'llp',
-  'plc',
-  'gmbh',
-  'ag',
-  'sa',
-  'srl',
-  'bv',
-  'pty',
-  'holdings',
-  'group',
-  'technologies',
-  'technology',
-  'tech',
-  'labs',
-  'services',
-  'solutions',
+  "incorporated",
+  "incorporation",
+  "inc",
+  "limited",
+  "ltd",
+  "corporation",
+  "corp",
+  "company",
+  "co",
+  "llc",
+  "llp",
+  "plc",
+  "gmbh",
+  "ag",
+  "sa",
+  "srl",
+  "bv",
+  "pty",
+  "holdings",
+  "group",
+  "technologies",
+  "technology",
+  "tech",
+  "labs",
+  "services",
+  "solutions",
 ];
 
 const LEGAL_SUFFIX_REGEX = new RegExp(
-  `\\b(${LEGAL_SUFFIXES.join('|')})\\.?$`,
-  'gi'
+  `\\b(${LEGAL_SUFFIXES.join("|")})\\.?$`,
+  "gi",
 );
 
 /**
  * Strips corporate legal suffixes, punctuation, and extraneous spacing.
  */
 export function stripLegalSuffixes(name: string): string {
-  if (!name) return '';
+  if (!name) return "";
   let cleaned = name
     .toLowerCase()
-    .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 
-  let prev = '';
+  let prev = "";
   while (cleaned !== prev) {
     prev = cleaned;
-    cleaned = cleaned.replace(LEGAL_SUFFIX_REGEX, '').trim();
+    cleaned = cleaned.replace(LEGAL_SUFFIX_REGEX, "").trim();
   }
 
   return cleaned;
@@ -67,7 +67,7 @@ export function normalizeTokens(str: string, stripLegal = false): string[] {
   const target = stripLegal ? stripLegalSuffixes(str) : str;
   return target
     .toLowerCase()
-    .replace(/[^\w\s]/g, ' ')
+    .replace(/[^\w\s]/g, " ")
     .split(/\s+/)
     .map((t) => t.trim())
     .filter((t) => t.length > 0);
@@ -80,7 +80,7 @@ export function normalizeTokens(str: string, stripLegal = false): string[] {
 export function tokenSortRatio(
   s1: string,
   s2: string,
-  stripLegal = true
+  stripLegal = true,
 ): number {
   const tokens1 = normalizeTokens(s1, stripLegal).sort();
   const tokens2 = normalizeTokens(s2, stripLegal).sort();
@@ -88,8 +88,8 @@ export function tokenSortRatio(
   if (tokens1.length === 0 && tokens2.length === 0) return 1.0;
   if (tokens1.length === 0 || tokens2.length === 0) return 0.0;
 
-  const sortedStr1 = tokens1.join(' ');
-  const sortedStr2 = tokens2.join(' ');
+  const sortedStr1 = tokens1.join(" ");
+  const sortedStr2 = tokens2.join(" ");
 
   return damerauLevenshteinSimilarity(sortedStr1, sortedStr2);
 }
@@ -101,7 +101,7 @@ export function tokenSortRatio(
 export function tokenSetRatio(
   s1: string,
   s2: string,
-  stripLegal = true
+  stripLegal = true,
 ): number {
   const tokens1 = normalizeTokens(s1, stripLegal);
   const tokens2 = normalizeTokens(s2, stripLegal);
@@ -122,12 +122,15 @@ export function tokenSetRatio(
     .filter((t) => !set1.has(t))
     .sort();
 
-  const interStr = intersection.join(' ');
-  const s1Full = Array.from(set1).sort().join(' ');
-  const s2Full = Array.from(set2).sort().join(' ');
+  const interStr = intersection.join(" ");
+  const s1Full = Array.from(set1).sort().join(" ");
+  const s2Full = Array.from(set2).sort().join(" ");
 
   // If one is an exact subset of the other
-  if (intersection.length > 0 && (diff1to2.length === 0 || diff2to1.length === 0)) {
+  if (
+    intersection.length > 0 &&
+    (diff1to2.length === 0 || diff2to1.length === 0)
+  ) {
     return 1.0;
   }
 

@@ -1,68 +1,73 @@
-import { tokenize } from './lexer';
-import { Parser, type ASTNode } from './parser';
+import { tokenize } from "./lexer";
+import { Parser, type ASTNode } from "./parser";
 
 export type RecordContext = Record<string, any>;
 
 export function evaluateAST(node: ASTNode, context: RecordContext): any {
   switch (node.type) {
-    case 'NumberLiteral':
+    case "NumberLiteral":
       return node.value;
 
-    case 'StringLiteral':
+    case "StringLiteral":
       return node.value;
 
-    case 'Identifier': {
+    case "Identifier": {
       // Support dot notation like company.annual_revenue
-      const parts = node.name.split('.');
+      const parts = node.name.split(".");
       let current: any = context;
       for (const part of parts) {
-        if (part === '__proto__' || part === 'constructor' || part === 'prototype') return null;
-        if (current == null || typeof current !== 'object') return null;
+        if (
+          part === "__proto__" ||
+          part === "constructor" ||
+          part === "prototype"
+        )
+          return null;
+        if (current == null || typeof current !== "object") return null;
         if (!Object.prototype.hasOwnProperty.call(current, part)) return null;
         current = current[part];
       }
       return current ?? null;
     }
 
-    case 'BinaryExpression': {
+    case "BinaryExpression": {
       const left = evaluateAST(node.left, context);
       const right = evaluateAST(node.right, context);
 
       switch (node.operator) {
-        case '+':
-          if (typeof left === 'string' || typeof right === 'string') {
-            return String(left ?? '') + String(right ?? '');
+        case "+":
+          if (typeof left === "string" || typeof right === "string") {
+            return String(left ?? "") + String(right ?? "");
           }
           return (Number(left) || 0) + (Number(right) || 0);
 
-        case '-':
+        case "-":
           return (Number(left) || 0) - (Number(right) || 0);
 
-        case '*':
+        case "*":
           return (Number(left) || 0) * (Number(right) || 0);
 
-        case '/': {
+        case "/": {
           const divisor = Number(right) || 0;
           if (divisor === 0) return 0; // Prevent divide by zero error
           return (Number(left) || 0) / divisor;
         }
 
-        case '>':
+        case ">":
           return left > right;
 
-        case '<':
+        case "<":
           return left < right;
 
-        case '>=':
+        case ">=":
           return left >= right;
 
-        case '<=':
+        case "<=":
           return left <= right;
 
-        case '==':
+        case "==":
           return left == right;
 
-        case '!=':
+        case "!=":
           return left != right;
 
         default:
@@ -70,49 +75,63 @@ export function evaluateAST(node: ASTNode, context: RecordContext): any {
       }
     }
 
-    case 'FunctionCall': {
+    case "FunctionCall": {
       const { name, args } = node;
 
       switch (name) {
-        case 'IF': {
+        case "IF": {
           if (args.length !== 3) {
-            throw new Error(`IF function expects 3 arguments, received ${args.length}`);
+            throw new Error(
+              `IF function expects 3 arguments, received ${args.length}`,
+            );
           }
           const condition = evaluateAST(args[0]!, context);
-          return condition ? evaluateAST(args[1]!, context) : evaluateAST(args[2]!, context);
+          return condition
+            ? evaluateAST(args[1]!, context)
+            : evaluateAST(args[2]!, context);
         }
 
-        case 'COALESCE': {
+        case "COALESCE": {
           for (const arg of args) {
             const val = evaluateAST(arg, context);
-            if (val !== null && val !== undefined && val !== '') {
+            if (val !== null && val !== undefined && val !== "") {
               return val;
             }
           }
           return null;
         }
 
-        case 'ROUND': {
+        case "ROUND": {
           if (args.length < 1 || args.length > 2) {
-            throw new Error(`ROUND expects 1 or 2 arguments, received ${args.length}`);
+            throw new Error(
+              `ROUND expects 1 or 2 arguments, received ${args.length}`,
+            );
           }
           const val = Number(evaluateAST(args[0]!, context)) || 0;
-          const decimals = args[1] ? Number(evaluateAST(args[1], context)) || 0 : 0;
+          const decimals = args[1]
+            ? Number(evaluateAST(args[1], context)) || 0
+            : 0;
           const factor = Math.pow(10, decimals);
           return Math.round(val * factor) / factor;
         }
 
-        case 'CONCAT': {
-          return args.map((arg) => String(evaluateAST(arg, context) ?? '')).join('');
+        case "CONCAT": {
+          return args
+            .map((arg) => String(evaluateAST(arg, context) ?? ""))
+            .join("");
         }
 
-        case 'MAX': {
-          const vals = args.map((arg) => Number(evaluateAST(arg, context)) || 0);
+        case "MAX": {
+          const vals = args.map(
+            (arg) => Number(evaluateAST(arg, context)) || 0,
+          );
           return Math.max(...vals);
         }
 
-        case 'MIN': {
-          const vals = args.map((arg) => Number(evaluateAST(arg, context)) || 0);
+        case "MIN": {
+          const vals = args.map(
+            (arg) => Number(evaluateAST(arg, context)) || 0,
+          );
           return Math.min(...vals);
         }
 
@@ -129,8 +148,11 @@ export function evaluateAST(node: ASTNode, context: RecordContext): any {
 /**
  * Parses and evaluates a safe formula expression string against record data.
  */
-export function evaluateFormula(expression: string, context: RecordContext = {}): any {
-  if (!expression || expression.trim() === '') return null;
+export function evaluateFormula(
+  expression: string,
+  context: RecordContext = {},
+): any {
+  if (!expression || expression.trim() === "") return null;
   const tokens = tokenize(expression);
   const parser = new Parser(tokens);
   const ast = parser.parse();

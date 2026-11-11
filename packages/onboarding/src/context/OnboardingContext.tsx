@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 import type {
   UserOnboardingState,
   OnboardingRole,
   OnboardingTemplate,
   OnboardingLanguage,
   TourDefinition,
-} from '../types';
-import { GENERAL_PRODUCT_TOUR } from '../tours/definitions';
-import { WelcomeScreen } from '../components/WelcomeScreen';
-import { OnboardingCarousel } from '../components/OnboardingCarousel';
-import { Spotlight } from '../components/Spotlight';
-import { CoachMark } from '../components/CoachMark';
+} from "../types";
+import { GENERAL_PRODUCT_TOUR } from "../tours/definitions";
+import { WelcomeScreen } from "../components/WelcomeScreen";
+import { OnboardingCarousel } from "../components/OnboardingCarousel";
+import { Spotlight } from "../components/Spotlight";
+import { CoachMark } from "../components/CoachMark";
 
 interface OnboardingContextValue {
   state: UserOnboardingState;
@@ -24,19 +24,19 @@ interface OnboardingContextValue {
   skipTour: () => void;
   completeTour: () => void;
   setLanguage: (lang: OnboardingLanguage) => void;
-  completeChecklistItem: (key: keyof UserOnboardingState['checklist']) => void;
+  completeChecklistItem: (key: keyof UserOnboardingState["checklist"]) => void;
   dismissChecklist: () => void;
   reopenChecklist: () => void;
 }
 
 const DEFAULT_STATE: UserOnboardingState = {
-  userId: 'usr-demo-admin',
-  workspaceId: 'ws-demo-sovereign',
-  role: 'admin',
-  template: 'b2b_saas',
-  currency: 'INR',
-  locale: 'en-IN',
-  language: 'en',
+  userId: "usr-demo-admin",
+  workspaceId: "ws-demo-sovereign",
+  role: "admin",
+  template: "b2b_saas",
+  currency: "INR",
+  locale: "en-IN",
+  language: "en",
   showWelcome: true,
   showCarousel: false,
   activeTourId: null,
@@ -54,7 +54,9 @@ const DEFAULT_STATE: UserOnboardingState = {
   updatedAt: new Date().toISOString(),
 };
 
-const OnboardingContext = React.createContext<OnboardingContextValue | null>(null);
+const OnboardingContext = React.createContext<OnboardingContextValue | null>(
+  null,
+);
 
 export function OnboardingProvider({
   children,
@@ -64,8 +66,8 @@ export function OnboardingProvider({
   initialTour?: TourDefinition;
 }) {
   const [state, setState] = React.useState<UserOnboardingState>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('nexus_onboarding_state');
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("nexus_onboarding_state");
       if (saved) {
         try {
           return JSON.parse(saved);
@@ -80,14 +82,14 @@ export function OnboardingProvider({
   // Sync to backend / local storage
   const syncState = React.useCallback((newState: UserOnboardingState) => {
     setState(newState);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('nexus_onboarding_state', JSON.stringify(newState));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("nexus_onboarding_state", JSON.stringify(newState));
     }
-    fetch('http://localhost:4000/v1/onboarding/state', {
-      method: 'PUT',
+    fetch("http://localhost:4000/v1/onboarding/state", {
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer demo-session-token',
+        "Content-Type": "application/json",
+        Authorization: "Bearer demo-session-token",
       },
       body: JSON.stringify(newState),
     }).catch(() => {});
@@ -174,7 +176,9 @@ export function OnboardingProvider({
     syncState({
       ...state,
       activeTourId: null,
-      completedTours: Array.from(new Set([...state.completedTours, initialTour.id])),
+      completedTours: Array.from(
+        new Set([...state.completedTours, initialTour.id]),
+      ),
       updatedAt: new Date().toISOString(),
     });
   };
@@ -187,7 +191,9 @@ export function OnboardingProvider({
     });
   };
 
-  const completeChecklistItem = (key: keyof UserOnboardingState['checklist']) => {
+  const completeChecklistItem = (
+    key: keyof UserOnboardingState["checklist"],
+  ) => {
     syncState({
       ...state,
       checklist: {
@@ -235,10 +241,7 @@ export function OnboardingProvider({
 
       {/* Welcome Screen overlay */}
       {state.showWelcome && (
-        <WelcomeScreen
-          onComplete={handleWelcomeComplete}
-          onSkip={skipTour}
-        />
+        <WelcomeScreen onComplete={handleWelcomeComplete} onSkip={skipTour} />
       )}
 
       {/* Onboarding Carousel */}
@@ -272,7 +275,7 @@ export function OnboardingProvider({
 export function useOnboarding() {
   const ctx = React.useContext(OnboardingContext);
   if (!ctx) {
-    throw new Error('useOnboarding must be used within an OnboardingProvider');
+    throw new Error("useOnboarding must be used within an OnboardingProvider");
   }
   return ctx;
 }

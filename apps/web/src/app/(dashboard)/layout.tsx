@@ -1,12 +1,16 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { AppShell } from '@nexus/ui';
-import { CommandPalette } from '@/components/command-palette';
-import { OnboardingProvider } from '@nexus/onboarding';
+import * as React from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { AppShell } from "@nexus/ui";
+import { CommandPalette } from "@/components/command-palette";
+import { OnboardingProvider } from "@nexus/onboarding";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const [commandPaletteOpen, setCommandPaletteOpen] = React.useState(false);
@@ -14,14 +18,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // Global Ctrl/Cmd + K shortcut listener
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setCommandPaletteOpen((prev) => !prev);
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const handleNavigate = (href: string) => {
@@ -29,8 +33,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('nexus-token');
-    router.push('/login');
+    localStorage.removeItem("nexus-token");
+    router.push("/login");
   };
 
   return (

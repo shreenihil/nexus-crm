@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
 interface SpotlightProps {
   targetTourId: string;
@@ -22,17 +22,19 @@ export function Spotlight({ targetTourId, padding = 8 }: SpotlightProps) {
 
   React.useEffect(() => {
     updateRect();
-    window.addEventListener('resize', updateRect);
-    window.addEventListener('scroll', updateRect, true);
+    window.addEventListener("resize", updateRect);
+    window.addEventListener("scroll", updateRect, true);
     return () => {
-      window.removeEventListener('resize', updateRect);
-      window.removeEventListener('scroll', updateRect, true);
+      window.removeEventListener("resize", updateRect);
+      window.removeEventListener("scroll", updateRect, true);
     };
   }, [updateRect]);
 
   if (!rect) {
     // Fallback scrim if element not yet mounted
-    return <div className="fixed inset-0 z-40 bg-black/50 transition-opacity pointer-events-none" />;
+    return (
+      <div className="fixed inset-0 z-40 bg-black/50 transition-opacity pointer-events-none" />
+    );
   }
 
   const x = Math.max(0, rect.left - padding);

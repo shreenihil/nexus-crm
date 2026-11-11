@@ -1,12 +1,15 @@
 # Categorized LinkedIn Hashtags & Search Keywords
 
 ### Primary Keywords
+
 #CRM #UserOnboarding #AppOnboarding #ProductTour #FeatureWalkthrough #InteractiveWalkthrough #UXDesign #UIUX #ProductDesign #SaaS #TypeScript #NextJS #BuildInPublic #WebDevelopment #SoftwareEngineering
 
 ### Technical Architecture Tags
+
 #SystemDesign #CloudArchitecture #Encryption #BYOK #DataEngineering #Fintech #FullStack #SoftwareArchitecture #Monorepo
 
 ### Ranking Keyword Analysis
+
 1. App Onboarding
 2. Onboarding Walkthrough
 3. Product Tour

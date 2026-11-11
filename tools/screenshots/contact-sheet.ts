@@ -1,16 +1,16 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { chromium } from '@playwright/test';
+import * as fs from "fs";
+import * as path from "path";
+import { chromium } from "@playwright/test";
 
 async function buildContactSheet() {
-  const baseDir = '/Users/shreenihilvijayan/Projects/CRM/project photos';
-  const manifestPath = path.join(baseDir, '07-post-copy', 'manifest.json');
-  const { manifest } = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const baseDir = "/Users/shreenihilvijayan/Projects/CRM/project photos";
+  const manifestPath = path.join(baseDir, "07-post-copy", "manifest.json");
+  const { manifest } = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 
-  let cardsHtml = '';
+  let cardsHtml = "";
   for (const item of manifest) {
     const fullImgPath = path.join(baseDir, item.file);
-    const imgBase64 = fs.readFileSync(fullImgPath).toString('base64');
+    const imgBase64 = fs.readFileSync(fullImgPath).toString("base64");
     cardsHtml += `
       <div class="card">
         <div class="img-wrap">
@@ -104,24 +104,27 @@ async function buildContactSheet() {
   </body>
   </html>`;
 
-  const sheetHtmlPath = path.join(baseDir, 'contact-sheet.html');
+  const sheetHtmlPath = path.join(baseDir, "contact-sheet.html");
   fs.writeFileSync(sheetHtmlPath, html);
-  console.log('HTML contact sheet written:', sheetHtmlPath);
+  console.log("HTML contact sheet written:", sheetHtmlPath);
 
   // Render to PNG
   const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
-  await page.setContent(html, { waitUntil: 'load' });
+  const page = await browser.newPage({
+    viewport: { width: 1920, height: 1080 },
+  });
+  await page.setContent(html, { waitUntil: "load" });
   await page.waitForTimeout(1500);
 
-  const pngPath = path.join(baseDir, 'contact-sheet.png');
+  const pngPath = path.join(baseDir, "contact-sheet.png");
   await page.screenshot({ path: pngPath, fullPage: true });
-  console.log('PNG contact sheet written:', pngPath);
+  console.log("PNG contact sheet written:", pngPath);
 
   // Copy to brain artifacts directory so user can inspect it
-  const artifactPath = '/Users/shreenihilvijayan/.gemini/antigravity-ide/brain/d04fd209-1d74-49d0-aa4e-503e99e79be6/contact-sheet.png';
+  const artifactPath =
+    "/Users/shreenihilvijayan/.gemini/antigravity-ide/brain/d04fd209-1d74-49d0-aa4e-503e99e79be6/contact-sheet.png";
   fs.copyFileSync(pngPath, artifactPath);
-  console.log('Artifact contact sheet copied:', artifactPath);
+  console.log("Artifact contact sheet copied:", artifactPath);
 
   await browser.close();
 }
