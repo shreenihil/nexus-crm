@@ -148,7 +148,7 @@ export default function LoginPage() {
         )}
 
         <div className="mt-6 pt-4 border-t border-[var(--color-border-default)] flex items-center justify-between text-xs text-[var(--color-text-muted)]">
-          <span>Don't have an account?</span>
+          <span>Don&apos;t have an account?</span>
           <Link
             href="/register"
             className="font-medium text-[var(--color-accent-primary)] hover:underline"

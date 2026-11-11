@@ -520,7 +520,7 @@ export default function SchemaBuilderPage() {
 
                 {objectRelationships.length === 0 ? (
                   <div className="p-6 text-center text-xs text-[var(--color-text-muted)] border border-dashed border-[var(--color-border-default)] rounded-[8px]">
-                    No explicit relationships defined for {selectedObject.singularLabel}. Click "Link Entity" to connect to another object.
+                    No explicit relationships defined for {selectedObject.singularLabel}. Click &quot;Link Entity&quot; to connect to another object.
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

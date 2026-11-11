@@ -1007,9 +1007,9 @@ export default function AutomationsPage() {
             </p>
 
             <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 space-y-3 font-mono text-xs">
-              <div className="text-zinc-400 font-semibold">// Inbound Webhook Endpoint:</div>
+              <div className="text-zinc-400 font-semibold">{'// Inbound Webhook Endpoint:'}</div>
               <div className="text-indigo-400">POST http://localhost:4000/v1/webhooks/inbound/:hookId</div>
-              <div className="text-zinc-400 font-semibold pt-2">// Required Signature Header:</div>
+              <div className="text-zinc-400 font-semibold pt-2">{'// Required Signature Header:'}</div>
               <div className="text-emerald-400">x-nexus-signature: sha256=&lt;hex_encoded_hmac_digest&gt;</div>
             </div>
 
@@ -1120,7 +1120,7 @@ export default function AutomationsPage() {
                 </h4>
                 <p className="text-xs text-[var(--color-text-secondary)] max-w-md mx-auto">
                   All outbound webhook deliveries have either completed successfully or are within normal retry backoff.
-                  You can click "Trigger Chaos Webhook" above to simulate a live delivery outage.
+                  You can click &quot;Trigger Chaos Webhook&quot; above to simulate a live delivery outage.
                 </p>
               </div>
             ) : (

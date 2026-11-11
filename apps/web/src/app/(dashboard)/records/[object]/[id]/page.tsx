@@ -1017,7 +1017,7 @@ export default function RecordDetailPage() {
 
               {quotes.length === 0 ? (
                 <div className="p-8 text-center text-xs text-[var(--color-text-muted)] border border-dashed border-[var(--color-border-default)] rounded-[8px]">
-                  No quotes generated for this deal yet. Click "Create Quote" to configure pricing.
+                  No quotes generated for this deal yet. Click &quot;Create Quote&quot; to configure pricing.
                 </div>
               ) : (
                 <div className="flex flex-col gap-3">
@@ -1109,7 +1109,7 @@ export default function RecordDetailPage() {
 
               {(!record?.relatedRecords || record.relatedRecords.length === 0) ? (
                 <div className="p-8 text-center text-xs text-[var(--color-text-muted)] border border-dashed border-[var(--color-border-default)] rounded-[8px]">
-                  No related records linked yet. Click "Link Record" to associate an entity.
+                  No related records linked yet. Click &quot;Link Record&quot; to associate an entity.
                 </div>
               ) : (
                 <div className="flex flex-col gap-2.5">

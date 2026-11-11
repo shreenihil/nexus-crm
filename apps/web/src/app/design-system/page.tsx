@@ -371,7 +371,7 @@ export default function DesignSystemGalleryPage() {
               {/* Card 2: Legal In-Words Generation */}
               <div className="p-5 rounded-[10px] border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] shadow-sm flex flex-col gap-3">
                 <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
-                  Indian Legal "In Words" Generator
+                  Indian Legal &quot;In Words&quot; Generator
                 </span>
                 <div className="flex flex-col gap-2">
                   <span className="text-xs text-[var(--color-text-muted)] block">Amount with Legal Words:</span>
